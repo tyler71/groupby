@@ -1,43 +1,47 @@
 #!/usr/bin/env python3
 
-from collections import defaultdict
 import os
 import argparse
 import pprint
 
-from DirectorySearch import recursive_directory_search
-from FileProperties import modification_date, disk_size, file_hash
+from FileProperties import file_signatures, duplicates_hashed
+from FileActions import remove_files, hardlink_files
+
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', "--directory",
+    parser.add_argument('-d', "--directories",
                         default=os.getcwd(),
                         nargs='+')
+    parser.add_argument('--remove',
+                        dest="duplicate_action",
+                        action="append_const",
+                        const='r',
+                        help="Remove Duplicates, last flag applies of remove or link ")
+    parser.add_argument('--link',
+                        dest="duplicate_action",
+                        action="append_const",
+                        const='l',
+                        help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
     args = parser.parse_args()
+    if args.duplicate_action:
+        duplicate_action = args.duplicate_action[-1]
+    else:
+        duplicate_action = list()
 
-    existing_files = set()
-    file_sig = defaultdict(list)
-    for directory in args.directory:
-        for basedir, files in recursive_directory_search(directory):
-            for file in files:
-                path = os.path.join(basedir, file)
-                if os.path.isfile(path):
-                    signature = (modification_date(path), disk_size(path))
-                    file_sig[signature].append(path)
+    signatures = file_signatures(args.directories)
+    hashed = duplicates_hashed(signatures.values())
 
-    hashed_duplicates = defaultdict(list)
-    for duplicates in file_sig.values():
-        if len(duplicates) > 1:
-            dup_hashes = set()
-            dup_generator = (duplicate for duplicate in duplicates)
-
-            source_file = next(dup_generator)
-            dup_hashes.add(file_hash(source_file))
-            for item in dup_generator:
-                item_hash = file_hash(item)
-                if item_hash in dup_hashes:
-                    hashed_duplicates[source_file].append(item)
-    pprint.pprint(hashed_duplicates)
+    if len(duplicate_action) == 0:
+        for key, value in hashed.items():
+            print(key)
+            print('\n'.join((" " * 4 + dup for dup in value)), end='\n\n')
+    elif duplicate_action == "r":
+        print(hashed.values())
+        #remove_files(hashed.values())
+    elif duplicate_action == "l":
+        for source_file, duplicates in hashed.items():
+            print(f"Linking {source_file} to {duplicates}")
 
 
 if __name__ == '__main__':
