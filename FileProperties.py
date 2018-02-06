@@ -19,10 +19,10 @@ def file_hash(filename: str) -> str:
             for chunk in iter(lambda: file.read(chunk_size), b''):
                 yield chunk
 
-    md5 = hashlib.md5()
+    sha256 = hashlib.sha256()
     for chunk in iter_read(filename):
-        md5.update(chunk)
-    file_hash = md5.hexdigest()
+        sha256.update(chunk)
+    file_hash = sha256.hexdigest()
 
     return file_hash
 
@@ -30,3 +30,4 @@ def file_hash(filename: str) -> str:
 if __name__ == '__main__':
     print(file_hash("tests/file_properties/hash"))
     print(disk_size("tests/file_properties/5120_byte"))
+    print(modification_date("tests/file_properties/5120_byte"))
