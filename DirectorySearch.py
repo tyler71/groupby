@@ -1,6 +1,7 @@
 import os
 
-def recursive_directory_search(directory: str) -> dict:
+
+def recursive_directory_search(directory: str) -> tuple:
     directory = os.path.expanduser(directory)
 
     for directory, subdir, files in os.walk(directory):

@@ -3,6 +3,7 @@ import os
 import hashlib
 
 from collections import defaultdict
+from functools import wraps
 
 from DirectorySearch import recursive_directory_search
 
@@ -30,8 +31,7 @@ def file_hash(filename: str) -> str:
     file_hash = sha256.hexdigest()
     return file_hash
 
-
-def file_signatures(directories: iter) -> dict:
+def file_properties(directories: iter) -> dict:
     '''
     Takes a list of directories, creates a signature of:
      * File disk size
@@ -50,7 +50,13 @@ def file_signatures(directories: iter) -> dict:
                 if os.path.isfile(path):
                     signature = (modification_date(path), disk_size(path))
                     file_sig[signature].append(path)
-    return file_sig
+    signature_duplicates = defaultdict(list)
+    for duplicates in file_sig.values():
+        dup_generator = (duplicate for duplicate in duplicates)
+        source_file = next(dup_generator)
+        signature_duplicates[source_file] = tuple(dup_generator)
+
+    return signature_duplicates
 
 
 def duplicates_hashed(duplicates: iter) -> dict:
@@ -62,7 +68,7 @@ def duplicates_hashed(duplicates: iter) -> dict:
     '''
     hashed_duplicates = defaultdict(list)
     for duplicate in duplicates:
-        if len(duplicate) > 1:
+        if len(duplicate) > 0:
             dup_hashes = set()
             dup_generator = (duplicate for duplicate in duplicate)
 
@@ -79,6 +85,6 @@ if __name__ == '__main__':
     print(file_hash("tests/file_properties/hash"))
     print(disk_size("tests/file_properties/5120_byte"))
     print(modification_date("tests/file_properties/5120_byte"))
-    sigs = file_signatures(["tests/directory_search"])
+    sigs = file_properties(["tests/directory_search"])
     print(sigs.items())
     print(duplicates_hashed(sigs.values()))
