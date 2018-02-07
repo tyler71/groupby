@@ -22,8 +22,9 @@ def main():
         "disk_size": disk_size,
     }
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', "--directories",
+    parser.add_argument('directories',
                         default=os.getcwd(),
+                        metavar="directory",
                         nargs='+')
     parser.add_argument('-f', "--filters",
                         choices=filters.keys(),
