@@ -38,8 +38,6 @@ def main():
                         action="append_const",
                         const='link',
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
-    parser.add_argument("--force",
-                        choices=["properties", "checksum"])
     args = parser.parse_args()
 
     if args.duplicate_action:
@@ -54,7 +52,7 @@ def main():
 
     results = first_filter(filters[args.filters[0]], paths)
     if args.filters[1:]:
-        for filter_type in (filters[filter] for filter in args.filters[1:]):
+        for filter_type in (filters[filter_] for filter_ in args.filters[1:]):
             results = duplicate_filter(filter_type, results)
 
     if duplicate_action == "link":
@@ -65,9 +63,9 @@ def main():
             remove_files(result[1:])
     else:
         for result in results:
-            print(result[0])
-            print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in result[1:])), end='\n\n')
-
+            if len(result) > 1:
+                print(result[0])
+                print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in result[1:])), end='\n\n')
 
 if __name__ == '__main__':
     main()
