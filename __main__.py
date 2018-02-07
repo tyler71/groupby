@@ -2,19 +2,31 @@
 
 import os
 import argparse
-import pprint
 
-import itertools
+from itertools import repeat
 
+from DirectorySearch import recursive_directory_search
+from FileProperties import first_filter, duplicate_filter
+from FileProperties import md5_sum, sha256_sum
+from FileProperties import modification_date
+from FileProperties import disk_size
 
-from FileProperties import file_properties, duplicates_hashed
-from FileActions import remove_files, hardlink_files
+from FileActions import hardlink_files, remove_files
 
 
 def main():
+    filters = {
+        "md5": md5_sum,
+        "sha256": sha256_sum,
+        "modification_date": modification_date,
+        "disk_size": disk_size,
+    }
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', "--directories",
                         default=os.getcwd(),
+                        nargs='+')
+    parser.add_argument('-f', "--filters",
+                        choices=filters.keys(),
                         nargs='+')
     parser.add_argument('--remove',
                         dest="duplicate_action",
@@ -26,43 +38,34 @@ def main():
                         action="append_const",
                         const='link',
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
-    parser.add_argument("--force",
-                        choices=["properties", "checksum"])
     args = parser.parse_args()
+
     if args.duplicate_action:
         duplicate_action = args.duplicate_action[-1]
     else:
-        duplicate_action = list()
+        duplicate_action = None
+    if not args.filters:
+        args.filters = ["disk_size", "md5"]
 
-    if args.force:
-        if args.force == "properties":
-            # Group files by modification date and size
-            results = file_properties(args.directories)
-        elif args.force == "checksum":
-            signatures = file_properties(args.directories)
-            # Compare checksums of each list of files
-            results = duplicates_hashed(signatures.values())
-            results += duplicates_hashed(signatures.keys())
-    else:
-        signatures = file_properties(args.directories)
-        print(signatures)
-        print(list(signatures.values()) + list(signatures.keys()))
-        results = duplicates_hashed(itertools.chain(signatures.values(), [signatures.keys()]))
+    paths = (path for directory in args.directories
+                  for path in recursive_directory_search(directory))
 
+    results = first_filter(filters[args.filters[0]], paths)
+    if args.filters[1:]:
+        for filter_type in (filters[filter_] for filter_ in args.filters[1:]):
+            results = duplicate_filter(filter_type, results)
 
-
-
-    if len(duplicate_action) == 0:
-        for key, value in results.items():
-            print(key)
-            print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in value)), end='\n\n')
+    if duplicate_action == "link":
+        for result in results:
+            hardlink_files(repeat(result[0]), result[1:])
     elif duplicate_action == "remove":
-        result = remove_files(hashed.values())
-    elif duplicate_action == "link":
-        for source_file, duplicates in hashed.items():
-            repeating_source_file = itertools.repeat(source_file)
-            result = hardlink_files(repeating_source_file, duplicates)
-
+        for result in results:
+            remove_files(result[1:])
+    else:
+        for result in results:
+            if len(result) > 1:
+                print(result[0])
+                print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in result[1:])), end='\n\n')
 
 if __name__ == '__main__':
     main()
