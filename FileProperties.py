@@ -3,10 +3,12 @@ import os
 import hashlib
 
 from collections import defaultdict
-from functools import wraps
 
-from DirectorySearch import recursive_directory_search
-
+# Used with checksum functions
+def _iter_read(filename: str, chunk_size=65536) -> bytes:
+    with open(filename, 'rb') as file:
+        for chunk in iter(lambda: file.read(chunk_size), b''):
+            yield chunk
 
 def modification_date(filename: str) -> datetime.datetime:
     modification_time = os.path.getmtime(filename)
@@ -17,12 +19,6 @@ def modification_date(filename: str) -> datetime.datetime:
 def disk_size(filename: str) -> int:
     byte_usage = os.path.getsize(filename)
     return byte_usage
-
-
-def _iter_read(filename: str, chunk_size=65536) -> bytes:
-    with open(filename, 'rb') as file:
-        for chunk in iter(lambda: file.read(chunk_size), b''):
-            yield chunk
 
 
 def md5_sum(filename, chunk_size=65536):
@@ -59,8 +55,8 @@ def duplicate_filter(func, duplicates: iter):
     :duplicates List of duplicates
     :return: dictionary
     '''
-    filtered_duplicates = defaultdict(list)
     for duplicate in duplicates:
+        filtered_duplicates = list()
         if len(duplicate) > 1:
             dup_hashes = set()
             dup_generator = (duplicate for duplicate in duplicate)
@@ -70,9 +66,8 @@ def duplicate_filter(func, duplicates: iter):
             for item in dup_generator:
                 item_hash = func(item)
                 if item_hash in dup_hashes:
-                    filtered_duplicates[source_file].append(item)
-            filtered_duplicates[source_file].append(source_file)
-    for duplicate in filtered_duplicates.values():
+                    filtered_duplicates.append(item)
+            filtered_duplicates.append(source_file)
         yield duplicate
 
 
