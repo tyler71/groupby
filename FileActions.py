@@ -1,5 +1,6 @@
 import os
 
+
 def remove_files(filenames: iter) -> list:
     removed_files = list()
     for filename in filenames:
