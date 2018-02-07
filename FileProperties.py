@@ -24,6 +24,7 @@ def _iter_read(filename: str, chunk_size=65536) -> bytes:
         for chunk in iter(lambda: file.read(chunk_size), b''):
             yield chunk
 
+
 def md5_sum(filename, chunk_size=65536):
     checksumer = hashlib.md5()
     for chunk in _iter_read(filename, chunk_size):
@@ -31,62 +32,13 @@ def md5_sum(filename, chunk_size=65536):
     file_hash = checksumer.hexdigest()
     return file_hash
 
+
 def sha256_sum(filename, chunk_size=65536):
     checksumer = hashlib.sha256()
     for chunk in _iter_read(filename, chunk_size):
         checksumer.update(chunk)
     file_hash = checksumer.hexdigest()
     return file_hash
-
-def file_properties(directories: iter) -> dict:
-    '''
-    Takes a list of directories, creates a signature of:
-     * File disk size
-     * Modification date
-    of each file in directory.
-
-    Then appends all files with similar signatures in a dictionary
-    :param directories:
-    :return:
-    '''
-    file_sig = defaultdict(list)
-    for directory in directories:
-        for basedir, files in recursive_directory_search(directory):
-            for file in files:
-                path = os.path.join(basedir, file)
-                if os.path.isfile(path):
-                    signature = (modification_date(path), disk_size(path))
-                    file_sig[signature].append(path)
-    signature_duplicates = defaultdict(list)
-    for duplicates in file_sig.values():
-        dup_generator = (duplicate for duplicate in duplicates)
-        source_file = next(dup_generator)
-        signature_duplicates[source_file] = tuple(dup_generator)
-
-    return signature_duplicates
-
-
-def duplicates_hashed(duplicates: iter) -> dict:
-    '''
-    Takes list of duplicates, compares their checksum and returns a source value,
-    and duplicates identified with it as a dictionary
-    :param duplicates:
-    :return: dictionary
-    '''
-    hashed_duplicates = defaultdict(list)
-    for duplicate in duplicates:
-        if len(duplicate) > 0:
-            dup_hashes = set()
-            dup_generator = (duplicate for duplicate in duplicate)
-
-            source_file = next(dup_generator)
-            dup_hashes.add(file_hash(source_file))
-            for item in dup_generator:
-                item_hash = file_hash(item)
-                if item_hash in dup_hashes:
-                    hashed_duplicates[source_file].append(item)
-            hashed_duplicates[source_file].append(source_file)
-    return hashed_duplicates
 
 
 def first_filter(func, paths: iter):
