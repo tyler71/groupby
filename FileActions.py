@@ -7,7 +7,7 @@ def remove_files(filenames: iter) -> list:
         print(f"Removing {filename}")
 
         try:
-            print(f"os.remove(filename)")
+            os.remove(filename)
             removed_files.append(filename)
         except FileNotFoundError:
             print("Not Found")
