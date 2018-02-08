@@ -4,11 +4,19 @@ import hashlib
 
 from collections import defaultdict
 
+
 # Used with checksum functions
 def _iter_read(filename: str, chunk_size=65536) -> bytes:
     with open(filename, 'rb') as file:
         for chunk in iter(lambda: file.read(chunk_size), b''):
             yield chunk
+
+
+def access_date(filename: str) -> datetime.datetime:
+    access_date = os.path.getmtime(filename)
+    parsed_date = datetime.datetime.fromtimestamp(access_date)
+    return parsed_date
+
 
 def modification_date(filename: str) -> datetime.datetime:
     modification_time = os.path.getmtime(filename)
