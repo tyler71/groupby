@@ -56,11 +56,10 @@ def main():
     paths = (path for directory in args.directories
                   for path in recursive_directory_search(directory))
 
-    # First filter converts all paths to grouped by filter and returns
-    # lists of duplicates
-    results = first_filter(filters[args.filters[0]], paths)
-    if args.filters[1:]:
-        for filter_type in (filters[filter_] for filter_ in args.filters[1:]):
+    filter_method, *other_filter_methods = args.filters
+    results = first_filter(filters[filter_method], paths)
+    if other_filter_methods:
+        for filter_type in (filters[filter_] for filter_ in other_filter_methods):
             results = duplicate_filter(filter_type, results)
 
     if duplicate_action == "link":
@@ -73,8 +72,10 @@ def main():
     else:
         for result in results:
             if len(result) > 1:
-                print(result[0])
-                print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in result[1:])), end='\n\n')
+                source_file, *duplicates = result
+                print(source_file)
+                print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
+
 
 if __name__ == '__main__':
     main()
