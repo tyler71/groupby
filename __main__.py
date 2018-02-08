@@ -3,12 +3,12 @@
 import os
 import argparse
 
-from itertools import repeat
+import itertools
 
 from DirectorySearch import recursive_directory_search
 from FileProperties import first_filter, duplicate_filter
 from FileProperties import md5_sum, sha256_sum
-from FileProperties import modification_date
+from FileProperties import modification_date, access_date
 from FileProperties import disk_size
 
 from FileActions import hardlink_files, remove_files
@@ -65,7 +65,8 @@ def main():
 
     if duplicate_action == "link":
         for result in results:
-            hardlink_files(repeat(result[0]), result[1:])
+            first, *others = result
+            hardlink_files(itertools.repeat(first), others)
     elif duplicate_action == "remove":
         for result in results:
             remove_files(result[1:])

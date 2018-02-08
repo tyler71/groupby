@@ -67,15 +67,13 @@ def duplicate_filter(func, duplicates: iter):
         filtered_duplicates = list()
         if len(duplicate) > 1:
             dup_hashes = set()
-            dup_generator = (duplicate for duplicate in duplicate)
-
-            source_file = next(dup_generator)
-            dup_hashes.add(func(source_file))
-            for item in dup_generator:
+            first, *others = duplicate
+            dup_hashes.add(func(first))
+            for item in others:
                 item_hash = func(item)
                 if item_hash in dup_hashes:
                     filtered_duplicates.append(item)
-            filtered_duplicates.append(source_file)
+            filtered_duplicates.append(others)
         yield duplicate
 
 
