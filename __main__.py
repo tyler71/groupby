@@ -7,9 +7,9 @@ import itertools
 
 from DirectorySearch import recursive_directory_search
 from FileProperties import first_filter, duplicate_filter
-from FileProperties import md5_sum, sha256_sum
+from FileProperties import md5_sum, sha256_sum, partial_md5_sum
 from FileProperties import modification_date, access_date
-from FileProperties import disk_size
+from FileProperties import disk_size, direct_compare
 
 from FileActions import hardlink_files, remove_files
 
@@ -18,9 +18,11 @@ def main():
     filters = {
         "md5": md5_sum,
         "sha256": sha256_sum,
+        "partial_md5": partial_md5_sum,
         "modified": modification_date,
         "accessed": access_date,
         "size": disk_size,
+        "file": direct_compare,
     }
     parser = argparse.ArgumentParser()
     parser.add_argument('directories',

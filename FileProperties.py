@@ -45,6 +45,20 @@ def sha256_sum(filename, chunk_size=65536):
     return file_hash
 
 
+def partial_md5_sum(filename, chunk_size=65536, chunks_read=200):
+    checksumer = hashlib.md5()
+    with open(filename, 'rb') as file:
+        for _ in range(0, chunks_read):
+            chunk = file.read(chunk_size)
+            checksumer.update(chunk)
+    return checksumer.hexdigest()
+
+def direct_compare(filename):
+    with open(filename, 'rb') as file:
+        data = file.read()
+    return data
+
+
 def first_filter(func, paths: iter):
     grouped_duplicates = defaultdict(list)
     for path in paths:
