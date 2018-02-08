@@ -59,20 +59,20 @@ def main():
                   for path in recursive_directory_search(directory))
 
     filter_method, *other_filter_methods = args.filters
-    results = first_filter(filters[filter_method], paths)
+    filtered_duplicates = first_filter(filters[filter_method], paths)
     if other_filter_methods:
         for filter_type in (filters[filter_] for filter_ in other_filter_methods):
-            results = duplicate_filter(filter_type, results)
+            filtered_duplicates = duplicate_filter(filter_type, filtered_duplicates)
 
     if duplicate_action == "link":
-        for result in results:
+        for result in filtered_duplicates:
             first, *others = result
             hardlink_files(itertools.repeat(first), others)
     elif duplicate_action == "remove":
-        for result in results:
+        for result in filtered_duplicates:
             remove_files(result[1:])
     else:
-        for result in results:
+        for result in filtered_duplicates:
             if len(result) > 1:
                 source_file, *duplicates = result
                 print(source_file)
