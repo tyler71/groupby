@@ -32,6 +32,8 @@ def main():
     parser.add_argument('-f', "--filters",
                         choices=filters.keys(),
                         nargs='+')
+    parser.add_argument('--include', action='append')
+    parser.add_argument('--exclude', action='append')
     parser.add_argument('--remove',
                         dest="duplicate_action",
                         action="append_const",
@@ -56,7 +58,7 @@ def main():
 
     # Get all file paths
     paths = (path for directory in args.directories
-                  for path in recursive_directory_search(directory))
+                  for path in recursive_directory_search(directory, include=args.include, exclude=args.exclude))
 
     filter_method, *other_filter_methods = args.filters
     filtered_duplicates = first_filter(filters[filter_method], paths)
