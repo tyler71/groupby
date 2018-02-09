@@ -48,10 +48,13 @@ def sha256_sum(filename, chunk_size=65536):
 def partial_md5_sum(filename, chunk_size=65536, chunks_read=200):
     checksumer = hashlib.md5()
     with open(filename, 'rb') as file:
-        for _ in range(0, chunks_read):
+        for null in range(0, chunks_read):
             chunk = file.read(chunk_size)
+            if chunk == b'':
+                break
             checksumer.update(chunk)
     return checksumer.hexdigest()
+
 
 def direct_compare(filename):
     with open(filename, 'rb') as file:
