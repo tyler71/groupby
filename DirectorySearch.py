@@ -1,6 +1,5 @@
 import os
 import pathlib
-import glob
 
 
 def directory_search(directory: str, recursive=True, include=None, exclude=None) -> tuple:

@@ -32,6 +32,7 @@ def main():
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
     parser.add_argument('--recursive', '-r', action='store_true')
+    parser.add_argument('--interactive', action='store_true')
     parser.add_argument('--remove',
                         dest="duplicate_action",
                         action="append_const",
@@ -42,8 +43,6 @@ def main():
                         action="append_const",
                         const='link',
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
-    parser.add_argument('--interactive',
-                        action='store_true')
     parser.add_argument('directories',
                         default=os.getcwd(),
                         metavar="directory",
@@ -61,10 +60,17 @@ def main():
         args.filters = ["size", "md5"]
 
     # Get all file paths
-    paths = (path for directory in args.directories
-             for path in directory_search(directory, recursive=args.recursive, include=args.include, exclude=args.exclude))
+    # Usage of set to remove duplicate directory entries
+    paths = (path for directory in set(args.directories)
+             for path in directory_search(directory,
+                                          recursive=args.recursive,
+                                          include=args.include,
+                                          exclude=args.exclude
+                                         )
+            )
 
-    filter_method, *other_filter_methods = (filters[filter_method] for filter_method in args.filters)
+    filter_method, *other_filter_methods = (filters[filter_method]
+                                            for filter_method in args.filters)
     filtered_duplicates = first_filter(filter_method, paths)
     if other_filter_methods:
         for filter_method in (filter_ for filter_ in other_filter_methods):
@@ -74,6 +80,7 @@ def main():
         for result in duplicates:
             first, *others = result
             hardlink_files(itertools.repeat(first), others)
+
     def dup_action_remove(duplicates):
         for result in duplicates:
             remove_files(result[1:])
@@ -91,8 +98,8 @@ def main():
                 print(source_file)
                 print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
         if args.interactive is True:
+            action_on_duplicated = None
             try:
-                action_on_duplicated = None
                 while action_on_duplicated not in {"1", "2", "3", "exit" "link", "remove"}:
                     action_on_duplicated = str(input("Select action: \n1) link \n2) remove\n3) exit\n"))
                 if action_on_duplicated in {"3", "exit"}:
