@@ -5,7 +5,7 @@ import argparse
 
 import itertools
 
-from DirectorySearch import recursive_directory_search
+from DirectorySearch import directory_search
 from FileProperties import first_filter, duplicate_filter
 from FileProperties import md5_sum, sha256_sum, partial_md5_sum
 from FileProperties import modification_date, access_date
@@ -31,6 +31,7 @@ def main():
                         help="Default: size md5")
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
+    parser.add_argument('--recursive', '-r', action='store_true')
     parser.add_argument('--remove',
                         dest="duplicate_action",
                         action="append_const",
@@ -61,7 +62,7 @@ def main():
 
     # Get all file paths
     paths = (path for directory in args.directories
-                  for path in recursive_directory_search(directory, include=args.include, exclude=args.exclude))
+             for path in directory_search(directory, recursive=args.recursive, include=args.include, exclude=args.exclude))
 
     filter_method, *other_filter_methods = (filters[filter_method] for filter_method in args.filters)
     filtered_duplicates = first_filter(filter_method, paths)

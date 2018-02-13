@@ -1,9 +1,11 @@
 import os
 import pathlib
+import glob
 
 
-def recursive_directory_search(directory: str, include=None, exclude=None) -> tuple:
+def directory_search(directory: str, recursive=True, include=None, exclude=None) -> tuple:
     directory = os.path.expanduser(directory)
+
 
     for directory, subdir, files in os.walk(directory):
         if exclude or include:
@@ -28,7 +30,11 @@ def recursive_directory_search(directory: str, include=None, exclude=None) -> tu
             for file in files:
                 yield os.path.join(directory, file)
 
+        # Break after 1st iteration to prevent recursiveness
+        if recursive is False:
+            break
+
 
 if __name__ == '__main__':
-    for directory, files in recursive_directory_search("tests/directory_search"):
+    for directory, files in directory_search("tests/directory_search"):
         print(directory, files)
