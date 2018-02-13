@@ -16,22 +16,19 @@ from FileActions import hardlink_files, remove_files
 
 def main():
     filters = {
+        "partial_md5": partial_md5_sum,
         "md5": md5_sum,
         "sha256": sha256_sum,
-        "partial_md5": partial_md5_sum,
         "modified": modification_date,
         "accessed": access_date,
         "size": disk_size,
         "file": direct_compare,
     }
     parser = argparse.ArgumentParser()
-    parser.add_argument('directories',
-                        default=os.getcwd(),
-                        metavar="directory",
-                        nargs='+')
     parser.add_argument('-f', "--filters",
                         choices=filters.keys(),
-                        nargs='+')
+                        nargs='+',
+                        help="Default: size md5")
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
     parser.add_argument('--remove',
@@ -44,6 +41,12 @@ def main():
                         action="append_const",
                         const='link',
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
+    parser.add_argument('--interactive',
+                        action='store_true')
+    parser.add_argument('directories',
+                        default=os.getcwd(),
+                        metavar="directory",
+                        nargs='+')
     args = parser.parse_args()
 
     # Choose only last duplicate action
@@ -54,31 +57,57 @@ def main():
 
     # Default filtering methods
     if not args.filters:
-        args.filters = ["disk_size", "md5"]
+        args.filters = ["size", "md5"]
 
     # Get all file paths
     paths = (path for directory in args.directories
                   for path in recursive_directory_search(directory, include=args.include, exclude=args.exclude))
 
-    filter_method, *other_filter_methods = args.filters
-    filtered_duplicates = first_filter(filters[filter_method], paths)
+    filter_method, *other_filter_methods = (filters[filter_method] for filter_method in args.filters)
+    filtered_duplicates = first_filter(filter_method, paths)
     if other_filter_methods:
-        for filter_type in (filters[filter_] for filter_ in other_filter_methods):
-            filtered_duplicates = duplicate_filter(filter_type, filtered_duplicates)
+        for filter_method in (filter_ for filter_ in other_filter_methods):
+            filtered_duplicates = duplicate_filter(filter_method, filtered_duplicates)
 
-    if duplicate_action == "link":
-        for result in filtered_duplicates:
+    def dup_action_link(duplicates):
+        for result in duplicates:
             first, *others = result
             hardlink_files(itertools.repeat(first), others)
-    elif duplicate_action == "remove":
-        for result in filtered_duplicates:
+    def dup_action_remove(duplicates):
+        for result in duplicates:
             remove_files(result[1:])
+
+    if duplicate_action == "link":
+        dup_action_link(filtered_duplicates)
+    elif duplicate_action == "remove":
+        dup_action_remove(filtered_duplicates)
     else:
+        if args.interactive is True:
+            filtered_duplicates = tuple(filtered_duplicates)
         for result in filtered_duplicates:
             if len(result) > 1:
                 source_file, *duplicates = result
                 print(source_file)
                 print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
+        if args.interactive is True:
+            try:
+                action_on_duplicated = None
+                while action_on_duplicated not in {"1", "2", "3", "exit" "link", "remove"}:
+                    action_on_duplicated = str(input("Select action: \n1) link \n2) remove\n3) exit\n"))
+                if action_on_duplicated in {"3", "exit"}:
+                    raise KeyboardInterrupt
+            except KeyboardInterrupt:
+                exit("\nExiting...")
+
+            interactive_actions = {
+                "1": dup_action_link,
+                "link": dup_action_link,
+                "2": dup_action_remove,
+                "remove": dup_action_remove,
+            }
+            action_on_duplicated = action_on_duplicated.lower()
+            interactive_actions[action_on_duplicated](filtered_duplicates)
+
 
 
 if __name__ == '__main__':
