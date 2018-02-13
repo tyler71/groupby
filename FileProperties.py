@@ -95,9 +95,9 @@ def duplicate_filter(func, duplicates: iter):
 
 
 if __name__ == '__main__':
-    print(file_hash("tests/file_properties/hash"))
+    print(md5_sum("tests/file_properties/hash"))
+    print(partial_md5_sum("tests/file_properties/hash"))
+    print(sha256_sum("tests/file_properties/hash"))
+
     print(disk_size("tests/file_properties/5120_byte"))
     print(modification_date("tests/file_properties/5120_byte"))
-    sigs = file_properties(["tests/directory_search"])
-    print(sigs.items())
-    print(duplicates_hashed(sigs.values()))
