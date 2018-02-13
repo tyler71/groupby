@@ -2,7 +2,7 @@ import os
 import pathlib
 
 
-def recursive_directory_search(directory: str, *, include, exclude) -> tuple:
+def recursive_directory_search(directory: str, include=None, exclude=None) -> tuple:
     directory = os.path.expanduser(directory)
 
     for directory, subdir, files in os.walk(directory):
