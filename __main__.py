@@ -43,7 +43,7 @@ def main():
                         action="append_const",
                         const='link',
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
-    parser.add_argument('directories',
+    parser.add_argument('-d', '--directories',
                         default=os.getcwd(),
                         metavar="directory",
                         nargs='+')
