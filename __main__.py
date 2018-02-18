@@ -69,6 +69,7 @@ def main():
                                          )
             )
 
+    # Get first (blocking) filter method, group other filter methods
     filter_method, *other_filter_methods = (filters[filter_method]
                                             for filter_method in args.filters)
     filtered_duplicates = first_filter(filter_method, paths)
@@ -77,13 +78,13 @@ def main():
             filtered_duplicates = duplicate_filter(filter_method, filtered_duplicates)
 
     def dup_action_link(duplicates):
-        for result in duplicates:
-            first, *others = result
+        for duplicate_result in duplicates:
+            first, *others = duplicate_result
             hardlink_files(itertools.repeat(first), others)
 
     def dup_action_remove(duplicates):
-        for result in duplicates:
-            remove_files(result[1:])
+        for duplicate_result in duplicates:
+            remove_files(duplicate_result[1:])
 
     if duplicate_action == "link":
         dup_action_link(filtered_duplicates)
@@ -115,7 +116,6 @@ def main():
             }
             action_on_duplicated = action_on_duplicated.lower()
             interactive_actions[action_on_duplicated](filtered_duplicates)
-
 
 
 if __name__ == '__main__':
