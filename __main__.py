@@ -46,7 +46,7 @@ def main():
                         const='link',
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
     parser.add_argument('-d', '--directories',
-                        default=os.getcwd(),
+                        default=[os.getcwd()],
                         metavar="directory",
                         nargs='+')
     args = parser.parse_args()

@@ -5,7 +5,6 @@ import pathlib
 def directory_search(directory: str, recursive=True, include=None, exclude=None) -> tuple:
     directory = os.path.expanduser(directory)
 
-
     for directory, subdir, files in os.walk(directory):
         if exclude or include:
             if exclude:
