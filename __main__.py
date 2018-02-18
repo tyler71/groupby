@@ -10,6 +10,7 @@ from FileProperties import first_filter, duplicate_filter
 from FileProperties import md5_sum, sha256_sum, partial_md5_sum
 from FileProperties import modification_date, access_date
 from FileProperties import disk_size, direct_compare
+from FileProperties import file_name
 
 from FileActions import hardlink_files, remove_files
 
@@ -22,6 +23,7 @@ def main():
         "modified": modification_date,
         "accessed": access_date,
         "size": disk_size,
+        "filename": file_name,
         "file": direct_compare,
     }
     parser = argparse.ArgumentParser()

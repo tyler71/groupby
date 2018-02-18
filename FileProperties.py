@@ -24,6 +24,10 @@ def modification_date(filename: str) -> datetime.datetime:
     return parsed_date
 
 
+def file_name(filename: str) -> str:
+    return os.path.basename(filename)
+
+
 def disk_size(filename: str) -> int:
     byte_usage = os.path.getsize(filename)
     return byte_usage
