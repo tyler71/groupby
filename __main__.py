@@ -12,6 +12,8 @@ from FileProperties import modification_date, access_date
 from FileProperties import disk_size, direct_compare
 from FileProperties import file_name
 
+from ShellCommand import ActionShell
+
 from FileActions import hardlink_files, remove_files
 
 
@@ -29,8 +31,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', "--filters",
                         choices=filters.keys(),
-                        nargs='+',
-                        help="Default: size md5")
+                        help="Default: size md5",
+                        action="append")
+    parser.add_argument('-s', '--shell',
+                        dest="filters",
+                        help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
+                        action=ActionShell)
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
     parser.add_argument('--recursive', '-r', action='store_true')
@@ -45,10 +51,10 @@ def main():
                         action="append_const",
                         const='link',
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
-    parser.add_argument('-d', '--directories',
+    parser.add_argument('directories',
                         default=[os.getcwd()],
                         metavar="directory",
-                        nargs='+')
+                        nargs='*')
     args = parser.parse_args()
 
     # Choose only last duplicate action
@@ -60,6 +66,7 @@ def main():
     # Default filtering methods
     if not args.filters:
         args.filters = ["size", "md5"]
+
 
     # Get all file paths
     # Usage of set to remove duplicate directory entries
@@ -73,6 +80,8 @@ def main():
 
     # Get first (blocking) filter method, group other filter methods
     filter_method, *other_filter_methods = (filters[filter_method]
+                                            if type(filter_method) is str
+                                            else filter_method
                                             for filter_method in args.filters)
     filtered_duplicates = first_filter(filter_method, paths)
     if other_filter_methods:
