@@ -70,8 +70,8 @@ def first_filter(func, paths: iter):
     grouped_duplicates = defaultdict(list)
     for path in paths:
         if os.path.isfile(path):
-            signature = func(path)
-            grouped_duplicates[signature].append(path)
+            item_hash = func(path)
+            grouped_duplicates[item_hash].append(path)
     for duplicate in grouped_duplicates.values():
         yield duplicate
 
@@ -84,18 +84,17 @@ def duplicate_filter(func, duplicates: iter):
     :duplicates List of duplicates
     :return: dictionary
     '''
-    for duplicate in duplicates:
+    for duplicate_list in duplicates:
         filtered_duplicates = list()
-        if len(duplicate) > 1:
-            dup_hashes = set()
-            first, *others = duplicate
-            dup_hashes.add(func(first))
+        if len(duplicate_list) > 1:
+            first, *others = duplicate_list
+            filtered_duplicates.append(first)
+            source_hash = func(first)
             for item in others:
                 item_hash = func(item)
-                if item_hash in dup_hashes:
+                if item_hash == source_hash:
                     filtered_duplicates.append(item)
-            filtered_duplicates.append(others)
-        yield duplicate
+        yield filtered_duplicates
 
 
 if __name__ == '__main__':
