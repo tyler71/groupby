@@ -16,8 +16,8 @@ def _iter_read(filename: str, chunk_size=65536) -> bytes:
 
 
 def access_date(filename: str) -> str:
-    access_date = os.path.getmtime(filename)
-    return str(access_date)
+    access_time = os.path.getmtime(filename)
+    return str(access_time)
 
 
 def modification_date(filename: str) -> str:

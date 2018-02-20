@@ -67,7 +67,6 @@ def main():
     if not args.filters:
         args.filters = ["size", "md5"]
 
-
     # Get all file paths
     # Usage of set to remove duplicate directory entries
     paths = (path for directory in set(args.directories)
