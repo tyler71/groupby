@@ -1,9 +1,12 @@
 import datetime
 import os
 import hashlib
+import re
 
 from collections import defaultdict
 
+# This matches a newline, a space, tab, return character OR a null value: between the | and )
+whitespace = re.compile('^([\n \t\r]|)+$')
 
 # Used with checksum functions
 def _iter_read(filename: str, chunk_size=65536) -> bytes:
@@ -71,7 +74,7 @@ def first_filter(func, paths: iter):
     for path in paths:
         if os.path.isfile(path):
             item_hash = func(path)
-            if item_hash == '\n':
+            if whitespace.match(item_hash):
                 # Just a newline means no output
                 continue
             grouped_duplicates[item_hash].append(path)
@@ -95,7 +98,7 @@ def duplicate_filter(func, duplicates: iter):
             source_hash = func(first)
             for item in others:
                 item_hash = func(item)
-                if item_hash == '\n':
+                if whitespace.match(item_hash):
                     # Just a newline means no output
                     continue
                 if item_hash == source_hash:
