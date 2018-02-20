@@ -89,14 +89,17 @@ def main():
 
     def dup_action_link(duplicates):
         for duplicate_result in duplicates:
-            first, *others = duplicate_result
-            hardlink_files(itertools.repeat(first), others)
+            if len(duplicate_result) > 1:
+                first, *others = duplicate_result
+                hardlink_files(itertools.repeat(first), others)
 
     def dup_action_remove(duplicates):
         for duplicate_result in duplicates:
-            remove_files(duplicate_result[1:])
+            if len(duplicate_result) > 1:
+                remove_files(duplicate_result[1:])
 
     if duplicate_action == "link":
+        filtered_duplicates = list(filtered_duplicates)
         dup_action_link(filtered_duplicates)
     elif duplicate_action == "remove":
         dup_action_remove(filtered_duplicates)
