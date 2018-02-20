@@ -27,5 +27,6 @@ def invoke_shell(filename: str, command) -> str:
     try:
         output = subprocess.check_output(command(quoted_filename), shell=True).decode('utf8')
     except subprocess.CalledProcessError as e:
-        raise RuntimeError("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        return b''
     return output
