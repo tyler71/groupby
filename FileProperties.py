@@ -1,4 +1,3 @@
-import datetime
 import os
 import hashlib
 import re
@@ -6,7 +5,8 @@ import re
 from collections import defaultdict
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
-whitespace = re.compile('^([\n \t\r]|)+$')
+_whitespace = re.compile('^([\n \t\r]|)+$')
+
 
 # Used with checksum functions
 def _iter_read(filename: str, chunk_size=65536) -> bytes:
@@ -15,20 +15,19 @@ def _iter_read(filename: str, chunk_size=65536) -> bytes:
             yield chunk
 
 
-def access_date(filename: str) -> datetime.datetime:
+def access_date(filename: str) -> str:
     access_date = os.path.getmtime(filename)
-    parsed_date = datetime.datetime.fromtimestamp(access_date)
-    return parsed_date
+    return str(access_date)
 
 
-def modification_date(filename: str) -> datetime.datetime:
+def modification_date(filename: str) -> str:
     modification_time = os.path.getmtime(filename)
-    parsed_date = datetime.datetime.fromtimestamp(modification_time)
-    return parsed_date
+    return str(modification_time)
 
 
 def file_name(filename: str) -> str:
-    return os.path.basename(filename)
+    file_basename = os.path.basename(filename)
+    return str(file_basename)
 
 
 def disk_size(filename: str) -> str:
@@ -41,7 +40,7 @@ def md5_sum(filename, chunk_size=65536) -> str:
     for chunk in _iter_read(filename, chunk_size):
         checksumer.update(chunk)
     file_hash = checksumer.hexdigest()
-    return file_hash
+    return str(file_hash)
 
 
 def sha256_sum(filename, chunk_size=65536) -> str:
@@ -49,7 +48,7 @@ def sha256_sum(filename, chunk_size=65536) -> str:
     for chunk in _iter_read(filename, chunk_size):
         checksumer.update(chunk)
     file_hash = checksumer.hexdigest()
-    return file_hash
+    return str(file_hash)
 
 
 def partial_md5_sum(filename, chunk_size=65536, chunks_read=200) -> str:
@@ -74,7 +73,7 @@ def first_filter(func, paths: iter):
     for path in paths:
         if os.path.isfile(path):
             item_hash = func(path)
-            if len(item_hash) < 10 and whitespace.match(str(item_hash)):
+            if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                 # Just a newline means no output
                 continue
             grouped_duplicates[item_hash].append(path)
@@ -98,7 +97,7 @@ def duplicate_filter(func, duplicates: iter):
             source_hash = func(first)
             for item in others:
                 item_hash = func(item)
-                if len(item_hash) < 10 and whitespace.match(str(item_hash)):
+                if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                     # Just a newline means no output
                     continue
                 if item_hash == source_hash:
