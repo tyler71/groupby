@@ -31,12 +31,12 @@ def file_name(filename: str) -> str:
     return os.path.basename(filename)
 
 
-def disk_size(filename: str) -> int:
+def disk_size(filename: str) -> str:
     byte_usage = os.path.getsize(filename)
-    return byte_usage
+    return str(byte_usage)
 
 
-def md5_sum(filename, chunk_size=65536):
+def md5_sum(filename, chunk_size=65536) -> str:
     checksumer = hashlib.md5()
     for chunk in _iter_read(filename, chunk_size):
         checksumer.update(chunk)
@@ -44,7 +44,7 @@ def md5_sum(filename, chunk_size=65536):
     return file_hash
 
 
-def sha256_sum(filename, chunk_size=65536):
+def sha256_sum(filename, chunk_size=65536) -> str:
     checksumer = hashlib.sha256()
     for chunk in _iter_read(filename, chunk_size):
         checksumer.update(chunk)
@@ -52,7 +52,7 @@ def sha256_sum(filename, chunk_size=65536):
     return file_hash
 
 
-def partial_md5_sum(filename, chunk_size=65536, chunks_read=200):
+def partial_md5_sum(filename, chunk_size=65536, chunks_read=200) -> str:
     checksumer = hashlib.md5()
     with open(filename, 'rb') as file:
         for null in range(0, chunks_read):
@@ -63,7 +63,7 @@ def partial_md5_sum(filename, chunk_size=65536, chunks_read=200):
     return checksumer.hexdigest()
 
 
-def direct_compare(filename):
+def direct_compare(filename) -> bytes:
     with open(filename, 'rb') as file:
         data = file.read()
     return data
@@ -74,7 +74,7 @@ def first_filter(func, paths: iter):
     for path in paths:
         if os.path.isfile(path):
             item_hash = func(path)
-            if whitespace.match(item_hash):
+            if len(item_hash) < 10 and whitespace.match(str(item_hash)):
                 # Just a newline means no output
                 continue
             grouped_duplicates[item_hash].append(path)
@@ -98,7 +98,7 @@ def duplicate_filter(func, duplicates: iter):
             source_hash = func(first)
             for item in others:
                 item_hash = func(item)
-                if whitespace.match(item_hash):
+                if len(item_hash) < 10 and whitespace.match(str(item_hash)):
                     # Just a newline means no output
                     continue
                 if item_hash == source_hash:
