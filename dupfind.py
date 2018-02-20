@@ -37,10 +37,6 @@ def main():
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
                         action=ActionShell)
-    parser.add_argument('--include', action='append')
-    parser.add_argument('--exclude', action='append')
-    parser.add_argument('--recursive', '-r', action='store_true')
-    parser.add_argument('--interactive', action='store_true')
     parser.add_argument('--remove',
                         dest="duplicate_action",
                         action="append_const",
@@ -51,6 +47,10 @@ def main():
                         action="append_const",
                         const='link',
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
+    parser.add_argument('--include', action='append')
+    parser.add_argument('--exclude', action='append')
+    parser.add_argument('--recursive', '-r', action='store_true')
+    parser.add_argument('--interactive', action='store_true')
     parser.add_argument('directories',
                         default=[os.getcwd()],
                         metavar="directory",
