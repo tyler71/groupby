@@ -5,16 +5,16 @@ import argparse
 
 import itertools
 
-from DirectorySearch import directory_search
-from FileProperties import first_filter, duplicate_filter
-from FileProperties import md5_sum, sha256_sum, partial_md5_sum
-from FileProperties import modification_date, access_date
-from FileProperties import disk_size, direct_compare
-from FileProperties import file_name
+from util.DirectorySearch import directory_search
+from util.FileProperties import first_filter, duplicate_filter
+from util.FileProperties import md5_sum, sha256_sum, partial_md5_sum
+from util.FileProperties import modification_date, access_date
+from util.FileProperties import disk_size, direct_compare
+from util.FileProperties import file_name
 
-from ShellCommand import ActionShell
+from util.ShellCommand import ActionShell
 
-from FileActions import hardlink_files, remove_files
+from util.FileActions import hardlink_files, remove_files
 
 
 def main():
