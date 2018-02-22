@@ -106,8 +106,10 @@ class DuplicateFilters:
                 self.filter_hashes.append([key])
                 yield duplicate
 
-    def _additional_filters(self, func, duplicates):
+    def _additional_filters(self, func, duplicates, index_offset=0, insert_group=False):
+        unmatched_duplicates = OrderedDefaultListDict()
         for index, duplicate_list in enumerate(duplicates):
+            index += index_offset
             filtered_duplicates = list()
             if len(duplicate_list) > 1:
                 first, *others = duplicate_list
@@ -116,19 +118,32 @@ class DuplicateFilters:
 
                 # For each additional filter, append the source hash to the filter_hashes, allowing
                 # a user to use the results as part of a command
-                self.filter_hashes[index].append(source_hash)
+                if insert_group:
+                    self.filter_hashes.insert(index, list())
+                    self.filter_hashes[index].append(source_hash)
+                else:
+                    self.filter_hashes[index].append(source_hash)
 
                 for item in others:
                     item_hash = func(item)
 
                     # If matching _whitespace, continue since it shouldn't be considered a valid
-                    # output
+                    # output, however will only check for values less then 10 (for performance)
                     if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                         continue
 
                     # If this item matches the source, include it in the list to be returned.
                     if item_hash == source_hash:
                         filtered_duplicates.append(item)
+                    else:
+                        unmatched_duplicates[item_hash].append(item)
+
+            # Calls itself on all unmatched groups
+            if unmatched_duplicates:
+                print('-' * 10)
+                index_offset = index + 1
+                yield from self._additional_filters(func, duplicates, index_offset=index_offset, insert_group=True)
+
             yield filtered_duplicates
 
 
