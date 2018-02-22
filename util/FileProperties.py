@@ -106,10 +106,9 @@ class DuplicateFilters:
                 self.filter_hashes.append([key])
                 yield duplicate
 
-    def _additional_filters(self, func, duplicates, index_offset=0, insert_group=False):
+    def _additional_filters(self, func, duplicates):
         unmatched_duplicates = OrderedDefaultListDict()
         for index, duplicate_list in enumerate(duplicates):
-            index += index_offset
             filtered_duplicates = list()
             if len(duplicate_list) > 1:
                 first, *others = duplicate_list
@@ -118,11 +117,7 @@ class DuplicateFilters:
 
                 # For each additional filter, append the source hash to the filter_hashes, allowing
                 # a user to use the results as part of a command
-                if insert_group:
-                    self.filter_hashes.insert(index, list())
-                    self.filter_hashes[index].append(source_hash)
-                else:
-                    self.filter_hashes[index].append(source_hash)
+                self.filter_hashes[index].append(source_hash)
 
                 for item in others:
                     item_hash = func(item)
@@ -141,8 +136,7 @@ class DuplicateFilters:
             # Calls itself on all unmatched groups
             if unmatched_duplicates:
                 print('-' * 10)
-                index_offset = index + 1
-                yield from self._additional_filters(func, duplicates, index_offset=index_offset, insert_group=True)
+                yield from self._additional_filters(func, duplicates)
 
             yield filtered_duplicates
 
