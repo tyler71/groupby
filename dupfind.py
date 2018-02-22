@@ -6,7 +6,7 @@ import argparse
 import itertools
 
 from util.DirectorySearch import directory_search
-from util.FileProperties import first_filter, duplicate_filter
+from util.FileProperties import DuplicateFilters
 from util.FileProperties import md5_sum, sha256_sum, partial_md5_sum
 from util.FileProperties import modification_date, access_date
 from util.FileProperties import disk_size, direct_compare
@@ -74,18 +74,15 @@ def main():
                                           recursive=args.recursive,
                                           include=args.include,
                                           exclude=args.exclude
-                                         )
-            )
+                                          )
+             )
 
     # Get first (blocking) filter method, group other filter methods
-    filter_method, *other_filter_methods = (filters[filter_method]
-                                            if type(filter_method) is str
-                                            else filter_method
-                                            for filter_method in args.filters)
-    filtered_duplicates = first_filter(filter_method, paths)
-    if other_filter_methods:
-        for filter_method in (filter_ for filter_ in other_filter_methods):
-            filtered_duplicates = duplicate_filter(filter_method, filtered_duplicates)
+    filter_methods = (filters[filter_method]
+                      if type(filter_method) is str
+                      else filter_method
+                      for filter_method in args.filters)
+    filtered_duplicates = DuplicateFilters(filters=filter_methods, filenames=paths)
 
     def dup_action_link(duplicates):
         for duplicate_result in duplicates:
@@ -106,11 +103,13 @@ def main():
     else:
         if args.interactive is True:
             filtered_duplicates = tuple(filtered_duplicates)
-        for result in filtered_duplicates:
+        for index, result in enumerate(filtered_duplicates):
             if len(result) > 1:
+                print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
                 source_file, *duplicates = result
                 print(source_file)
                 print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
+
         if args.interactive is True:
             action_on_duplicated = None
             try:
