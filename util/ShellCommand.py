@@ -1,6 +1,7 @@
 import subprocess
 from functools import partial
 import argparse
+import shlex
 
 from argparse import _ensure_value, _copy
 
@@ -22,11 +23,11 @@ class ActionShell(argparse._AppendAction):
         setattr(namespace, self.dest, items)
 
 
-def invoke_shell(filename: str, command) -> str:
-    quoted_filename = "'{}'".format(filename)
+def invoke_shell(filename: str, *, command,) -> str:
+    quoted_filename = shlex.quote(filename)
     try:
         output = subprocess.check_output(command(quoted_filename), shell=True).decode('utf8')
     except subprocess.CalledProcessError as e:
         print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         return b''
-    return output
+    return output.strip()

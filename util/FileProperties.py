@@ -2,7 +2,14 @@ import os
 import hashlib
 import re
 
-from collections import defaultdict
+from collections import OrderedDict
+
+
+class OrderedDefaultListDict(OrderedDict):
+    def __missing__(self, key):
+        self[key] = value = []
+        return value
+
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
@@ -68,41 +75,71 @@ def direct_compare(filename) -> bytes:
     return data
 
 
-def first_filter(func, paths: iter):
-    grouped_duplicates = defaultdict(list)
-    for path in paths:
-        if os.path.isfile(path):
-            item_hash = func(path)
-            if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
-                # Just a newline means no output
-                continue
-            grouped_duplicates[item_hash].append(path)
-    for duplicate in grouped_duplicates.values():
-        yield duplicate
+class DuplicateFilters:
+    def __init__(self, *, filters, filenames):
+        self.filters = filters
+        self.filenames = filenames
+        self.filter_hashes = list()
 
+    def __iter__(self):
+        return self.process()
 
-def duplicate_filter(func, duplicates: iter):
-    '''
-    Takes list of duplicates, compares their checksum and returns a source value,
-    and duplicates identified with it as a dictionary
-    :func object Takes function and applies to iterable of duplicates
-    :duplicates List of duplicates
-    :return: dictionary
-    '''
-    for duplicate_list in duplicates:
-        filtered_duplicates = list()
-        if len(duplicate_list) > 1:
-            first, *others = duplicate_list
-            filtered_duplicates.append(first)
-            source_hash = func(first)
-            for item in others:
-                item_hash = func(item)
+    def process(self):
+        initial_filter, *other_filters = self.filters
+        results = self._first_filter(initial_filter, self.filenames)
+        for additional_filter in other_filters:
+            results = self._additional_filters(additional_filter, results)
+        for duplicate_list in results:
+            yield duplicate_list
+
+    def _first_filter(self, func, paths):
+        grouped_duplicates = OrderedDefaultListDict()
+        for path in paths:
+            if os.path.isfile(path):
+                item_hash = func(path)
                 if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                     # Just a newline means no output
                     continue
-                if item_hash == source_hash:
-                    filtered_duplicates.append(item)
-        yield filtered_duplicates
+                grouped_duplicates[item_hash].append(path)
+        for key, duplicate in grouped_duplicates.items():
+            if len(duplicate) > 1:
+                # key is appended enclosed in a list to group it, allowing other filters to also append to that
+                # specific group
+                self.filter_hashes.append([key])
+                yield duplicate
+
+    def _additional_filters(self, func, duplicates):
+        unmatched_duplicates = OrderedDefaultListDict()
+        for index, duplicate_list in enumerate(duplicates):
+            filtered_duplicates = list()
+            if len(duplicate_list) > 1:
+                first, *others = duplicate_list
+                filtered_duplicates.append(first)
+                source_hash = func(first)
+
+                # For each additional filter, append the source hash to the filter_hashes, allowing
+                # a user to use the results as part of a command
+                self.filter_hashes[index].append(source_hash)
+
+                for item in others:
+                    item_hash = func(item)
+
+                    # If matching _whitespace, continue since it shouldn't be considered a valid
+                    # output, however will only check for values less then 10 (for performance)
+                    if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
+                        continue
+
+                    # If this item matches the source, include it in the list to be returned.
+                    if item_hash == source_hash:
+                        filtered_duplicates.append(item)
+                    else:
+                        unmatched_duplicates[item_hash].append(item)
+
+            # Calls itself on all unmatched groups
+            #if unmatched_duplicates:
+                #yield from self._first_filter(func, unmatched_duplicates)
+
+            yield filtered_duplicates
 
 
 if __name__ == '__main__':
