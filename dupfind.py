@@ -4,6 +4,7 @@ import os
 import argparse
 
 import itertools
+from functools import partial
 
 from util.DirectorySearch import directory_search
 from util.FileProperties import DuplicateFilters
@@ -12,7 +13,7 @@ from util.FileProperties import modification_date, access_date
 from util.FileProperties import disk_size, direct_compare
 from util.FileProperties import file_name
 
-from util.ShellCommand import ActionShell
+from util.ShellCommand import ActionShell, invoke_shell
 
 from util.FileActions import hardlink_files, remove_files
 
@@ -78,10 +79,11 @@ def main():
              )
 
     # Get first (blocking) filter method, group other filter methods
-    filter_methods = (filters[filter_method]
-                      if type(filter_method) is str
-                      else filter_method
-                      for filter_method in args.filters)
+    print(args.filters)
+    filter_methods = [partial(invoke_shell, command=lambda filename: filter_method.format(filename))
+                      if '{}' in filter_method
+                      else filters[filter_method]
+                      for filter_method in args.filters]
     filtered_duplicates = DuplicateFilters(filters=filter_methods, filenames=paths)
 
     def dup_action_link(duplicates):

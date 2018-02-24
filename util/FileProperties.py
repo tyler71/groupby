@@ -4,10 +4,12 @@ import re
 
 from collections import OrderedDict
 
+
 class OrderedDefaultListDict(OrderedDict):
     def __missing__(self, key):
         self[key] = value = []
         return value
+
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
@@ -83,9 +85,10 @@ class DuplicateFilters:
         return self.process()
 
     def process(self):
-        first_filter, *additional_filters = self.filters
-        results = self._first_filter(first_filter, self.filenames)
-        for additional_filter in additional_filters:
+        initial_filter, *other_filters = self.filters
+        print(initial_filter, other_filters)
+        results = self._first_filter(initial_filter, self.filenames)
+        for additional_filter in other_filters:
             results = self._additional_filters(additional_filter, results)
         for duplicate_list in results:
             yield duplicate_list
@@ -134,9 +137,8 @@ class DuplicateFilters:
                         unmatched_duplicates[item_hash].append(item)
 
             # Calls itself on all unmatched groups
-            if unmatched_duplicates:
-                print('-' * 10)
-                yield from self._additional_filters(func, duplicates)
+            #if unmatched_duplicates:
+                #yield from self._first_filter(func, unmatched_duplicates)
 
             yield filtered_duplicates
 
