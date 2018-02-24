@@ -79,11 +79,10 @@ def main():
              )
 
     # Get first (blocking) filter method, group other filter methods
-    print(args.filters)
-    filter_methods = [partial(invoke_shell, command=lambda filename: filter_method.format(filename))
-                      if '{}' in filter_method
-                      else filters[filter_method]
-                      for filter_method in args.filters]
+    filter_methods = (filters[filter_method]
+                      if type(filter_method) is str
+                      else filter_method
+                      for filter_method in args.filters)
     filtered_duplicates = DuplicateFilters(filters=filter_methods, filenames=paths)
 
     def dup_action_link(duplicates):

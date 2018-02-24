@@ -86,7 +86,6 @@ class DuplicateFilters:
 
     def process(self):
         initial_filter, *other_filters = self.filters
-        print(initial_filter, other_filters)
         results = self._first_filter(initial_filter, self.filenames)
         for additional_filter in other_filters:
             results = self._additional_filters(additional_filter, results)

@@ -12,13 +12,13 @@ class ActionShell(argparse._AppendAction):
         if isinstance(values, list):
             for template in values:
                 template_func = lambda filename: template.format(filename)
-                #shell_command = partial(invoke_shell, command=template_func)
-                items.append(template)
+                shell_command = partial(invoke_shell, command=template_func)
+                items.append(shell_command)
         else:
             template = values
             template_func = lambda filename: template.format(filename)
-            #shell_command = partial(invoke_shell, command=template_func)
-            items.append(template)
+            shell_command = partial(invoke_shell, command=template_func)
+            items.append(shell_command)
 
         setattr(namespace, self.dest, items)
 
@@ -27,7 +27,6 @@ def invoke_shell(filename: str, *, command,) -> str:
     quoted_filename = shlex.quote(filename)
     try:
         output = subprocess.check_output(command(quoted_filename), shell=True).decode('utf8')
-        print(output)
     except subprocess.CalledProcessError as e:
         print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         return b''
