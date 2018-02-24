@@ -109,9 +109,9 @@ class DuplicateFilters:
                 yield duplicate
 
     def _additional_filters(self, func, duplicates):
-        unmatched_duplicates = OrderedDefaultListDict()
         index = 0
         for duplicate_list in duplicates:
+            unmatched_duplicates = OrderedDefaultListDict()
             filtered_duplicates = list()
             if len(duplicate_list) > 1:
                 first, *others = duplicate_list
@@ -143,8 +143,8 @@ class DuplicateFilters:
                 for item_hash, unmatched_duplicate in unmatched_duplicates.items():
                     # key is appended enclosed in a list to group it, allowing other filters to also append to that
                     # specific group
-                    self.filter_hashes.insert(index, previous_filter_track + [item_hash])
                     index += 1
+                    self.filter_hashes.insert(index, previous_filter_track + [item_hash])
                     yield unmatched_duplicate
 
             index += 1
