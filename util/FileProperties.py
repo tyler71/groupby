@@ -76,26 +76,31 @@ def direct_compare(filename) -> bytes:
 
 
 class DuplicateFilters:
-    def __init__(self, *, filters, filenames):
+    def __init__(self, *, filters, filenames, conditions=None):
         self.filters = filters
         self.filenames = filenames
         self.filter_hashes = list()
+        if conditions is None:
+            self.conditions = list()
+        else:
+            self.conditions = conditions
 
     def __iter__(self):
         return self.process()
 
     def process(self):
         initial_filter, *other_filters = self.filters
-        results = self._first_filter(initial_filter, self.filenames)
+        results = self._first_filter(initial_filter, self.filenames, conditions=self.conditions)
         for additional_filter in other_filters:
             results = self._additional_filters(additional_filter, results)
         for duplicate_list in results:
             yield duplicate_list
 
-    def _first_filter(self, func, paths):
+    def _first_filter(self, func, paths, conditions):
+        conditions.append(os.path.isfile)
         grouped_duplicates = OrderedDefaultListDict()
         for path in paths:
-            if os.path.isfile(path):
+            if all(condition(path) for condition in conditions):
                 item_hash = func(path)
                 if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                     # Just a newline means no output
@@ -109,8 +114,9 @@ class DuplicateFilters:
                 yield duplicate
 
     def _additional_filters(self, func, duplicates):
-        unmatched_duplicates = OrderedDefaultListDict()
-        for index, duplicate_list in enumerate(duplicates):
+        index = 0
+        for duplicate_list in duplicates:
+            unmatched_duplicates = OrderedDefaultListDict()
             filtered_duplicates = list()
             if len(duplicate_list) > 1:
                 first, *others = duplicate_list
@@ -135,11 +141,18 @@ class DuplicateFilters:
                     else:
                         unmatched_duplicates[item_hash].append(item)
 
-            # Calls itself on all unmatched groups
-            #if unmatched_duplicates:
-                #yield from self._first_filter(func, unmatched_duplicates)
-
             yield filtered_duplicates
+            # Calls itself on all unmatched groups
+            if unmatched_duplicates:
+                previous_filter_track = self.filter_hashes[index][0:-1]
+                for item_hash, unmatched_duplicate in unmatched_duplicates.items():
+                    # key is appended enclosed in a list to group it, allowing other filters to also append to that
+                    # specific group
+                    index += 1
+                    self.filter_hashes.insert(index, previous_filter_track + [item_hash])
+                    yield unmatched_duplicate
+
+            index += 1
 
 
 if __name__ == '__main__':
