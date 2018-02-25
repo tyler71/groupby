@@ -60,6 +60,7 @@ def main():
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
     parser.add_argument('-r', '--recursive', action='store_true')
+    parser.add_argument('-t', '--threshold', type=int, default=1, help="Minimum number of groups")
     parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
     parser.add_argument('--follow-symbolic', action='store_true', help="Allow following of symbolic links for compare")
     parser.add_argument('--interactive', action='store_true')
@@ -79,6 +80,8 @@ def main():
         duplicate_action = args.duplicate_action[-1]
     else:
         duplicate_action = None
+
+    args.threshold = args.threshold if args.threshold > 1 else 1
 
     # Default filtering methods
     if not args.filters:
@@ -103,13 +106,13 @@ def main():
 
     def dup_action_link(duplicates):
         for duplicate_result in duplicates:
-            if len(duplicate_result) > 1:
+            if len(duplicate_result) >= args.threshold:
                 first, *others = duplicate_result
                 hardlink_files(itertools.repeat(first), others)
 
     def dup_action_remove(duplicates):
         for duplicate_result in duplicates:
-            if len(duplicate_result) > 1:
+            if len(duplicate_result) >= args.threshold:
                 remove_files(duplicate_result[1:])
 
     if duplicate_action == "link":
@@ -121,7 +124,7 @@ def main():
         if args.interactive is True:
             filtered_duplicates = tuple(filtered_duplicates)
         for index, result in enumerate(filtered_duplicates):
-            if len(result) > 1:
+            if len(result) >= args.threshold:
                 print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
                 source_file, *duplicates = result
                 print(source_file)
