@@ -11,16 +11,21 @@ class ActionShell(argparse._AppendAction):
         items = _copy.copy(_ensure_value(namespace, self.dest, []))
         if isinstance(values, list):
             for template in values:
-                template_func = lambda filename: template.format(filename)
-                shell_command = partial(invoke_shell, command=template_func)
+                shell_command = convert_to_shell(invoke_shell, template)
                 items.append(shell_command)
         else:
             template = values
-            template_func = lambda filename: template.format(filename)
-            shell_command = partial(invoke_shell, command=template_func)
+            shell_command = convert_to_shell(invoke_shell, template)
             items.append(shell_command)
 
         setattr(namespace, self.dest, items)
+
+def convert_to_shell(func, template):
+    def wrapper(*args, **kwargs):
+        template_func = template.format(*args, **kwargs)
+        shell_command = partial(func, command=template_func)
+        return shell_command
+    return wrapper
 
 
 def invoke_shell(filename: str, *, command,) -> str:
