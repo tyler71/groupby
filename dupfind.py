@@ -29,6 +29,9 @@ def main():
         "filename": file_name,
         "file": direct_compare,
     }
+    conditions = {
+        "symbolic_link": os.path.islink
+    }
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', "--filters",
                         choices=filters.keys(),
