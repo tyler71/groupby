@@ -76,26 +76,31 @@ def direct_compare(filename) -> bytes:
 
 
 class DuplicateFilters:
-    def __init__(self, *, filters, filenames):
+    def __init__(self, *, filters, filenames, conditions=None):
         self.filters = filters
         self.filenames = filenames
         self.filter_hashes = list()
+        if conditions is None:
+            self.conditions = list()
+        else:
+            self.conditions = conditions
 
     def __iter__(self):
         return self.process()
 
     def process(self):
         initial_filter, *other_filters = self.filters
-        results = self._first_filter(initial_filter, self.filenames)
+        results = self._first_filter(initial_filter, self.filenames, conditions=self.conditions)
         for additional_filter in other_filters:
             results = self._additional_filters(additional_filter, results)
         for duplicate_list in results:
             yield duplicate_list
 
-    def _first_filter(self, func, paths):
+    def _first_filter(self, func, paths, conditions):
+        conditions.append(os.path.isfile)
         grouped_duplicates = OrderedDefaultListDict()
         for path in paths:
-            if os.path.isfile(path):
+            if all(condition(path) for condition in conditions):
                 item_hash = func(path)
                 if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                     # Just a newline means no output
