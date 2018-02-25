@@ -97,10 +97,9 @@ class DuplicateFilters:
             yield duplicate_list
 
     def _first_filter(self, func, paths, conditions):
-        conditions.append(os.path.isfile)
         grouped_duplicates = OrderedDefaultListDict()
         for path in paths:
-            if not all(condition(path) for condition in conditions):
+            if all(condition(path) for condition in conditions):
                 item_hash = func(path)
                 if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                     # Just a newline means no output

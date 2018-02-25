@@ -4,7 +4,6 @@ import os
 import argparse
 
 import itertools
-from functools import partial
 
 from util.DirectorySearch import directory_search
 from util.FileProperties import DuplicateFilters
@@ -29,8 +28,15 @@ def main():
         "filename": file_name,
         "file": direct_compare,
     }
+
+    def negation(func):
+        def wrapper(*args, **kwargs):
+            return not func(*args, **kwargs)
+        return wrapper
     conditions = {
-        "symbolic_link": os.path.islink
+        "is_file": os.path.isfile,
+        "not_symbolic_link": negation(os.path.islink),
+        "not_empty": lambda filename: os.path.getsize(filename) > 0,
     }
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', "--filters",
@@ -53,13 +59,20 @@ def main():
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
-    parser.add_argument('--recursive', '-r', action='store_true')
+    parser.add_argument('-r', '--recursive', action='store_true')
+    parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
+    parser.add_argument('--follow-symbolic', action='store_true', help="Allow following of symbolic links for compare")
     parser.add_argument('--interactive', action='store_true')
     parser.add_argument('directories',
                         default=[os.getcwd()],
                         metavar="directory",
                         nargs='*')
     args = parser.parse_args()
+
+    if args.follow_symbolic is True:
+        conditions.pop("not_symbolic_link")
+    if args.empty_file is True:
+        conditions.pop("not_empty")
 
     # Choose only last duplicate action
     if args.duplicate_action:
@@ -86,7 +99,7 @@ def main():
                       if type(filter_method) is str
                       else filter_method
                       for filter_method in args.filters)
-    filtered_duplicates = DuplicateFilters(filters=filter_methods, filenames=paths)
+    filtered_duplicates = DuplicateFilters(filters=filter_methods, filenames=paths, conditions=conditions.values())
 
     def dup_action_link(duplicates):
         for duplicate_result in duplicates:
