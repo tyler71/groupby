@@ -12,7 +12,7 @@ from util.FileProperties import modification_date, access_date
 from util.FileProperties import disk_size, direct_compare
 from util.FileProperties import file_name
 
-from util.ShellCommand import ActionShell, invoke_shell
+from util.ShellCommand import ActionShell
 
 from util.FileActions import hardlink_files, remove_files
 
