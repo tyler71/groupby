@@ -11,23 +11,29 @@ class ActionShell(argparse._AppendAction):
         items = _copy.copy(_ensure_value(namespace, self.dest, []))
         if isinstance(values, list):
             for template in values:
-                template_func = lambda filename: template.format(filename)
-                shell_command = partial(invoke_shell, command=template_func)
+                template_format = convert_to_shell(template)
+                shell_command = partial(invoke_shell, command=template_format)
                 items.append(shell_command)
         else:
             template = values
-            template_func = lambda filename: template.format(filename)
-            shell_command = partial(invoke_shell, command=template_func)
+            template_format = convert_to_shell(template)
+            shell_command = partial(invoke_shell, command=template_format)
             items.append(shell_command)
 
         setattr(namespace, self.dest, items)
 
+def convert_to_shell(template):
+    def wrapper(*args, **kwargs):
+        template_func = template.format(*args, **kwargs)
+        return template_func
+    return wrapper
 
-def invoke_shell(filename: str, *, command,) -> str:
-    quoted_filename = shlex.quote(filename)
+
+def invoke_shell(*args, command, **kwargs) -> str:
+    args = [shlex.quote(arg) for arg in args]
     try:
-        output = subprocess.check_output(command(quoted_filename), shell=True).decode('utf8')
+        output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
     except subprocess.CalledProcessError as e:
         print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-        return b''
+        return ''
     return output.strip()

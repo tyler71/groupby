@@ -4,6 +4,7 @@ import os
 import argparse
 
 import itertools
+import functools
 
 from util.DirectorySearch import directory_search
 from util.FileProperties import DuplicateFilters
@@ -46,6 +47,9 @@ def main():
     parser.add_argument('-s', '--shell',
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
+                        action=ActionShell)
+    parser.add_argument('--exec-group',
+                        dest="duplicate_action",
                         action=ActionShell)
     parser.add_argument('--remove',
                         dest="duplicate_action",
@@ -120,6 +124,16 @@ def main():
         dup_action_link(filtered_duplicates)
     elif duplicate_action == "remove":
         dup_action_remove(filtered_duplicates)
+    elif type(duplicate_action) is functools.partial:
+        for index, results in enumerate(filtered_duplicates):
+            if len(results) >= args.threshold:
+                # Take each filters output and label f1: 1st_output, fn: n_output...
+                labeled_filters = {f"f{filter_number + 1}": filter_output
+                                   for filter_number, filter_output in enumerate(filtered_duplicates.filter_hashes[index])}
+                for result in results:
+                    # Executes the command given and returns its output if available
+                    command_string = duplicate_action(result, **labeled_filters)
+                    print(command_string)
     else:
         if args.interactive is True:
             filtered_duplicates = tuple(filtered_duplicates)
