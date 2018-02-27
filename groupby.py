@@ -141,8 +141,8 @@ def main():
             if len(result) >= args.threshold:
                 if args.basic_formatting:
                     print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
-                    if duplicates:
-                        print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in results)), end='\n\n')
+                    if result:
+                        print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in result)), end='\n\n')
                     else:
                         print('')
                 else:
