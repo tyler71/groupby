@@ -35,6 +35,7 @@ def main():
                         action=ActionShell)
     parser.add_argument('--exec-group',
                         dest="duplicate_action",
+                        help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
                         action=ActionShell)
     parser.add_argument('--remove',
                         dest="duplicate_action",
@@ -49,7 +50,7 @@ def main():
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
     parser.add_argument('-r', '--recursive', action='store_true')
-    parser.add_argument('-t', '--threshold', type=int, default=1, help="Minimum number of groups")
+    parser.add_argument('-t', '--threshold', type=int, default=1, help="Minimum number of files in each group")
     parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
     parser.add_argument('--follow-symbolic', action='store_true', help="Allow following of symbolic links for compare")
     parser.add_argument('--interactive', action='store_true')
