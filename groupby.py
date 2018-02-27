@@ -141,7 +141,10 @@ def main():
                 print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
                 source_file, *duplicates = result
                 print(source_file)
-                print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
+                if duplicates:
+                    print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
+                else:
+                    print('')
 
         # A messy implementation to a interactive dialog
         if args.interactive is True:
