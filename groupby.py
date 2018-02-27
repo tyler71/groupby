@@ -53,6 +53,7 @@ def main():
     parser.add_argument('--exclude', action='append')
     parser.add_argument('-r', '--recursive', action='store_true')
     parser.add_argument('-t', '--threshold', type=int, default=1, help="Minimum number of files in each group")
+    parser.add_argument("--basic-formatting", action="store_true")
     parser.add_argument("--max-depth", type=int)
     parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
     parser.add_argument('--follow-symbolic', action='store_true', help="Allow following of symbolic links for compare")
@@ -138,13 +139,20 @@ def main():
         # Print all groups.
         for index, result in enumerate(filtered_duplicates):
             if len(result) >= args.threshold:
-                print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
-                source_file, *duplicates = result
-                print(source_file)
-                if duplicates:
-                    print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
+                if args.basic_formatting:
+                    print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
+                    if duplicates:
+                        print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in results)), end='\n\n')
+                    else:
+                        print('')
                 else:
-                    print('')
+                    print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
+                    source_file, *duplicates = result
+                    print(source_file)
+                    if duplicates:
+                        print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
+                    else:
+                        print('')
 
         # A messy implementation to a interactive dialog
         if args.interactive is True:
