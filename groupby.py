@@ -51,6 +51,7 @@ def main():
     parser.add_argument('--exclude', action='append')
     parser.add_argument('-r', '--recursive', action='store_true')
     parser.add_argument('-t', '--threshold', type=int, default=1, help="Minimum number of files in each group")
+    parser.add_argument("--max-depth", type=int)
     parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
     parser.add_argument('--follow-symbolic', action='store_true', help="Allow following of symbolic links for compare")
     parser.add_argument('--interactive', action='store_true')
@@ -74,14 +75,14 @@ def main():
     args.threshold = args.threshold if args.threshold > 1 else 1
 
     # Default filtering methods
-    if not args.filters:
-        args.filters = ["size", "md5"]
+    args.filters = args.filters if args.filters else ["size", "md5"]
 
     # Get all file paths
     # Usage of set to remove duplicate directory entries
     paths = (path for directory in set(args.directories)
              for path in directory_search(directory,
                                           recursive=args.recursive,
+                                          max_depth=args.max_depth,
                                           include=args.include,
                                           exclude=args.exclude
                                           )

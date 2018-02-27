@@ -2,9 +2,10 @@ import os
 import pathlib
 
 
-def directory_search(directory: str, recursive=True, include=None, exclude=None) -> tuple:
+def directory_search(directory: str, *, recursive=True, max_depth=None, include=None, exclude=None) -> tuple:
     directory = os.path.expanduser(directory)
 
+    directory_depth = 0
     for directory, subdir, files in os.walk(directory):
         if include or exclude:
             if include:
@@ -31,6 +32,10 @@ def directory_search(directory: str, recursive=True, include=None, exclude=None)
         # Break after 1st iteration to prevent recursiveness
         if recursive is False:
             break
+        elif max_depth is int and max_depth > 0:
+            directory_depth += 1
+            if directory_depth == max_depth:
+                break
 
 
 if __name__ == '__main__':
