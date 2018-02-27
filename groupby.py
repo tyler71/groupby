@@ -108,11 +108,17 @@ def main():
             if len(duplicate_result) >= args.threshold:
                 remove_files(duplicate_result[1:])
 
+    # Take the first file in a group as the source,
+    # and remove and then hard link the source file to each target path
     if duplicate_action == "link":
         filtered_duplicates = list(filtered_duplicates)
         dup_action_link(filtered_duplicates)
+    # Removes all but the first first identified in the group
     elif duplicate_action == "remove":
         dup_action_remove(filtered_duplicates)
+    # Custom shell action supplied by --exec-group
+    # Uses references to tracked filters in filter_hashes as {f1} {fn}
+    # {} is aliased to positional {0}
     elif type(duplicate_action) is functools.partial:
         for index, results in enumerate(filtered_duplicates):
             if len(results) >= args.threshold:
@@ -122,10 +128,14 @@ def main():
                 for result in results:
                     # Executes the command given and returns its output if available
                     command_string = duplicate_action(result, **labeled_filters)
-                    print(command_string)
+                    print(command_string, end='') # Shell commands already have newline
     else:
         if args.interactive is True:
+            # If interactive, it will list the grouped files and then need to act on it.
+            # Because output is through a generator, generate all results and store them
             filtered_duplicates = tuple(filtered_duplicates)
+
+        # Print all groups.
         for index, result in enumerate(filtered_duplicates):
             if len(result) >= args.threshold:
                 print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
@@ -133,6 +143,7 @@ def main():
                 print(source_file)
                 print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
 
+        # A messy implementation to a interactive dialog
         if args.interactive is True:
             action_on_duplicated = None
             try:
