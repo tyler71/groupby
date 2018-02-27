@@ -9,20 +9,23 @@ from argparse import _ensure_value, _copy
 class ActionShell(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         items = _copy.copy(_ensure_value(namespace, self.dest, []))
-        if isinstance(values, list):
+        if isinstance(values, (list, tuple)):
             for template in values:
-                template_format = convert_to_shell(template)
+                template = template.replace("{}", "{0}")
+                template_format = format_template(template)
                 shell_command = partial(invoke_shell, command=template_format)
                 items.append(shell_command)
         else:
             template = values
-            template_format = convert_to_shell(template)
+            template = template.replace("{}", "{0}")
+            template_format = format_template(template)
             shell_command = partial(invoke_shell, command=template_format)
             items.append(shell_command)
 
         setattr(namespace, self.dest, items)
 
-def convert_to_shell(template):
+
+def format_template(template):
     def wrapper(*args, **kwargs):
         template_func = template.format(*args, **kwargs)
         return template_func
