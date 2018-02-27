@@ -14,6 +14,21 @@ class OrderedDefaultListDict(OrderedDict):
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
 
+def list_filters():
+    filters = OrderedDict(
+        {
+            "partial_md5": partial_md5_sum,
+            "md5": md5_sum,
+            "sha256": sha256_sum,
+            "modified": modification_date,
+            "accessed": access_date,
+            "size": disk_size,
+            "filename": file_name,
+            "file": direct_compare,
+        }
+    )
+    return filters
+
 
 # Used with checksum functions
 def _iter_read(filename: str, chunk_size=65536) -> bytes:

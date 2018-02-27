@@ -1,34 +1,19 @@
 #!/usr/bin/env python3
 
-import os
 import argparse
-
-import itertools
 import functools
+import itertools
+import os
 
+import util.FileProperties
 from util.DirectorySearch import directory_search
-from util.FileProperties import DuplicateFilters
-from util.FileProperties import md5_sum, sha256_sum, partial_md5_sum
-from util.FileProperties import modification_date, access_date
-from util.FileProperties import disk_size, direct_compare
-from util.FileProperties import file_name
-
-from util.ShellCommand import ActionShell
-
 from util.FileActions import hardlink_files, remove_files
+from util.FileProperties import DuplicateFilters
+from util.ShellCommand import ActionShell
 
 
 def main():
-    filters = {
-        "partial_md5": partial_md5_sum,
-        "md5": md5_sum,
-        "sha256": sha256_sum,
-        "modified": modification_date,
-        "accessed": access_date,
-        "size": disk_size,
-        "filename": file_name,
-        "file": direct_compare,
-    }
+    available_filters = util.FileProperties.list_filters()
 
     def negation(func):
         def wrapper(*args, **kwargs):
@@ -41,7 +26,7 @@ def main():
     }
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', "--filters",
-                        choices=filters.keys(),
+                        choices=available_filters.keys(),
                         help="Default: size md5",
                         action="append")
     parser.add_argument('-s', '--shell',
@@ -102,7 +87,7 @@ def main():
              )
 
     # Get first (blocking) filter method, group other filter methods
-    filter_methods = (filters[filter_method]
+    filter_methods = (available_filters[filter_method]
                       if type(filter_method) is str
                       else filter_method
                       for filter_method in args.filters)
