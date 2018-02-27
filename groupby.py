@@ -4,6 +4,7 @@ import argparse
 import functools
 import itertools
 import os
+import sys
 
 import util.FileProperties
 from util.DirectorySearch import directory_search
@@ -13,6 +14,7 @@ from util.ShellCommand import ActionShell
 
 
 def main():
+    assert sys.version_info >= (3,6), "Requires Python3.6 or greater"
     available_filters = util.FileProperties.list_filters()
 
     def negation(func):
