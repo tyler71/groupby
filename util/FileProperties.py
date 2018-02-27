@@ -4,6 +4,7 @@ import re
 
 from collections import OrderedDict
 
+from util.Logging import func_call
 
 class OrderedDefaultListDict(OrderedDict):
     def __missing__(self, key):
@@ -13,6 +14,7 @@ class OrderedDefaultListDict(OrderedDict):
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
+
 
 def list_filters():
     filters = OrderedDict(
@@ -37,26 +39,31 @@ def _iter_read(filename: str, chunk_size=65536) -> bytes:
             yield chunk
 
 
+@func_call
 def access_date(filename: str) -> str:
     access_time = os.path.getmtime(filename)
     return str(access_time)
 
 
+@func_call
 def modification_date(filename: str) -> str:
     modification_time = os.path.getmtime(filename)
     return str(modification_time)
 
 
+@func_call
 def file_name(filename: str) -> str:
     file_basename = os.path.basename(filename)
     return str(file_basename)
 
 
+@func_call
 def disk_size(filename: str) -> str:
     byte_usage = os.path.getsize(filename)
     return str(byte_usage)
 
 
+@func_call
 def md5_sum(filename, chunk_size=65536) -> str:
     checksumer = hashlib.md5()
     for chunk in _iter_read(filename, chunk_size):
@@ -65,6 +72,7 @@ def md5_sum(filename, chunk_size=65536) -> str:
     return str(file_hash)
 
 
+@func_call
 def sha256_sum(filename, chunk_size=65536) -> str:
     checksumer = hashlib.sha256()
     for chunk in _iter_read(filename, chunk_size):
@@ -73,6 +81,7 @@ def sha256_sum(filename, chunk_size=65536) -> str:
     return str(file_hash)
 
 
+@func_call
 def partial_md5_sum(filename, chunk_size=65536, chunks_read=200) -> str:
     checksumer = hashlib.md5()
     with open(filename, 'rb') as file:
@@ -84,6 +93,7 @@ def partial_md5_sum(filename, chunk_size=65536, chunks_read=200) -> str:
     return checksumer.hexdigest()
 
 
+@func_call
 def direct_compare(filename) -> bytes:
     with open(filename, 'rb') as file:
         data = file.read()

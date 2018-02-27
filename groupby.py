@@ -2,6 +2,7 @@
 
 import argparse
 import functools
+import logging
 import itertools
 import os
 import sys
@@ -11,6 +12,7 @@ from util.DirectorySearch import directory_search
 from util.FileActions import hardlink_files, remove_files
 from util.FileProperties import DuplicateFilters
 from util.ShellCommand import ActionShell
+from util.Logging import log_levels
 
 
 def main():
@@ -58,6 +60,7 @@ def main():
     parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
     parser.add_argument('--follow-symbolic', action='store_true', help="Allow following of symbolic links for compare")
     parser.add_argument('--interactive', action='store_true')
+    parser.add_argument('-v', '--verbosity', default=3, action="count")
     parser.add_argument('directories',
                         default=[os.getcwd()],
                         metavar="directory",
@@ -68,6 +71,13 @@ def main():
         conditions.pop("not_symbolic_link")
     if args.empty_file is True:
         conditions.pop("not_empty")
+
+    if args.verbosity:
+        logging.basicConfig(level=log_levels.get(args.verbosity, 3),
+                            stream=sys.stderr,
+                            format='[%(levelname)s] %(message)s')
+    else:
+        logging.disable(logging.CRITICAL)
 
     # Choose only last duplicate action
     if args.duplicate_action:
@@ -143,8 +153,8 @@ def main():
                     logging.info(' -> '.join(filtered_duplicates.filter_hashes[index]))
                     print('\n'.join((str(dup)) for dup in result), end='\n')
                 else:
-                    print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
                     source_file, *duplicates = result
+                    logging.info(' -> '.join(filtered_duplicates.filter_hashes[index]))
                     print(source_file)
                     if duplicates:
                         print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')
