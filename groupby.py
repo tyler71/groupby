@@ -140,11 +140,8 @@ def main():
         for index, result in enumerate(filtered_duplicates):
             if len(result) >= args.threshold:
                 if args.basic_formatting:
-                    print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
-                    if result:
-                        print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in result)), end='\n\n')
-                    else:
-                        print('')
+                    logging.info(' -> '.join(filtered_duplicates.filter_hashes[index]))
+                    print('\n'.join((str(dup)) for dup in result), end='\n')
                 else:
                     print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
                     source_file, *duplicates = result
