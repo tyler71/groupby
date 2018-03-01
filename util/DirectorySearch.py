@@ -45,7 +45,10 @@ def dir_include_exclude(directory, *, include=None, exclude=None):
                 return True
             else:
                 return False
-    return False
+    else:
+        return True
+
+
 
 def file_include_exclude(files, *, directory, include, exclude):
     if include:
