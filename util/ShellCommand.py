@@ -47,12 +47,12 @@ class TemplateFunc(string.Formatter):
             self.template = self.template.replace(key, alias)
 
     aliases = {
-        "{}": "{0}",
-        "{.}": "{:a}",
-        "{/}": "{:b}",
-        "{//}": "{:c}",
-        "{/.}": "{:e}",
-        "{..}": "{:f}",
+        "{}": "{0:s}",
+        "{.}": "{0:a}",
+        "{/}": "{0:b}",
+        "{//}": "{0:c}",
+        "{/.}": "{0:e}",
+        "{..}": "{0:f}",
     }
 
     def __call__(self, *args, **kwargs):
@@ -90,7 +90,7 @@ class TemplateFunc(string.Formatter):
 
 
 def invoke_shell(*args, command, **kwargs) -> str:
-    args = [shlex.quote(arg) for arg in args]
+    args = (shlex.quote(arg) for arg in args)
     try:
         output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
     except subprocess.CalledProcessError as e:
