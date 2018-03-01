@@ -20,8 +20,7 @@ class ActionShell(argparse._AppendAction):
                 items.append(shell_command)
         else:
             template = values
-            template = template.replace("{}", "{0}")
-            template_format = format_template(template)
+            template_format = TemplateFunc(template)
             shell_command = partial(invoke_shell, command=template_format)
             items.append(shell_command)
 
@@ -39,18 +38,25 @@ def format_template(template):
         return template_func
     return wrapper
 
+
 class TemplateFunc(string.Formatter):
     def __init__(self, template):
         self.template = template
-        self.template = template.replace("{}", "{0}")
-        self.template = template.replace("{.}", "{:a}")
-        self.template = template.replace("{/}", "{:b}")
-        self.template = template.replace("{//}", "{:c}")
-        self.template = template.replace("{/.}", "{:e}")
-        self.template = template.replace("{..}", "{:f}")
+
+        for key, alias in self.aliases.items():
+            self.template = self.template.replace(key, alias)
+
+    aliases = {
+        "{}": "{0}",
+        "{.}": "{:a}",
+        "{/}": "{:b}",
+        "{//}": "{:c}",
+        "{/.}": "{:e}",
+        "{..}": "{:f}",
+    }
 
     def __call__(self, *args, **kwargs):
-        pass
+        return self.format(self.template, *args, **kwargs)
 
     def format_field(self, value, spec):
         # {.} notation: Remove file extension
@@ -58,24 +64,29 @@ class TemplateFunc(string.Formatter):
             split_ext = os.path.splitext(value)
             value_no_ext = split_ext[0]
             value = value_no_ext
+            spec = spec[:-1] + 's'
         # {/} notation: basename of list()file
         if spec.endswith("b"):
             split_filename = os.path.split(value)[1]
             value = split_filename
+            spec = spec[:-1] + 's'
         # {//} notation: directory of filename)
         if spec.endswith("c"):
             split_dir = os.path.split(value)[0]
             value = split_dir
-        # {/.} notation: basename of file, with extentest removed
-        if spec == "e":
-            no_dir =  os.path.split(value)[1]
+            spec = spec[:-1] + 's'
+        # {/.} notation: basename of file, with ext removed
+        if spec.endswith("e"):
+            no_dir = os.path.split(value)[1]
             split_ext = os.path.splitext(no_dir)[0]
             value = split_ext
-        # {..} notation: test extension of file
+            spec = spec[:-1] + 's'
+        # {..} notation: extension of file
         if spec.endswith("f"):
             ext = os.path.splitext(value)[1]
             value = ext
-        return value, spec
+            spec = spec[:-1] + 's'
+        return super().format_field(value, spec)
 
 
 def invoke_shell(*args, command, **kwargs) -> str:
@@ -85,4 +96,4 @@ def invoke_shell(*args, command, **kwargs) -> str:
     except subprocess.CalledProcessError as e:
         print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         return ''
-    return output.strip()
+    return output
