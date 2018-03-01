@@ -124,12 +124,15 @@ def main():
     if duplicate_action == "link":
         filtered_duplicates = list(filtered_duplicates)
         dup_action_link(filtered_duplicates)
+
     # Removes all but the first first identified in the group
     elif duplicate_action == "remove":
         dup_action_remove(filtered_duplicates)
+
     # Custom shell action supplied by --exec-group
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
-    # {} is aliased to positional {0}
+    # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
+    # Also includes expansion of {..}, just includes filename extension
     elif type(duplicate_action) is functools.partial:
         for index, results in enumerate(filtered_duplicates):
             if len(results) >= args.threshold:
