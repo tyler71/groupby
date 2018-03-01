@@ -37,7 +37,7 @@ def main():
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
                         action=ActionShell)
-    parser.add_argument('--exec-group',
+    parser.add_argument('-x', '--exec-group',
                         dest="duplicate_action",
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
                         action=ActionShell)
@@ -134,12 +134,13 @@ def main():
         for index, results in enumerate(filtered_duplicates):
             if len(results) >= args.threshold:
                 # Take each filters output and label f1: 1st_output, fn: n_output...
-                labeled_filters = {f"f{filter_number + 1}": filter_output
+                # Strip filter_output because of embedded newline
+                labeled_filters = {f"f{filter_number + 1}": filter_output.strip()
                                    for filter_number, filter_output in enumerate(filtered_duplicates.filter_hashes[index])}
                 for result in results:
                     # Executes the command given and returns its output if available
                     command_string = duplicate_action(result, **labeled_filters)
-                    print(command_string, end='') # Shell commands already have newline
+                    print(command_string, end='')  # Shell commands already have newline
     else:
         if args.interactive is True:
             # If interactive, it will list the grouped files and then need to act on it.
