@@ -2,21 +2,23 @@
 
 import argparse
 import functools
-import logging
 import itertools
+import logging
 import os
 import sys
 
-import util.FileProperties
+from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.FileActions import hardlink_files, remove_files
 from util.FileProperties import DuplicateFilters
-from util.ShellCommand import ActionShell
 from util.Logging import log_levels
+
+import util.FileProperties
 
 
 def main():
-    assert sys.version_info >= (3,6), "Requires Python3.6 or greater"
+    assert sys.version_info >= (3, 6), "Requires Python3.6 or greater"
+
     available_filters = util.FileProperties.list_filters()
 
     def negation(func):
@@ -28,43 +30,9 @@ def main():
         "not_symbolic_link": negation(os.path.islink),
         "not_empty": lambda filename: os.path.getsize(filename) > 0,
     }
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', "--filters",
-                        choices=available_filters.keys(),
-                        help="Default: size md5",
-                        action="append")
-    parser.add_argument('-s', '--shell',
-                        dest="filters",
-                        help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
-                        action=ActionShell)
-    parser.add_argument('-x', '--exec-group',
-                        dest="duplicate_action",
-                        help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
-                        action=ActionShell)
-    parser.add_argument('--remove',
-                        dest="duplicate_action",
-                        action="append_const",
-                        const='remove',
-                        help="Remove Duplicates, last flag applies of remove or link ")
-    parser.add_argument('--link',
-                        dest="duplicate_action",
-                        action="append_const",
-                        const='link',
-                        help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
-    parser.add_argument('--include', action='append')
-    parser.add_argument('--exclude', action='append')
-    parser.add_argument('-r', '--recursive', action='store_true')
-    parser.add_argument('-t', '--threshold', type=int, default=1, help="Minimum number of files in each group")
-    parser.add_argument("--basic-formatting", action="store_true")
-    parser.add_argument("--max-depth", type=int)
-    parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
-    parser.add_argument('--follow-symbolic', action='store_true', help="Allow following of symbolic links for compare")
-    parser.add_argument('--interactive', action='store_true')
-    parser.add_argument('-v', '--verbosity', default=3, action="count")
-    parser.add_argument('directories',
-                        default=[os.getcwd()],
-                        metavar="directory",
-                        nargs='*')
+    parser = parser_logic(parser)
     args = parser.parse_args()
 
     if args.follow_symbolic is True:
@@ -97,7 +65,9 @@ def main():
                                           recursive=args.recursive,
                                           max_depth=args.max_depth,
                                           include=args.include,
-                                          exclude=args.exclude
+                                          exclude=args.exclude,
+                                          dir_include=args.dir_include,
+                                          dir_exclude=args.dir_exclude,
                                           )
              )
 
