@@ -2,6 +2,7 @@
 
 import argparse
 import functools
+import logging
 import itertools
 import os
 import sys
@@ -11,6 +12,7 @@ from util.DirectorySearch import directory_search
 from util.FileActions import hardlink_files, remove_files
 from util.FileProperties import DuplicateFilters
 from util.ShellCommand import ActionShell
+from util.Logging import log_levels
 
 
 def main():
@@ -35,7 +37,7 @@ def main():
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
                         action=ActionShell)
-    parser.add_argument('--exec-group',
+    parser.add_argument('-x', '--exec-group',
                         dest="duplicate_action",
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
                         action=ActionShell)
@@ -58,6 +60,7 @@ def main():
     parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
     parser.add_argument('--follow-symbolic', action='store_true', help="Allow following of symbolic links for compare")
     parser.add_argument('--interactive', action='store_true')
+    parser.add_argument('-v', '--verbosity', default=3, action="count")
     parser.add_argument('directories',
                         default=[os.getcwd()],
                         metavar="directory",
@@ -68,6 +71,13 @@ def main():
         conditions.pop("not_symbolic_link")
     if args.empty_file is True:
         conditions.pop("not_empty")
+
+    if args.verbosity:
+        logging.basicConfig(level=log_levels.get(args.verbosity, 3),
+                            stream=sys.stderr,
+                            format='[%(levelname)s] %(message)s')
+    else:
+        logging.disable(logging.CRITICAL)
 
     # Choose only last duplicate action
     if args.duplicate_action:
@@ -114,22 +124,26 @@ def main():
     if duplicate_action == "link":
         filtered_duplicates = list(filtered_duplicates)
         dup_action_link(filtered_duplicates)
+
     # Removes all but the first first identified in the group
     elif duplicate_action == "remove":
         dup_action_remove(filtered_duplicates)
+
     # Custom shell action supplied by --exec-group
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
-    # {} is aliased to positional {0}
+    # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
+    # Also includes expansion of {..}, just includes filename extension
     elif type(duplicate_action) is functools.partial:
         for index, results in enumerate(filtered_duplicates):
             if len(results) >= args.threshold:
                 # Take each filters output and label f1: 1st_output, fn: n_output...
-                labeled_filters = {f"f{filter_number + 1}": filter_output
+                # Strip filter_output because of embedded newline
+                labeled_filters = {f"f{filter_number + 1}": filter_output.strip()
                                    for filter_number, filter_output in enumerate(filtered_duplicates.filter_hashes[index])}
                 for result in results:
                     # Executes the command given and returns its output if available
                     command_string = duplicate_action(result, **labeled_filters)
-                    print(command_string, end='') # Shell commands already have newline
+                    print(command_string, end='')  # Shell commands already have newline
     else:
         if args.interactive is True:
             # If interactive, it will list the grouped files and then need to act on it.
@@ -143,8 +157,8 @@ def main():
                     logging.info(' -> '.join(filtered_duplicates.filter_hashes[index]))
                     print('\n'.join((str(dup)) for dup in result), end='\n')
                 else:
-                    print(*filtered_duplicates.filter_hashes[index], sep=' -> ')
                     source_file, *duplicates = result
+                    logging.info(' -> '.join(filtered_duplicates.filter_hashes[index]))
                     print(source_file)
                     if duplicates:
                         print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in duplicates)), end='\n\n')

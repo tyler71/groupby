@@ -39,11 +39,17 @@ When using `-x`/`--exec-group`, an additional expansion is available under the n
 
 ```buildoutcfg
 # Move all files with the same size into their own directory
-$ groupby -r -f size -x "echo mkdir -p {f1}; echo mv {} {f1}/{/}
-mkdir -p 122254
-mv /foo/bar/file.ogg 122254/file.ogg
+$ groupby -r -f size -x "mkdir -p {f1}; mv {} {f1}/{/}
+ ->  mkdir -p 122254
+ ->  mv /foo/bar/file.ogg 122254/file.ogg
 
 # Group all pictures into year and month
-$ groupby -r -s " 
-
+groupby.py -t2 -r \                             
+    -s "exiftool -p '\$DateTimeOriginal' {} | cut -d\: -f1" \                   
+    -s "exiftool -p '\$DateTimeOriginal' {} | cut -d\: -f2" \                   
+    -x "echo mkdir -p {f1}/{f2}; echo mv {} {f1}/{f2}/{/}"  \                   
+    foo/bar
+mkdir -p 2015/04
+mv foo/bar/image1.png 2015/04/image1.png
+...
 ```
