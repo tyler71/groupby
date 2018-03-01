@@ -38,6 +38,14 @@ def format_template(template):
         return template_func
     return wrapper
 
+def invoke_shell(*args, command, **kwargs) -> str:
+    args = (shlex.quote(arg) for arg in args)
+    try:
+        output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
+    except subprocess.CalledProcessError as e:
+        print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        return ''
+    return output
 
 class TemplateFunc(string.Formatter):
     def __init__(self, template):
@@ -59,7 +67,15 @@ class TemplateFunc(string.Formatter):
         return self.format(self.template, *args, **kwargs)
 
     def format_field(self, value, spec):
-        # {.} notation: Remove file extension
+        '''
+            Based on parallel notation including
+            {}  : filename
+            {.} : filename with extension removed
+            {/} : basename of filename
+            {//}: dirname of file
+            {/.}: dirname of file with extension removed
+        '''
+
         if spec.endswith("a"):
             split_ext = os.path.splitext(value)
             value_no_ext = split_ext[0]
@@ -81,7 +97,7 @@ class TemplateFunc(string.Formatter):
             split_ext = os.path.splitext(no_dir)[0]
             value = split_ext
             spec = spec[:-1] + 's'
-        # {..} notation: extension of file
+        # {..} expanded notation: extension of file
         if spec.endswith("f"):
             ext = os.path.splitext(value)[1]
             value = ext
@@ -89,11 +105,3 @@ class TemplateFunc(string.Formatter):
         return super().format_field(value, spec)
 
 
-def invoke_shell(*args, command, **kwargs) -> str:
-    args = (shlex.quote(arg) for arg in args)
-    try:
-        output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
-    except subprocess.CalledProcessError as e:
-        print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-        return ''
-    return output
