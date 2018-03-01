@@ -125,7 +125,7 @@ class DuplicateFilters:
         grouped_duplicates = OrderedDefaultListDict()
         for path in paths:
             if all(condition(path) for condition in conditions):
-                item_hash = func(path)
+                item_hash = func(path).strip()
                 if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                     # Just a newline means no output
                     continue
@@ -145,14 +145,14 @@ class DuplicateFilters:
             if len(duplicate_list) > 1:
                 first, *others = duplicate_list
                 filtered_duplicates.append(first)
-                source_hash = func(first)
+                source_hash = func(first).strip()
 
                 # For each additional filter, append the source hash to the filter_hashes, allowing
                 # a user to use the results as part of a command
                 self.filter_hashes[index].append(source_hash)
 
                 for item in others:
-                    item_hash = func(item)
+                    item_hash = func(item).strip()
 
                     # If matching _whitespace, continue since it shouldn't be considered a valid
                     # output, however will only check for values less then 10 (for performance)

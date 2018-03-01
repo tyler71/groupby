@@ -38,6 +38,7 @@ def format_template(template):
         return template_func
     return wrapper
 
+
 def invoke_shell(*args, command, **kwargs) -> str:
     args = (shlex.quote(arg) for arg in args)
     try:
@@ -46,6 +47,7 @@ def invoke_shell(*args, command, **kwargs) -> str:
         print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         return ''
     return output
+
 
 class TemplateFunc(string.Formatter):
     def __init__(self, template):
