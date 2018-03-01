@@ -3,14 +3,9 @@ import pathlib
 
 
 def directory_search(directory: str, *,
-                     recursive=True,
-                     max_depth=None,
-                     ignore_hidden=None,
-                     include=None,
-                     exclude=None,
-
-                     dir_include=None,
-                     dir_exclude=None,
+                     recursive=True, max_depth=None, ignore_hidden=None,
+                     include=None, exclude=None,
+                     dir_include=None, dir_exclude=None,
                      ) -> tuple:
     directory = os.path.expanduser(directory)
 
@@ -35,6 +30,19 @@ def directory_search(directory: str, *,
             if directory_depth == max_depth:
                 break
 
+def dir_include_exclude(files, *, directory, include, exclude):
+    if include:
+        pass
+    else:
+        included_directories = set()
+    if exclude:
+        pass
+    else:
+        exclude_directories = set()
+
+    if directory in included_directories:
+        yield
+    pass
 
 def file_include_exclude(files, *, directory, include, exclude):
     if include:
@@ -49,6 +57,7 @@ def file_include_exclude(files, *, directory, include, exclude):
                               if pathlib.PurePath(file).match(glob_match)}
     else:
         excluded_filenames = set()
+
     for file in files:
         if file in included_filenames:
             yield (directory, file)
