@@ -19,7 +19,7 @@ def func_call(func):
     def wrapper_func(*args, **kwargs):
         result = func(*args, **kwargs)
         logging.debug('function({args} {kwargs}) -> {result}'.format(
-            function=func.__name__,
+            function=func.__qualname__,
             args=args,
             kwargs=kwargs,
             result=result))
