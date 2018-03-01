@@ -6,12 +6,13 @@ import subprocess
 
 from functools import partial
 
-from util.FileProperties import list_filters as available_filters
+from util.FileProperties import list_filters
 
 
 def parser_logic(parser):
+    available_filters = list_filters()
     parser.add_argument('-f', "--filters",
-                        choices=available_filters().keys(),
+                        choices=available_filters.keys(),
                         help="Default: size md5",
                         action="append")
     parser.add_argument('-s', '--shell',
@@ -34,6 +35,8 @@ def parser_logic(parser):
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
+    parser.add_argument('--dir-include', action='append')
+    parser.add_argument('--dir-exclude', action='append')
     parser.add_argument('-r', '--recursive', action='store_true')
     parser.add_argument('-t', '--threshold', type=int, default=1, help="Minimum number of files in each group")
     parser.add_argument("--basic-formatting", action="store_true")

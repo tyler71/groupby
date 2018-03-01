@@ -13,9 +13,13 @@ from util.FileActions import hardlink_files, remove_files
 from util.FileProperties import DuplicateFilters
 from util.Logging import log_levels
 
+import util.FileProperties
+
 
 def main():
     assert sys.version_info >= (3, 6), "Requires Python3.6 or greater"
+
+    available_filters = util.FileProperties.list_filters()
 
     def negation(func):
         def wrapper(*args, **kwargs):
