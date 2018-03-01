@@ -11,6 +11,8 @@ def directory_search(directory: str, *,
 
     directory_depth = 0
     for directory, subdir, files in os.walk(directory):
+        if not dir_include_exclude(directory, include=dir_include, exclude=dir_exclude):
+            continue
         if include or exclude:
             for directory, file in file_include_exclude(files,
                                                         directory=directory,
@@ -30,19 +32,20 @@ def directory_search(directory: str, *,
             if directory_depth == max_depth:
                 break
 
-def dir_include_exclude(files, *, directory, include, exclude):
-    if include:
-        pass
-    else:
-        included_directories = set()
-    if exclude:
-        pass
-    else:
-        exclude_directories = set()
 
-    if directory in included_directories:
-        yield
-    pass
+def dir_include_exclude(directory, *, include=None, exclude=None):
+    if include or exclude:
+        if include is not None:
+            include_check = [True if item in directory else False for item in include]
+            if all(include_check):
+                return True
+        if exclude is not None:
+            exclude_check = [True if item in directory else False for item in exclude]
+            if not all(exclude_check) and len(exclude_check) > 0:
+                return True
+            else:
+                return False
+    return False
 
 def file_include_exclude(files, *, directory, include, exclude):
     if include:

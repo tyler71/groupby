@@ -61,7 +61,9 @@ def main():
                                           recursive=args.recursive,
                                           max_depth=args.max_depth,
                                           include=args.include,
-                                          exclude=args.exclude
+                                          exclude=args.exclude,
+                                          dir_include=args.dir_include,
+                                          dir_exclude=args.dir_exclude,
                                           )
              )
 
