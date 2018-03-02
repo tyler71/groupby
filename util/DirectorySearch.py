@@ -7,13 +7,17 @@ def directory_search(directory: str, *,
                      include=None, exclude=None,
                      dir_include=None, dir_exclude=None,
                      ) -> tuple:
-    directory = os.path.expanduser(directory)
+    orig_directory = os.path.expanduser(directory)
+    orig_directory_hidden = hidden_in_dir(directory)
 
     directory_depth = 0
-    for directory, subdir, files in os.walk(directory):
+    for directory, subdir, files in os.walk(orig_directory):
 
         # Skip hidden directories if specified
-        if follow_hidden is not True and hidden_in_dir(directory):
+        if all((
+                follow_hidden is not True,
+                orig_directory_hidden is not True,
+                hidden_in_dir(directory))):
             continue
 
         # Check for included and excluded directories
