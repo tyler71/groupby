@@ -53,6 +53,22 @@ def parser_logic(parser):
     return parser
 
 
+def format_template(template):
+    def wrapper(*args, **kwargs):
+        template_func = template.format(*args, **kwargs)
+        return template_func
+    return wrapper
+
+
+def invoke_shell(*args, command, **kwargs) -> str:
+    args = (shlex.quote(arg) for arg in args)
+    try:
+        output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
+    except subprocess.CalledProcessError as e:
+        print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        return ''
+    return output
+
 
 class ActionShell(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -78,23 +94,6 @@ class ActionShell(argparse._AppendAction):
         template_format = Template(template)
         shell_command = partial(invoke_shell, command=template_format)
         return shell_command
-
-
-def format_template(template):
-    def wrapper(*args, **kwargs):
-        template_func = template.format(*args, **kwargs)
-        return template_func
-    return wrapper
-
-
-def invoke_shell(*args, command, **kwargs) -> str:
-    args = (shlex.quote(arg) for arg in args)
-    try:
-        output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
-    except subprocess.CalledProcessError as e:
-        print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-        return ''
-    return output
 
 
 class TemplateFunc(string.Formatter):
