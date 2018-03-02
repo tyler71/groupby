@@ -11,9 +11,9 @@ def directory_search(directory: str, *,
 
     directory_depth = 0
     for directory, subdir, files in os.walk(directory):
-        
+
         # Skip hidden directories if specified
-        if follow_hidden is not True and directory.startswith('.'):
+        if follow_hidden is not True and hidden_in_dir(directory):
             continue
 
         # Check for included and excluded directories
@@ -79,6 +79,14 @@ def file_include_exclude(files, *, directory, include, exclude):
             yield (directory, file)
         elif file not in excluded_filenames and len(excluded_filenames) > 0:
             yield (directory, file)
+
+
+def hidden_in_dir(directory):
+    result = [True
+              if fragment_dir.startswith('.')
+              else False
+              for fragment_dir in directory.split('/') ]
+    return True if any(result) else False
 
 
 if __name__ == '__main__':
