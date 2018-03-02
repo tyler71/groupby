@@ -37,6 +37,7 @@ def parser_logic(parser):
     parser.add_argument('--exclude', action='append')
     parser.add_argument('--dir-include', action='append')
     parser.add_argument('--dir-exclude', action='append')
+    parser.add_argument('--follow-hidden', action='store_true')
     parser.add_argument('-r', '--recursive', action='store_true')
     parser.add_argument('-t', '--threshold', type=int, default=1, help="Minimum number of files in each group")
     parser.add_argument("--basic-formatting", action="store_true")

@@ -3,7 +3,7 @@ import pathlib
 
 
 def directory_search(directory: str, *,
-                     recursive=True, max_depth=None, ignore_hidden=None,
+                     recursive=True, max_depth=None, follow_hidden=None,
                      include=None, exclude=None,
                      dir_include=None, dir_exclude=None,
                      ) -> tuple:
@@ -11,8 +11,16 @@ def directory_search(directory: str, *,
 
     directory_depth = 0
     for directory, subdir, files in os.walk(directory):
-        if not dir_include_exclude(directory, include=dir_include, exclude=dir_exclude):
+        
+        # Skip hidden directories if specified
+        if follow_hidden is not True and directory.startswith('.'):
             continue
+
+        # Check for included and excluded directories
+        # If directory matches, skip it
+        if dir_include or dir_exclude:
+            if not dir_include_exclude(directory, include=dir_include, exclude=dir_exclude):
+                continue
         if include or exclude:
             for directory, file in file_include_exclude(files,
                                                         directory=directory,
@@ -25,6 +33,7 @@ def directory_search(directory: str, *,
                 yield os.path.join(directory, file)
 
         # Break after 1st iteration to prevent recursiveness
+        # If max-depth is specified, break after specified number
         if recursive is False:
             break
         elif max_depth is int and max_depth > 0:
@@ -39,6 +48,8 @@ def dir_include_exclude(directory, *, include=None, exclude=None):
             include_check = [True if item in directory else False for item in include]
             if all(include_check):
                 return True
+            else:
+                return False
         if exclude is not None:
             exclude_check = [True if item in directory else False for item in exclude]
             if not all(exclude_check) and len(exclude_check) > 0:
@@ -47,7 +58,6 @@ def dir_include_exclude(directory, *, include=None, exclude=None):
                 return False
     else:
         return True
-
 
 
 def file_include_exclude(files, *, directory, include, exclude):
