@@ -6,6 +6,7 @@ from collections import OrderedDict
 
 from util.Logging import func_call
 
+
 class OrderedDefaultListDict(OrderedDict):
     def __missing__(self, key):
         self[key] = value = []

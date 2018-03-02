@@ -78,20 +78,18 @@ class ActionShell(argparse._AppendAction):
         items = _copy.copy(_ensure_value(namespace, self.dest, []))
         if isinstance(values, (list, tuple)):
             for template in values:
-                template = template.replace("{}", "{0}")
-                template_format = format_template(template)
-                shell_command = partial(invoke_shell, command=template_format)
+                template = format_template(template)
+                shell_command = self._process(template)
                 items.append(shell_command)
         else:
             template = values
-            template_format = TemplateFunc(template)
-            shell_command = partial(invoke_shell, command=template_format)
+            shell_command = self._process(template)
             items.append(shell_command)
 
         setattr(namespace, self.dest, items)
 
     def _process(self, template):
-        template_format = Template(template)
+        template_format = TemplateFunc(template)
         shell_command = partial(invoke_shell, command=template_format)
         return shell_command
 

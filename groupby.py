@@ -17,7 +17,10 @@ import util.FileProperties
 
 
 def main():
-    assert sys.version_info >= (3, 6), "Requires Python3.6 or greater"
+    assert_statement = "Requires Python{mjr}.{mnr} or greater".format(
+        mjr=sys.version_info.major,
+        mnr=sys.version_info.minor)
+    assert sys.version_info >= (3, 4), assert_statement
 
     available_filters = util.FileProperties.list_filters()
 
@@ -109,8 +112,9 @@ def main():
             if len(results) >= args.threshold:
                 # Take each filters output and label f1: 1st_output, fn: n_output...
                 # Strip filter_output because of embedded newline
-                labeled_filters = {f"f{filter_number + 1}": filter_output.strip()
-                                   for filter_number, filter_output in enumerate(filtered_duplicates.filter_hashes[index])}
+                labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
+                                   for filter_number, filter_output
+                                   in enumerate(filtered_duplicates.filter_hashes[index])}
                 for result in results:
                     # Executes the command given and returns its output if available
                     command_string = duplicate_action(result, **labeled_filters)

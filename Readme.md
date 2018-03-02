@@ -7,13 +7,15 @@
 * Predefined filters or use your own
 * Supports similar GNU Parallel notation
 * Use filter output for each group in custom commands
+* Ignore or prefer specific directories or files
+* Ignores hidden directories
 
 ## Custom commands
 *groupby* supports custom filters and execution of commands on grouped files.
 To assist with this, the following syntax is observed:
 ```buildoutcfg
 # filename
-{}   -> /foo/bar/file.ogg  -> 
+{}   -> /foo/bar/file.ogg
  
 # Filename with extension removed
 {.}  -> /foo/bar/file
@@ -25,7 +27,7 @@ To assist with this, the following syntax is observed:
 {//} -> /foo/bar/
 
 # Basename of file with extension removed
-{//} -> file
+{/.} -> file
 
 # File extension
 {..} -> .ogg
@@ -53,3 +55,4 @@ mkdir -p 2015/04
 mv foo/bar/image1.png 2015/04/image1.png
 ...
 ```
+## 

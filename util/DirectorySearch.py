@@ -85,7 +85,7 @@ def hidden_in_dir(directory):
     result = [True
               if fragment_dir.startswith('.')
               else False
-              for fragment_dir in directory.split('/') ]
+              for fragment_dir in directory.split('/')]
     return True if any(result) else False
 
 
