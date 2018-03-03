@@ -72,7 +72,7 @@ To assist with this, brace expansion of the following syntax is observed:
 {/}  -> file.ogg
 
 # Directory of file
-{//} -> /foo/bar/
+{//} -> /foo/bar
 
 # Basename of file with extension removed
 {/.} -> file
