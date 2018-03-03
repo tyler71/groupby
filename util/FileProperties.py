@@ -1,6 +1,7 @@
 import os
 import hashlib
 import re
+import datetime
 
 from collections import OrderedDict
 
@@ -43,13 +44,15 @@ def _iter_read(filename: str, chunk_size=65536) -> bytes:
 @func_call
 def access_date(filename: str) -> str:
     access_time = os.path.getmtime(filename)
-    return str(access_time)
+    access_datetime = datetime.datetime.fromtimestamp(access_time)
+    return str(access_datetime)
 
 
 @func_call
 def modification_date(filename: str) -> str:
     modification_time = os.path.getmtime(filename)
-    return str(modification_time)
+    modified_datetime = datetime.datetime.fromtimestamp(modification_time)
+    return str(modified_datetime)
 
 
 @func_call
