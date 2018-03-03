@@ -58,9 +58,9 @@ optional arguments:
   -v, --verbosity
 ```
 
-## Custom commands
-*groupby* supports custom filters and execution of commands on grouped files.
-To assist with this, the following syntax is observed:
+## Custom Commands
+*groupby* supports execution of commands on grouped files.
+To assist with this, brace expansion of the following syntax is observed:
 ```buildoutcfg
 # filename
 {}   -> /foo/bar/file.ogg
@@ -79,12 +79,15 @@ To assist with this, the following syntax is observed:
 
 # File extension
 {..} -> .ogg
+
+# Filter output
+{fn} -> output
 ```
-With the exception of {..}, this is a similar syntax to GNU Parallel
+With the exceptions of {..} and {fn}, this brace expansion is a similar syntax to [GNU Parallel](https://www.gnu.org/software/parallel/)
 
 ### Group Execution
 ___
-When using `-x`/`--exec-group`, an additional expansion is available under the notation of 
+When using `-x`/`--exec-group`, an additional brace expansion is available under the notation of 
 `{fn}`, representing the output of that filter for that group.
 
 ```buildoutcfg
@@ -108,14 +111,38 @@ groupby.py -t2 -r \
 ## Filters
 *groupby* supports three kinds of filters
 * builtin
-* shell filters
-* regex filters
+* shell
+* regex
 
-Filters are completed in order, left to right.
-Filters either match or exclude 
-### Regular Expressions (regex)
+Filters are completed in order, left to right as specified on each file discovered.
+### Builtin Filters
+*groupby* comes with several builtin filters including
+* **md5**:  complete full md5 checksum
+* **sha256**: complete full sha256 checksum
+* **partial_md5**: md5 checksum of the first 12mb of a file
+* **modified**: returns the modified date
+* **accessed**: returns the accessed date
+* **size**: returns the size in bytes
+* **filename**: returns the filename
+* **file**: returns the byte data
+
+### Shell Filters
+Shell filters, invoked with `-s`/`--shell` require the use of brace expansion to know which file to act on.
+For example, ```du -b {}``` will translate to ```du -b foobar.mkv```
+Be aware of the output of shell commands. They often include the relative path and filename
+in the output. *Output should be sanitized to only include the output of the command* through
+tools such as cut or grep. For example
+```buildoutcfg
+du -b {} -> du -b foobar.mkv -> 476027 foobar.mkv
+du -b {} -> du -b foobar.mkv | cut -f1 -> 476027
+grep -oE '[0-9]+' {} -> grep -oE '[0-9]+' foobar.mkv -> 476027
+```
+See Custom Commands for more information on brace expansion
+
+### Regular Expression Filters (regex)
 [Python based regular expressions](https://docs.python.org/3/library/re.html) 
-may be specified and is treated as a filter.
+may be invoked with `--regex`
+
 Filenames often carry unique information about a file, such as
 * resolution for videos
 * bit-rate for audio
@@ -128,7 +155,9 @@ This information can be used to group the files.
 # foo/bar_720p.mkv
 # foo/foo4_720p.mkv
 # foo/foo6_480p.mkv
+
 groupby --regex '\d{3,4}p' foo/
+# '\d{3,4}p' == Match 3 or 4 digits and then a character of 'p'
 # Output
 -> foo/foo6_480p.mkv
 ->
