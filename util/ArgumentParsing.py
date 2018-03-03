@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import shlex
 import string
 import subprocess
@@ -15,6 +16,7 @@ def parser_logic(parser):
                         choices=available_filters.keys(),
                         help="Default: size md5",
                         action="append")
+    parser.add_argument('--regex', dest="filters", action=ActionRegex)
     parser.add_argument('-s', '--shell',
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
@@ -53,24 +55,20 @@ def parser_logic(parser):
     return parser
 
 
-def format_template(template):
-    def wrapper(*args, **kwargs):
-        template_func = template.format(*args, **kwargs)
-        return template_func
-    return wrapper
 
 
-def invoke_shell(*args, command, **kwargs) -> str:
-    args = (shlex.quote(arg) for arg in args)
-    try:
-        output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
-    except subprocess.CalledProcessError as e:
-        print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+def re_match(filename, *, pattern):
+    filename = shlex.quote(filename)
+    pattern = re.compile(pattern)
+
+    match = pattern.search(filename)
+    if match:
+        return match.group()
+    else:
         return ''
-    return output
 
 
-class ActionShell(argparse._AppendAction):
+class ActionTemplate(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         _copy = argparse._copy
         _ensure_value = argparse._ensure_value
@@ -78,20 +76,49 @@ class ActionShell(argparse._AppendAction):
         items = _copy.copy(_ensure_value(namespace, self.dest, []))
         if isinstance(values, (list, tuple)):
             for template in values:
-                template = format_template(template)
-                shell_command = self._process(template)
-                items.append(shell_command)
+                template = self.format_template(template)
+                callable_ = self._process(template)
+                items.append(callable_)
         else:
             template = values
-            shell_command = self._process(template)
-            items.append(shell_command)
+            callable_ = self._process(template)
+            items.append(callable_)
 
         setattr(namespace, self.dest, items)
 
+    def _format_template(self, template):
+        def wrapper(*args, **kwargs):
+            template_func = template.format(*args, **kwargs)
+            return template_func
+        return wrapper
+
+
+class ActionShell(ActionTemplate):
     def _process(self, template):
         template_format = TemplateFunc(template)
-        shell_command = partial(invoke_shell, command=template_format)
+        shell_command = partial(self._invoke_shell, command=template_format)
         return shell_command
+
+    def _invoke_shell(self, *args, command, **kwargs) -> str:
+        args = (shlex.quote(arg) for arg in args)
+        try:
+            output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
+        except subprocess.CalledProcessError as e:
+            print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+            return ''
+        return output
+
+
+class ActionRegex(ActionTemplate):
+    def _process(self, template):
+        regex_pattern = partial(self._re_match, pattern=template)
+        return regex_pattern
+
+    def _re_match(self, filename, *, pattern):
+        filename = shlex.quote(filename)
+        pattern = re.compile(pattern)
+        result = pattern.search(filename)
+        return result.group() if result else ""
 
 
 class TemplateFunc(string.Formatter):
