@@ -20,16 +20,16 @@ def parser_logic(parser):
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
                         action=ActionShell)
     parser.add_argument('-x', '--exec-group',
-                        dest="duplicate_action",
+                        dest="group_action",
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
                         action=ActionShell)
     parser.add_argument('--remove',
-                        dest="duplicate_action",
+                        dest="group_action",
                         action="append_const",
                         const='remove',
                         help="Remove Duplicates, last flag applies of remove or link ")
     parser.add_argument('--link',
-                        dest="duplicate_action",
+                        dest="group_action",
                         action="append_const",
                         const='link',
                         help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link")
