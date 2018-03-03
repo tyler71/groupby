@@ -3,7 +3,7 @@ import pathlib
 
 
 def directory_search(directory: str, *,
-                     recursive=True, max_depth=None, follow_hidden=None,
+                     recursive=True, max_depth=None, dir_hidden=None,
                      include=None, exclude=None,
                      dir_include=None, dir_exclude=None,
                      ) -> tuple:
@@ -15,7 +15,7 @@ def directory_search(directory: str, *,
 
         # Skip hidden directories if specified
         if all((
-                follow_hidden is not True,
+                dir_hidden is not True,
                 orig_directory_hidden is not True,
                 hidden_in_dir(directory))):
             continue

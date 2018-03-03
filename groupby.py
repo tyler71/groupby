@@ -66,7 +66,7 @@ def main():
     paths = (path for directory in set(args.directories)
              for path in directory_search(directory,
                                           recursive=args.recursive,
-                                          follow_hidden=args.follow_hidden,
+                                          dir_hidden=args.dir_hidden,
                                           max_depth=args.max_depth,
                                           include=args.include,
                                           exclude=args.exclude,
