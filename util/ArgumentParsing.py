@@ -16,7 +16,7 @@ def parser_logic(parser):
                         choices=available_filters.keys(),
                         help="Default: size md5",
                         action="append")
-    parser.add_argument('--regex', dest="filters", action=ActionRegex)
+    parser.add_argument('-E', '--regex', dest="filters", action=ActionRegex)
     parser.add_argument('-s', '--shell',
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
@@ -106,6 +106,9 @@ class ActionShell(ActionTemplate):
         except subprocess.CalledProcessError as e:
             print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
             return ''
+        except KeyError as e:
+            print("Filter", e, "not found")
+            exit(1)
         return output
 
 
