@@ -132,7 +132,7 @@ class DuplicateFilters:
                     continue
                 grouped_duplicates[item_hash].append(path)
         for key, duplicate in grouped_duplicates.items():
-            if len(duplicate) > 1:
+            if len(duplicate) > 0:
                 # key is appended enclosed in a list to group it, allowing other filters to also append to that
                 # specific group
                 self.filter_hashes.append([key])
@@ -143,7 +143,7 @@ class DuplicateFilters:
         for duplicate_list in duplicates:
             unmatched_duplicates = OrderedDefaultListDict()
             filtered_duplicates = list()
-            if len(duplicate_list) > 1:
+            if len(duplicate_list) > 0:
                 first, *others = duplicate_list
                 filtered_duplicates.append(first)
                 source_hash = func(first).strip()
