@@ -119,33 +119,33 @@ class DuplicateFilters:
         results = self._first_filter(initial_filter, self.filenames, conditions=self.conditions)
         for additional_filter in other_filters:
             results = self._additional_filters(additional_filter, results)
-        for duplicate_list in results:
-            yield duplicate_list
+        for group_list in results:
+            yield group_list
 
     def _first_filter(self, func, paths, conditions):
-        grouped_duplicates = OrderedDefaultListDict()
+        grouped_groups = OrderedDefaultListDict()
         for path in paths:
             if all(condition(path) for condition in conditions):
                 item_hash = func(path).strip()
                 if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                     # Just a newline means no output
                     continue
-                grouped_duplicates[item_hash].append(path)
-        for key, duplicate in grouped_duplicates.items():
-            if len(duplicate) > 0:
+                grouped_groups[item_hash].append(path)
+        for key, group in grouped_groups.items():
+            if len(group) > 0:
                 # key is appended enclosed in a list to group it, allowing other filters to also append to that
                 # specific group
                 self.filter_hashes.append([key])
-                yield duplicate
+                yield group
 
-    def _additional_filters(self, func, duplicates):
+    def _additional_filters(self, func, groups):
         index = 0
-        for duplicate_list in duplicates:
-            unmatched_duplicates = OrderedDefaultListDict()
-            filtered_duplicates = list()
-            if len(duplicate_list) > 0:
-                first, *others = duplicate_list
-                filtered_duplicates.append(first)
+        for group_list in groups:
+            unmatched_groups = OrderedDefaultListDict()
+            filtered_groups = list()
+            if len(group_list) > 0:
+                first, *others = group_list
+                filtered_groups.append(first)
                 source_hash = func(first).strip()
 
                 # For each additional filter, append the source hash to the filter_hashes, allowing
@@ -162,20 +162,20 @@ class DuplicateFilters:
 
                     # If this item matches the source, include it in the list to be returned.
                     if item_hash == source_hash:
-                        filtered_duplicates.append(item)
+                        filtered_groups.append(item)
                     else:
-                        unmatched_duplicates[item_hash].append(item)
+                        unmatched_groups[item_hash].append(item)
 
-            yield filtered_duplicates
+            yield filtered_groups
             # Calls itself on all unmatched groups
-            if unmatched_duplicates:
+            if unmatched_groups:
                 previous_filter_track = self.filter_hashes[index][0:-1]
-                for item_hash, unmatched_duplicate in unmatched_duplicates.items():
+                for item_hash, unmatched_group in unmatched_groups.items():
                     # key is appended enclosed in a list to group it, allowing other filters to also append to that
                     # specific group
                     index += 1
                     self.filter_hashes.insert(index, previous_filter_track + [item_hash])
-                    yield unmatched_duplicate
+                    yield unmatched_group
 
             index += 1
 

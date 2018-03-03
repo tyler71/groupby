@@ -13,9 +13,9 @@ def remove_files(filenames: iter) -> list:
     return removed_files
 
 
-def hardlink_files(source_files: iter, duplicate_files: iter) -> list:
+def hardlink_files(source_files: iter, group_files: iter) -> list:
     linked_files = list()
-    for source_file, filename in zip(source_files, duplicate_files):
+    for source_file, filename in zip(source_files, group_files):
         print("Linking {source_file} -> {filename}".format(source_file=source_file, filename=filename))
         try:
             os.remove(filename)

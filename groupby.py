@@ -82,13 +82,13 @@ def main():
                       for filter_method in args.filters)
     filtered_groups = DuplicateFilters(filters=filter_methods, filenames=paths, conditions=conditions.values())
 
-    def dup_action_link(groups):
+    def grp_action_link(groups):
         for group_result in groups:
             if len(group_result) >= args.threshold:
                 first, *others = group_result
                 hardlink_files(itertools.repeat(first), others)
 
-    def dup_action_remove(groups):
+    def grp_action_remove(groups):
         for group_result in groups:
             if len(group_result) >= args.threshold:
                 remove_files(group_result[1:])
@@ -97,11 +97,11 @@ def main():
     # and remove and then hard link the source file to each target path
     if group_action == "link":
         filtered_groups = list(filtered_groups)
-        dup_action_link(filtered_groups)
+        grp_action_link(filtered_groups)
 
     # Removes all but the first first identified in the group
     elif group_action == "remove":
-        dup_action_remove(filtered_groups)
+        grp_action_remove(filtered_groups)
 
     # Custom shell action supplied by --exec-group
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
@@ -130,13 +130,13 @@ def main():
             if len(result) >= args.threshold:
                 if args.basic_formatting:
                     logging.info(' -> '.join(filtered_groups.filter_hashes[index]))
-                    print('\n'.join((str(dup)) for dup in result), end='\n')
+                    print('\n'.join((str(grp)) for grp in result), end='\n')
                 else:
                     source_file, *groups = result
                     logging.info(' -> '.join(filtered_groups.filter_hashes[index]))
                     print(source_file)
                     if groups:
-                        print('\n'.join((str(dup).rjust(len(dup) + 4) for dup in groups)), end='\n\n')
+                        print('\n'.join((str(grp).rjust(len(grp) + 4) for grp in groups)), end='\n\n')
                     else:
                         print('')
 
@@ -152,10 +152,10 @@ def main():
                 exit("\nExiting...")
 
             interactive_actions = {
-                "1": dup_action_link,
-                "link": dup_action_link,
-                "2": dup_action_remove,
-                "remove": dup_action_remove,
+                "1": grp_action_link,
+                "link": grp_action_link,
+                "2": grp_action_remove,
+                "remove": grp_action_remove,
             }
             action_on_grouped = action_on_grouped.lower()
             interactive_actions[action_on_grouped](filtered_groups)
