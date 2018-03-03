@@ -95,7 +95,15 @@ class ActionTemplate(argparse._AppendAction):
 
 class ActionShell(ActionTemplate):
     def _process(self, template):
-        template_format = TemplateFunc(template)
+        aliases = {
+            "{}": "{0:s}",
+            "{.}": "{0:a}",
+            "{/}": "{0:b}",
+            "{//}": "{0:c}",
+            "{/.}": "{0:e}",
+            "{..}": "{0:f}",
+        }
+        template_format = TemplateFunc(template, aliases=aliases)
         shell_command = partial(self._invoke_shell, command=template_format)
         return shell_command
 
@@ -127,20 +135,13 @@ class ActionRegex(ActionTemplate):
 
 
 class TemplateFunc(string.Formatter):
-    def __init__(self, template):
+    def __init__(self, template, aliases):
         self.template = template
+        self.aliases = aliases
 
         for key, alias in self.aliases.items():
             self.template = self.template.replace(key, alias)
 
-    aliases = {
-        "{}": "{0:s}",
-        "{.}": "{0:a}",
-        "{/}": "{0:b}",
-        "{//}": "{0:c}",
-        "{/.}": "{0:e}",
-        "{..}": "{0:f}",
-    }
 
     def __call__(self, *args, **kwargs):
         return self.format(self.template, *args, **kwargs)
