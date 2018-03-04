@@ -16,7 +16,7 @@ def parser_logic(parser):
                         choices=available_filters.keys(),
                         help="Default: size md5",
                         action="append")
-    parser.add_argument('-E', '--regex', dest="filters", action=ActionRegex)
+    parser.add_argument('-E', '--regex', dest="filters", action=FilterRegex)
     parser.add_argument('-s', '--shell',
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
@@ -57,17 +57,6 @@ def parser_logic(parser):
 
 
 
-def re_match(filename, *, pattern):
-    filename = shlex.quote(filename)
-    pattern = re.compile(pattern)
-
-    match = pattern.search(filename)
-    if match:
-        return match.group()
-    else:
-        return ''
-
-
 class ActionTemplate(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         _copy = argparse._copy
@@ -91,6 +80,11 @@ class ActionTemplate(argparse._AppendAction):
             template_func = template.format(*args, **kwargs)
             return template_func
         return wrapper
+
+    def _process(self, template):
+        # should take a template
+        # and return a function allowing it to be called with a string
+        raise (ValueError, "Expected to be extended in subclass")
 
 
 class ActionShell(ActionTemplate):
@@ -120,7 +114,7 @@ class ActionShell(ActionTemplate):
         return output
 
 
-class ActionRegex(ActionTemplate):
+class FilterRegex(ActionTemplate):
     def _process(self, template):
         template = re.compile(template)
         regex_pattern = partial(self._re_match, pattern=template)
