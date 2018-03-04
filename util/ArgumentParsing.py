@@ -54,12 +54,16 @@ def parser_logic(parser):
     return parser
 
 
-
-
-
-
 class ActionShell(ActionTemplate):
     def _process(self, template):
+        '''
+            Based on parallel notation including
+            {}  : filename
+            {.} : filename with extension removed
+            {/} : basename of filename
+            {//}: dirname of file
+            {/.}: dirname of file with extension removed
+        '''
         aliases = {
             "{}": "{0:s}",
             "{.}": "{0:a}",

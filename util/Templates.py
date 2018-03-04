@@ -1,6 +1,11 @@
 import argparse
 import string
 
+
+# This inherits the action="append" of argparse
+# It takes a argument of template which should be a string
+# and passes it to _process which should return a function will be called
+# with a filename.
 class ActionTemplate(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         _copy = argparse._copy
@@ -9,7 +14,6 @@ class ActionTemplate(argparse._AppendAction):
         items = _copy.copy(_ensure_value(namespace, self.dest, []))
         if isinstance(values, (list, tuple)):
             for template in values:
-                template = self.format_template(template)
                 callable_ = self._process(template)
                 items.append(callable_)
         else:
@@ -19,18 +23,14 @@ class ActionTemplate(argparse._AppendAction):
 
         setattr(namespace, self.dest, items)
 
-    def _format_template(self, template):
-        def wrapper(*args, **kwargs):
-            template_func = template.format(*args, **kwargs)
-            return template_func
-        return wrapper
-
     def _process(self, template):
         # should take a template
         # and return a function allowing it to be called with a string
         raise (ValueError, "Expected to be extended in subclass")
 
 
+# This overrides the .format string, to allow for greater control of how .format works
+# Additional formats can be specified with a new letter of spec
 class TemplateFunc(string.Formatter):
     def __init__(self, template, aliases):
         self.template = template
@@ -43,14 +43,6 @@ class TemplateFunc(string.Formatter):
         return self.format(self.template, *args, **kwargs)
 
     def format_field(self, value, spec):
-        '''
-            Based on parallel notation including
-            {}  : filename
-            {.} : filename with extension removed
-            {/} : basename of filename
-            {//}: dirname of file
-            {/.}: dirname of file with extension removed
-        '''
 
         if spec.endswith("a"):
             split_ext = os.path.splitext(value)
