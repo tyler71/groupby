@@ -1,6 +1,6 @@
 import os
 
-from util.ArgumentParsing import ActionTemplate
+from util.Templates import ActionTemplate
 
 
 def remove_files(filenames: iter) -> list:
@@ -32,10 +32,8 @@ class ActionMerge(ActionTemplate):
         if ":" in template:
             template = template.split(":")
         else:
-            template = [template]
-        if len(template) == 1:
-            merge_dir = template[0]
-        elif len(template) == 2:
+            merge_dir = template
+        if len(template) == 2:
             merge_dir, overwrite_flag = template
         elif len(template) == 3:
             merge_dir, overwrite_flag, condition = template
@@ -43,5 +41,5 @@ class ActionMerge(ActionTemplate):
         if not os.path.exists(merge_dir):
             os.makedirs(merge_dir)
         if os.path.exists(merge_dir) and len(os.listdir(merge_dir)) == 0:
-
+            pass
 
