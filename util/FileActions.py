@@ -1,5 +1,7 @@
 import os
 
+from util.ArgumentParsing import ActionTemplate
+
 
 def remove_files(filenames: iter) -> list:
     removed_files = list()
@@ -24,3 +26,22 @@ def hardlink_files(source_files: iter, group_files: iter) -> list:
         except FileNotFoundError:
             print("Not Found")
     return linked_files
+
+class ActionMerge(ActionTemplate):
+    def _process(self, template):
+        if ":" in template:
+            template = template.split(":")
+        else:
+            template = [template]
+        if len(template) == 1:
+            merge_dir = template[0]
+        elif len(template) == 2:
+            merge_dir, overwrite_flag = template
+        elif len(template) == 3:
+            merge_dir, overwrite_flag, condition = template
+
+        if not os.path.exists(merge_dir):
+            os.makedirs(merge_dir)
+        if os.path.exists(merge_dir) and len(os.listdir(merge_dir)) == 0:
+
+
