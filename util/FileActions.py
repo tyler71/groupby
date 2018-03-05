@@ -1,31 +1,45 @@
 import os
 
-from util.Templates import ActionTemplate
+from util.ActionGroupFunc import ActionTemplate
+import itertools
+
+class RemoveFiles(ActionTemplate):
+    def _process(self, template):
+        return self.remove_files
+
+    def remove_files(self, groupfiles: iter) -> list:
+        removed_files = list()
+        for filename in groupfiles:
+            print("Removing {file}".format(file=filename))
+            try:
+                pass
+                # os.remove(filename)
+                # removed_files.append(filename)
+            except FileNotFoundError:
+                print("Not Found")
+        return removed_files
 
 
-def remove_files(filenames: iter) -> list:
-    removed_files = list()
-    for filename in filenames:
-        print("Removing {file}".format(file=filename))
-        try:
-            os.remove(filename)
-            removed_files.append(filename)
-        except FileNotFoundError:
-            print("Not Found")
-    return removed_files
+class HardlinkAction(ActionTemplate)
+    def _process(self, template):
+        return self.hardlink_files
 
+    def hardlink_files(self, group_files: iter) -> list:
+        linked_files = list()
+        for group in group_files:
+            source_file = itertools.repeat(group[0])
 
-def hardlink_files(source_files: iter, group_files: iter) -> list:
-    linked_files = list()
-    for source_file, filename in zip(source_files, group_files):
-        print("Linking {source_file} -> {filename}".format(source_file=source_file, filename=filename))
-        try:
-            os.remove(filename)
-            os.link(source_file, filename)
-            linked_files.append((source_file, filename))
-        except FileNotFoundError:
-            print("Not Found")
-    return linked_files
+            for source_file, filename in zip(source_files, group):
+                print("Linking {source_file} -> {filename}".format(source_file=source_file, filename=filename))
+                try:
+                    pass
+                    # os.remove(filename)
+                    # os.link(source_file, filename)
+                    linked_files.append((source_file, filename))
+                except FileNotFoundError:
+                    print("Not Found")
+        return linked_files
+
 
 class ActionMerge(ActionTemplate):
     def _process(self, template):
@@ -46,7 +60,6 @@ class ActionMerge(ActionTemplate):
 
         return self._abstract_call
 
-
     def _abstract_call(self, condition=None, *, merge_dir, overwrite_flag, filter_group, hashes):
         overwrite = self.overwrite_flags[overwrite_flag]
         if overwrite_flag.upper() == 'CONDITION':
@@ -60,13 +73,23 @@ class ActionMerge(ActionTemplate):
         overwrite(condition, filter_group=filter_group)
 
 
+    def _count(self, filter_group):
+        # This keeps the left padding of 0's
+        def incr_count(count):
+            return str(int(count) + 1).zfill(len(count))
 
-    def _count(self, filter_group, * filter_dir):
         for file in filter_group:
             filename = os.path.splitext(file)[1]
-            count = 0000
-            if os.path.exists():
-                pass
+            filename_split = filename.split('.')
+            if os.path.exists(self.filter_dir + filename):
+                count = '0000'
+                while os.path.exists(os.path.join(self.filter_dir, filename_split[0], count, filename[1])):
+                    count = incr_count(count)
+                print(os.path.join(self.filter_dir, filename_split[0], count, filename[1]))
+
+
+
+
 
 
     def _ignore(self, filter_group):
