@@ -69,8 +69,6 @@ class OrderedDefaultListDict(OrderedDict):
         return value
 
 
-
-
 # Used with checksum functions
 def _iter_read(filename: str, chunk_size=65536) -> bytes:
     with open(filename, 'rb') as file:

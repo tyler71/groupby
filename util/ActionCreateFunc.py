@@ -10,9 +10,11 @@ from util.Templates import StringExpansionFunc
 class ActionAppendExecShell(ActionAppendCreateFunc):
     def _process(self, template):
         template_format = StringExpansionFunc(template)
-        shell_command = partial(self._invoke_shell, command=template_format)
+        shell_group_command = partial(self._invoke_shell, command=template_format)
         return shell_command
 
+    def _invoke_group_shell(self, filtered_groups):
+        for
     def _invoke_shell(self, *args, command, **kwargs) -> str:
         args = (shlex.quote(arg) for arg in args)
         try:
@@ -30,9 +32,9 @@ class ActionAppendRemove(ActionAppendCreateFunc):
     def _process(self, template):
         return self.remove_files
 
-    def remove_files(self, groupfiles: iter) -> list:
+    def remove_files(self, filtered_groups: iter) -> list:
         removed_files = list()
-        for group in groupfiles:
+        for group in filtered_groups:
             for filename in group:
                 print("Removing {file}".format(file=filename))
                 try:
@@ -48,9 +50,9 @@ class ActionAppendLink(ActionAppendCreateFunc):
     def _process(self, template):
         return self.hardlink_files
 
-    def hardlink_files(self, group_files: iter) -> list:
+    def hardlink_files(self, filtered_groups: iter) -> list:
         linked_files = list()
-        for group in group_files:
+        for group in filtered_groups:
             source_file = group[0]
 
             for filename in group:
@@ -84,7 +86,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
 
         return self._abstract_call
 
-    def _abstract_call(self, condition=None, *, merge_dir, overwrite_flag, filter_group, hashes):
+    def _abstract_call(self, condition=None, *, merge_dir, overwrite_flag, filtered_groups, hashes):
         overwrite = self.overwrite_flags[overwrite_flag]
         if overwrite_flag.upper() == 'CONDITION':
             assert condition is not None
@@ -94,7 +96,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             os.makedirs(merge_dir)
         if len(os.listdir(merge_dir)) == 0:
             os.makedirs(self.filter_dir)
-        overwrite(condition, filter_group=filter_group)
+        for filter_group in filtered_groups:
+            overwrite(condition, filter_group=filter_group)
 
     def _count(self, filter_group):
         # This keeps the left padding of 0's
