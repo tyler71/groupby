@@ -5,12 +5,11 @@ import logging
 import os
 import sys
 
+import util.ActionCreateFilter
+from util.ActionCreateFilter import DuplicateFilters
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
-from util.ActionCreateFilter import DuplicateFilters
 from util.Logging import log_levels
-
-import util.ActionCreateFilter
 
 
 def main():
@@ -86,17 +85,18 @@ def main():
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
     # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
     # Also includes expansion of {..}, just includes filename extension
-    for index, results in enumerate(filtered_groups):
-        if len(results) >= args.threshold:
-            # Take each filters output and label f1: 1st_output, fn: n_output...
-            # Strip filter_output because of embedded newline
-            labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
-                               for filter_number, filter_output
-                               in enumerate(filtered_groups.filter_hashes[index])}
-            for result in results:
-                # Executes the command given and returns its output if available
-                command_string = group_action(result, **labeled_filters)
-                print(command_string, end='')  # Shell commands already have newline
+    if group_action:
+        for index, results in enumerate(filtered_groups):
+            if len(results) >= args.threshold:
+                # Take each filters output and label f1: 1st_output, fn: n_output...
+                # Strip filter_output because of embedded newline
+                labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
+                                   for filter_number, filter_output
+                                   in enumerate(filtered_groups.filter_hashes[index])}
+                for result in results:
+                    # Executes the command given and returns its output if available
+                    command_string = group_action(result, **labeled_filters)
+                    print(command_string, end='')  # Shell commands already have newline
     else:
         if args.interactive is True:
             # If interactive, it will list the grouped files and then need to act on it.

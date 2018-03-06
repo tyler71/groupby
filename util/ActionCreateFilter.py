@@ -13,6 +13,23 @@ from util.Templates import ActionAppendCreateFunc, StringExpansionFunc
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
 
+
+def list_filters():
+    filters = OrderedDict(
+        {
+            "partial_md5": partial_md5_sum,
+            "md5": md5_sum,
+            "sha256": sha256_sum,
+            "modified": modification_date,
+            "accessed": access_date,
+            "size": disk_size,
+            "filename": file_name,
+            "file": direct_compare,
+        }
+    )
+    return filters
+
+
 class ActionAppendShellFilter(ActionAppendCreateFunc):
     def _process(self, template):
         template_format = StringExpansionFunc(template)
@@ -30,6 +47,7 @@ class ActionAppendShellFilter(ActionAppendCreateFunc):
             print("Filter", e, "not found")
             exit(1)
         return output
+
 
 class FilterRegex(ActionAppendCreateFunc):
     def _process(self, template):
@@ -51,20 +69,6 @@ class OrderedDefaultListDict(OrderedDict):
         return value
 
 
-def list_filters():
-    filters = OrderedDict(
-        {
-            "partial_md5": partial_md5_sum,
-            "md5": md5_sum,
-            "sha256": sha256_sum,
-            "modified": modification_date,
-            "accessed": access_date,
-            "size": disk_size,
-            "filename": file_name,
-            "file": direct_compare,
-        }
-    )
-    return filters
 
 
 # Used with checksum functions
