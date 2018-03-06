@@ -33,14 +33,15 @@ class ActionAppendRemove(ActionAppendCreateFunc):
 
     def remove_files(self, groupfiles: iter) -> list:
         removed_files = list()
-        for filename in groupfiles:
-            print("Removing {file}".format(file=filename))
-            try:
-                pass
-                # os.remove(filename)
-                # removed_files.append(filename)
-            except FileNotFoundError:
-                print("Not Found")
+        for group in groupfiles:
+            for filename in group:
+                print("Removing {file}".format(file=filename))
+                try:
+                    pass
+                    # os.remove(filename)
+                    # removed_files.append(filename)
+                except FileNotFoundError:
+                    print("Not Found")
         return removed_files
 
 
