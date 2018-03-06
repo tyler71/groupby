@@ -1,6 +1,6 @@
 import os
 
-from util.ActionCreateFilter import FilterRegex, ActionAppendShellFilter
+from util.ActionCreateFilter import ActionAppendRegexFilter, ActionAppendShellFilter
 from util.ActionCreateFilter import list_filters
 from util.ActionCreateFunc import ActionAppendExecShell, \
     ActionAppendMerge, \
@@ -14,7 +14,7 @@ def parser_logic(parser):
                         choices=available_filters.keys(),
                         help="Default: size md5",
                         action="append")
-    parser.add_argument('-E', '--regex', dest="filters", action=FilterRegex)
+    parser.add_argument('-E', '--regex', dest="filters", action=ActionAppendRegexFilter)
     parser.add_argument('-s', '--shell',
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",

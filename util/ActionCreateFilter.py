@@ -49,7 +49,7 @@ class ActionAppendShellFilter(ActionAppendCreateFunc):
         return output
 
 
-class FilterRegex(ActionAppendCreateFunc):
+class ActionAppendRegexFilter(ActionAppendCreateFunc):
     def _process(self, template):
         template = re.compile(template)
         regex_pattern = partial(self._re_match, pattern=template)
