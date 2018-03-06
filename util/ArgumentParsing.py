@@ -1,6 +1,6 @@
 import os
 
-from util.FileProperties import list_filters
+from util.ActionCreateFilter import list_filters
 from util.ActionCreateFilter import FilterRegex
 from util.ActionCreateFunc import ActionAppendShell, ActionAppendMerge, ActionAppendLink, ActionAppendRemove
 

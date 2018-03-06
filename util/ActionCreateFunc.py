@@ -97,7 +97,6 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             os.makedirs(self.filter_dir)
         overwrite(condition, filter_group=filter_group)
 
-
     def _count(self, filter_group):
         # This keeps the left padding of 0's
         def incr_count(count):

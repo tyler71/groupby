@@ -7,10 +7,10 @@ import sys
 
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
-from util.FileProperties import DuplicateFilters
+from util.ActionCreateFilter import DuplicateFilters
 from util.Logging import log_levels
 
-import util.FileProperties
+import util.ActionCreateFilter
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
         mnr=sys.version_info.minor)
     assert sys.version_info >= (3, 4), assert_statement
 
-    available_filters = util.FileProperties.list_filters()
+    available_filters = util.ActionCreateFilter.list_filters()
 
     def negation(func):
         def wrapper(*args, **kwargs):
