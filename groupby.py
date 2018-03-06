@@ -91,12 +91,10 @@ def main():
                 labeled_filters = OrderedDict()
                 for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[index]):
                     labeled_filters["f{fn}".format(fn=filter_number + 1)] = filter_output.strip()
-                # labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
-                #                    for filter_number, filter_output
-                #                    in enumerate(filtered_groups.filter_hashes[index])}
                 command_string = group_action(results, **labeled_filters)
                 for output in command_string:
                     print(output, end='')
+            print('')
     else:
         if args.interactive is True:
             # If interactive, it will list the grouped files and then need to act on it.

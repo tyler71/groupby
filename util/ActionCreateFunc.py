@@ -129,18 +129,21 @@ class ActionAppendMerge(ActionAppendCreateFunc):
         for file in filter_group:
             filename = os.path.split(file)[1]
             filename_split = filename.split('.')
-            if os.path.exists(filter_dir + filename):
+            if os.path.exists(os.path.join(filter_dir, filename)):
                 count = '0001'
-                dest_file = os.path.join(filter_dir, filename_split[0], count, filename_split[1])
-                while os.path.exists(dest_file):
+                dest_dir = filter_dir
+                dest_file = os.path.join(filename_split[0] + "_{}.".format(count) + filename_split[1])
+                dest_dir_file = os.path.join(dest_dir, dest_file)
+                while os.path.exists(dest_dir_file):
+                    print(dest_dir_file)
                     count = incr_count(count)
-                    dest_file = os.path.join(filter_dir, filename_split[0], count, filename_split[1])
-                shutil.copy(file, dest_file)
-                moved_files.append(dest_file)
+                    dest_file = os.path.join(filename_split[0] + "_{}.".format(count) + filename_split[1])
+                shutil.copy(file, dest_dir_file)
+                moved_files.append(dest_dir_file)
             else:
-                dest_file = os.path.join(filter_dir, filename)
-                shutil.copy(file, dest_file)
-                moved_files.append(dest_file + '\n')
+                dest_dir_file = os.path.join(filter_dir, filename)
+                shutil.copy(file, dest_dir_file)
+                moved_files.append(dest_dir_file + '\n')
 
         return moved_files
 
