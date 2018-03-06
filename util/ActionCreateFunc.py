@@ -1,6 +1,6 @@
-import itertools
 import os
 import subprocess
+import shlex
 
 from functools import partial
 

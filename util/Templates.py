@@ -1,6 +1,6 @@
 import argparse
 import string
-
+import os
 
 # This inherits the action="append" of argparse
 # It takes a argument of template which should be a string

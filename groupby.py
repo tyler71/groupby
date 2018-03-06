@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import functools
-import itertools
 import logging
 import os
 import sys
