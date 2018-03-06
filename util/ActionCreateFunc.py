@@ -101,8 +101,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
         if overwrite_flag is not None and overwrite_flag.upper() == 'CONDITION':
             assert condition is not None
 
-        if overwrite_flag in overwrite_flags:
-            overwrite_method = overwrite_flags[overwrite_method]
+        if overwrite_flag.upper() in overwrite_flags:
+            overwrite_method = overwrite_flags[overwrite_flag.upper()]
         else:
             overwrite_method = self._count
 
@@ -148,11 +148,33 @@ class ActionAppendMerge(ActionAppendCreateFunc):
         return moved_files
 
 
-    def _ignore(self, filter_group):
-        pass
+    def _ignore(self, filter_dir, filter_group):
+        moved_files = list()
 
-    def _error(self, filter_group):
-        pass
+        for file in filter_group:
+            filename = os.path.split(file)[1]
+            if os.path.exists(os.path.join(filter_dir, filename)):
+                continue
+            else:
+                dest_dir_file = os.path.join(filter_dir, filename)
+                shutil.copy(file, dest_dir_file)
+                moved_files.append(dest_dir_file + '\n')
+
+        return moved_files
+
+    def _error(self, filter_dir, filter_group):
+        moved_files = list()
+
+        for file in filter_group:
+            filename = os.path.split(file)[1]
+            if os.path.exists(os.path.join(filter_dir, filename)):
+                raise FileExistsError
+            else:
+                dest_dir_file = os.path.join(filter_dir, filename)
+                shutil.copy(file, dest_dir_file)
+                moved_files.append(dest_dir_file + '\n')
+
+        return moved_files
 
     def _condition(self, filter_group, *, condition):
         pass
