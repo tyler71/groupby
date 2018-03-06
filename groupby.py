@@ -79,25 +79,24 @@ def main():
                       for filter_method in args.filters)
     filtered_groups = DuplicateFilters(filters=filter_methods, filenames=paths, conditions=conditions.values())
 
-    if group_action:
-        group_action(filtered_groups)
+    # if group_action:
+    #     group_action(filtered_groups)
 
     # Custom shell action supplied by --exec-group
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
     # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
     # Also includes expansion of {..}, just includes filename extension
-    # if type(group_action) is functools.partial:
-    #     for index, results in enumerate(filtered_groups):
-    #         if len(results) >= args.threshold:
-    #             # Take each filters output and label f1: 1st_output, fn: n_output...
-    #             # Strip filter_output because of embedded newline
-    #             labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
-    #                                for filter_number, filter_output
-    #                                in enumerate(filtered_groups.filter_hashes[index])}
-    #             for result in results:
-    #                 # Executes the command given and returns its output if available
-    #                 command_string = group_action(result, **labeled_filters)
-    #                 print(command_string, end='')  # Shell commands already have newline
+    for index, results in enumerate(filtered_groups):
+        if len(results) >= args.threshold:
+            # Take each filters output and label f1: 1st_output, fn: n_output...
+            # Strip filter_output because of embedded newline
+            labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
+                               for filter_number, filter_output
+                               in enumerate(filtered_groups.filter_hashes[index])}
+            for result in results:
+                # Executes the command given and returns its output if available
+                command_string = group_action(result, **labeled_filters)
+                print(command_string, end='')  # Shell commands already have newline
     else:
         if args.interactive is True:
             # If interactive, it will list the grouped files and then need to act on it.

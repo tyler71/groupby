@@ -8,6 +8,7 @@ from util.Templates import ActionAppendCreateFunc
 from util.Templates import StringExpansionFunc
 
 
+# Used as both a filter and a group exec
 class ActionAppendShell(ActionAppendCreateFunc):
     def _process(self, template):
         template_format = StringExpansionFunc(template)
@@ -15,6 +16,7 @@ class ActionAppendShell(ActionAppendCreateFunc):
         return shell_command
 
     def _invoke_shell(self, *args, command, **kwargs) -> str:
+        print(args)
         args = (shlex.quote(arg) for arg in args)
         try:
             output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
