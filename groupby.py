@@ -10,6 +10,7 @@ from util.ActionCreateFilter import DuplicateFilters
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.Logging import log_levels
+from collections import OrderedDict
 
 
 def main():
@@ -78,9 +79,6 @@ def main():
                       for filter_method in args.filters)
     filtered_groups = DuplicateFilters(filters=filter_methods, filenames=paths, conditions=conditions.values())
 
-    # if group_action:
-    #     group_action(filtered_groups)
-
     # Custom shell action supplied by --exec-group
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
     # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
@@ -90,12 +88,15 @@ def main():
             if len(results) >= args.threshold:
                 # Take each filters output and label f1: 1st_output, fn: n_output...
                 # Strip filter_output because of embedded newline
-                labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
-                                   for filter_number, filter_output
-                                   in enumerate(filtered_groups.filter_hashes[index])}
+                labeled_filters = OrderedDict()
+                for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[index]):
+                    labeled_filters["f{fn}".format(fn=filter_number + 1)] = filter_output.strip()
+                # labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
+                #                    for filter_number, filter_output
+                #                    in enumerate(filtered_groups.filter_hashes[index])}
                 command_string = group_action(results, **labeled_filters)
-                for result in command_string:
-                    print(result, end='')
+                for output in command_string:
+                    print(output, end='')
     else:
         if args.interactive is True:
             # If interactive, it will list the grouped files and then need to act on it.
