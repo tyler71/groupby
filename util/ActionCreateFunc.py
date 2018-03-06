@@ -37,12 +37,12 @@ class ActionAppendRemove(ActionAppendCreateFunc):
     def _process(self, template):
         return self.remove_files
 
-    def remove_files(self, filtered_group: iter) -> list:
+    def remove_files(self, filtered_group: iter, **kwargs) -> list:
         removed_files = list()
         for filename in filtered_group:
-            print("Removing {file}".format(file=filename))
             try:
                 pass
+                removed_files.append("Removing {file}\n".format(file=filename))
                 # os.remove(filename)
                 # removed_files.append(filename)
             except FileNotFoundError:
@@ -54,17 +54,16 @@ class ActionAppendLink(ActionAppendCreateFunc):
     def _process(self, template):
         return self.hardlink_files
 
-    def hardlink_files(self, filtered_group: iter) -> list:
+    def hardlink_files(self, filtered_group: iter, **kwargs) -> list:
         linked_files = list()
         source_file = filtered_group[0]
 
         for filename in filtered_group:
-            print("Linking {source_file} -> {filename}".format(source_file=source_file, filename=filename))
             try:
                 pass
+                linked_files.append("Linking {source_file} -> {filename}\n".format(source_file=source_file, filename=filename))
                 # os.remove(filename)
                 # os.link(source_file, filename)
-                linked_files.append((source_file, filename))
             except FileNotFoundError:
                 print("Not Found")
         return linked_files
