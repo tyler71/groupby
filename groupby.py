@@ -93,10 +93,9 @@ def main():
                 labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
                                    for filter_number, filter_output
                                    in enumerate(filtered_groups.filter_hashes[index])}
-                for result in results:
-                    # Executes the command given and returns its output if available
-                    command_string = group_action(result, **labeled_filters)
-                    print(command_string, end='')  # Shell commands already have newline
+                command_string = group_action(results, **labeled_filters)
+                for result in command_string:
+                    print(result, end='')
     else:
         if args.interactive is True:
             # If interactive, it will list the grouped files and then need to act on it.

@@ -10,11 +10,16 @@ from util.Templates import StringExpansionFunc
 class ActionAppendExecShell(ActionAppendCreateFunc):
     def _process(self, template):
         template_format = StringExpansionFunc(template)
-        shell_group_command = partial(self._invoke_shell, command=template_format)
+        shell_command = partial(self._group_invoke_shell, command=template_format)
         return shell_command
 
-    def _invoke_group_shell(self, filtered_groups):
-        for
+    def _group_invoke_shell(self, filtered_group, command, **kwargs):
+        command_outputs = list()
+        for file in filtered_group:
+            output = self._invoke_shell(file, command=command, **kwargs)
+            command_outputs.append(output)
+        return command_outputs
+
     def _invoke_shell(self, *args, command, **kwargs) -> str:
         args = (shlex.quote(arg) for arg in args)
         try:
@@ -32,17 +37,16 @@ class ActionAppendRemove(ActionAppendCreateFunc):
     def _process(self, template):
         return self.remove_files
 
-    def remove_files(self, filtered_groups: iter) -> list:
+    def remove_files(self, filtered_group: iter) -> list:
         removed_files = list()
-        for group in filtered_groups:
-            for filename in group:
-                print("Removing {file}".format(file=filename))
-                try:
-                    pass
-                    # os.remove(filename)
-                    # removed_files.append(filename)
-                except FileNotFoundError:
-                    print("Not Found")
+        for filename in filtered_group:
+            print("Removing {file}".format(file=filename))
+            try:
+                pass
+                # os.remove(filename)
+                # removed_files.append(filename)
+            except FileNotFoundError:
+                print("Not Found")
         return removed_files
 
 
@@ -50,20 +54,19 @@ class ActionAppendLink(ActionAppendCreateFunc):
     def _process(self, template):
         return self.hardlink_files
 
-    def hardlink_files(self, filtered_groups: iter) -> list:
+    def hardlink_files(self, filtered_group: iter) -> list:
         linked_files = list()
-        for group in filtered_groups:
-            source_file = group[0]
+        source_file = filtered_group[0]
 
-            for filename in group:
-                print("Linking {source_file} -> {filename}".format(source_file=source_file, filename=filename))
-                try:
-                    pass
-                    # os.remove(filename)
-                    # os.link(source_file, filename)
-                    linked_files.append((source_file, filename))
-                except FileNotFoundError:
-                    print("Not Found")
+        for filename in filtered_group:
+            print("Linking {source_file} -> {filename}".format(source_file=source_file, filename=filename))
+            try:
+                pass
+                # os.remove(filename)
+                # os.link(source_file, filename)
+                linked_files.append((source_file, filename))
+            except FileNotFoundError:
+                print("Not Found")
         return linked_files
 
 
@@ -86,7 +89,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
 
         return self._abstract_call
 
-    def _abstract_call(self, condition=None, *, merge_dir, overwrite_flag, filtered_groups, hashes):
+    def _abstract_call(self, condition=None, *, merge_dir, overwrite_flag, filtered_group, hashes):
         overwrite = self.overwrite_flags[overwrite_flag]
         if overwrite_flag.upper() == 'CONDITION':
             assert condition is not None
@@ -96,8 +99,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             os.makedirs(merge_dir)
         if len(os.listdir(merge_dir)) == 0:
             os.makedirs(self.filter_dir)
-        for filter_group in filtered_groups:
-            overwrite(condition, filter_group=filter_group)
+            overwrite(condition, filter_group=filtered_group)
 
     def _count(self, filter_group):
         # This keeps the left padding of 0's
