@@ -71,39 +71,49 @@ class ActionAppendLink(ActionAppendCreateFunc):
 
 class ActionAppendMerge(ActionAppendCreateFunc):
     def _process(self, template):
+        flag = template
         self.overwrite_flags = {
             "COUNT": self._count,
             "IGNORE": self._ignore,
             "ERROR": self._error,
             "CONDITION": self._condition,
         }
-        if ":" in template:
-            self.template = template.split(":")
+        if ":" in flag:
+            flag = flag.split(":")
+            if len(flag) == 2:
+                merge_dir, overwrite_flag = flag
+            elif len(flag) == 3:
+                merge_dir, overwrite_flag, condition = flag
         else:
-            self.merge_dir = template
-        if len(template) == 2:
-            self.merge_dir, self.overwrite_flag = template
-        elif len(template) == 3:
-            self.merge_dir, self.overwrite_flag, self.condition = template
+            merge_dir = flag
+            condition = None
+            overwrite_flag = None
 
-        return self._abstract_call
+        callable_ = partial(self._abstract_call,
+                            condition=condition,
+                            merge_dir=merge_dir,
+                            overwrite_flag=overwrite_flag)
+        return callable_
 
-    def _abstract_call(self, condition=None, *, merge_dir, overwrite_flag, filtered_group, hashes):
-        overwrite = self.overwrite_flags[overwrite_flag]
-        if overwrite_flag.upper() == 'CONDITION':
+    def _abstract_call(self, filtered_group, *, condition, merge_dir, overwrite_flag, **kwargs):
+        overwrite = self.overwrite_flags.get(overwrite_flag, self._count)
+        if overwrite_flag is not None and overwrite_flag.upper() == 'CONDITION':
             assert condition is not None
 
-        self.filter_dir = os.path.join(merge_dir, *hashes)
+        self.filter_dir = os.path.join(merge_dir, *kwargs.values())
         if not os.path.exists(merge_dir):
             os.makedirs(merge_dir)
         if len(os.listdir(merge_dir)) == 0:
             os.makedirs(self.filter_dir)
-            overwrite(condition, filter_group=filtered_group)
+            output = overwrite(condition, self.filter_dir, filter_group=filtered_group)
+            return output
 
-    def _count(self, filter_group):
+    def _count(self, filter_group, filter_dir):
         # This keeps the left padding of 0's
         def incr_count(count):
             return str(int(count) + 1).zfill(len(count))
+
+        moved_files = list()
 
         for file in filter_group:
             filename = os.path.splitext(file)[1]
@@ -112,7 +122,12 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 count = '0000'
                 while os.path.exists(os.path.join(self.filter_dir, filename_split[0], count, filename[1])):
                     count = incr_count(count)
-                print(os.path.join(self.filter_dir, filename_split[0], count, filename[1]))
+                moved_files.append(os.path.join(self.filter_dir, filename_split[0], count, filename[1]))
+            else:
+                moved_files.append(self.filter_dir + filename)
+
+        return moved_files
+
 
     def _ignore(self, filter_group):
         pass
