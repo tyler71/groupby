@@ -3,15 +3,33 @@ import hashlib
 import os
 import re
 import shlex
+import subprocess
 from collections import OrderedDict
 from functools import partial
 
 from util.Logging import func_call
-from util.Templates import ActionAppendCreateFunc
+from util.Templates import ActionAppendCreateFunc, StringExpansionFunc
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
 
+class ActionAppendShellFilter(ActionAppendCreateFunc):
+    def _process(self, template):
+        template_format = StringExpansionFunc(template)
+        shell_command = partial(self._invoke_shell, command=template_format)
+        return shell_command
+
+    def _invoke_shell(self, *args, command, **kwargs) -> str:
+        args = (shlex.quote(arg) for arg in args)
+        try:
+            output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
+        except subprocess.CalledProcessError as e:
+            print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+            return ''
+        except KeyError as e:
+            print("Filter", e, "not found")
+            exit(1)
+        return output
 
 class FilterRegex(ActionAppendCreateFunc):
     def _process(self, template):

@@ -1,8 +1,11 @@
 import os
 
+from util.ActionCreateFilter import FilterRegex, ActionAppendShellFilter
 from util.ActionCreateFilter import list_filters
-from util.ActionCreateFilter import FilterRegex
-from util.ActionCreateFunc import ActionAppendShell, ActionAppendMerge, ActionAppendLink, ActionAppendRemove
+from util.ActionCreateFunc import ActionAppendExecShell, \
+    ActionAppendMerge, \
+    ActionAppendLink, \
+    ActionAppendRemove
 
 
 def parser_logic(parser):
@@ -15,11 +18,11 @@ def parser_logic(parser):
     parser.add_argument('-s', '--shell',
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
-                        action=ActionAppendShell)
+                        action=ActionAppendShellFilter)
     parser.add_argument('-x', '--exec-group',
                         dest="group_action",
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
-                        action=ActionAppendShell)
+                        action=ActionAppendExecShell)
     parser.add_argument('--remove',
                         dest="group_action",
                         action=ActionAppendRemove,

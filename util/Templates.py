@@ -1,6 +1,6 @@
 import argparse
-import string
 import os
+import string
 
 
 # This inherits the action="append" of argparse

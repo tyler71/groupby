@@ -1,22 +1,19 @@
 import os
-import subprocess
 import shlex
-
+import subprocess
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import StringExpansionFunc
 
 
-# Used as both a filter and a group exec
-class ActionAppendShell(ActionAppendCreateFunc):
+class ActionAppendExecShell(ActionAppendCreateFunc):
     def _process(self, template):
         template_format = StringExpansionFunc(template)
         shell_command = partial(self._invoke_shell, command=template_format)
         return shell_command
 
     def _invoke_shell(self, *args, command, **kwargs) -> str:
-        print(args)
         args = (shlex.quote(arg) for arg in args)
         try:
             output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
