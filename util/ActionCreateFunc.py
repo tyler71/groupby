@@ -1,10 +1,12 @@
 import os
 import shlex
 import subprocess
+import shutil
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import StringExpansionFunc
+
 
 
 class ActionAppendExecShell(ActionAppendCreateFunc):
@@ -71,44 +73,53 @@ class ActionAppendLink(ActionAppendCreateFunc):
 
 class ActionAppendMerge(ActionAppendCreateFunc):
     def _process(self, template):
-        flag = template
-        self.overwrite_flags = {
+        mergedir_flag = template
+        overwrite_flags = {
             "COUNT": self._count,
             "IGNORE": self._ignore,
             "ERROR": self._error,
             "CONDITION": self._condition,
         }
-        if ":" in flag:
-            flag = flag.split(":")
-            if len(flag) == 2:
-                merge_dir, overwrite_flag = flag
-            elif len(flag) == 3:
-                merge_dir, overwrite_flag, condition = flag
+        if ":" in mergedir_flag:
+            mergedir_flag = mergedir_flag.split(":")
+            if len(mergedir_flag) == 2:
+                merge_dir, overwrite_flag = mergedir_flag
+                condition = None
+            elif len(mergedir_flag) == 3:
+                merge_dir, overwrite_flag, condition = mergedir_flag
         else:
-            merge_dir = flag
+            merge_dir = mergedir_flag
             condition = None
             overwrite_flag = None
+
+        if os.path.exists(merge_dir):
+            print(IsADirectoryError)
+            exit()
+        else:
+            os.makedirs(merge_dir)
+
+        if overwrite_flag is not None and overwrite_flag.upper() == 'CONDITION':
+            assert condition is not None
+
+        if overwrite_flag in overwrite_flags:
+            overwrite_method = overwrite_flags[overwrite_method]
+        else:
+            overwrite_method = self._count
 
         callable_ = partial(self._abstract_call,
                             condition=condition,
                             merge_dir=merge_dir,
-                            overwrite_flag=overwrite_flag)
+                            overwrite_method=overwrite_method)
         return callable_
 
-    def _abstract_call(self, filtered_group, *, condition, merge_dir, overwrite_flag, **kwargs):
-        overwrite = self.overwrite_flags.get(overwrite_flag, self._count)
-        if overwrite_flag is not None and overwrite_flag.upper() == 'CONDITION':
-            assert condition is not None
+    def _abstract_call(self, filtered_group, *, condition, merge_dir, overwrite_method, **kwargs):
 
-        self.filter_dir = os.path.join(merge_dir, *kwargs.values())
-        if not os.path.exists(merge_dir):
-            os.makedirs(merge_dir)
-        if len(os.listdir(merge_dir)) == 0:
-            os.makedirs(self.filter_dir)
-            output = overwrite(condition, self.filter_dir, filter_group=filtered_group)
-            return output
+        filter_dir = os.path.join(merge_dir, *kwargs.values())
+        os.makedirs(filter_dir)
+        output = overwrite_method(filter_dir, filter_group=filtered_group)
+        return output
 
-    def _count(self, filter_group, filter_dir):
+    def _count(self, filter_dir, filter_group):
         # This keeps the left padding of 0's
         def incr_count(count):
             return str(int(count) + 1).zfill(len(count))
@@ -116,15 +127,20 @@ class ActionAppendMerge(ActionAppendCreateFunc):
         moved_files = list()
 
         for file in filter_group:
-            filename = os.path.splitext(file)[1]
+            filename = os.path.split(file)[1]
             filename_split = filename.split('.')
-            if os.path.exists(self.filter_dir + filename):
-                count = '0000'
-                while os.path.exists(os.path.join(self.filter_dir, filename_split[0], count, filename[1])):
+            if os.path.exists(filter_dir + filename):
+                count = '0001'
+                dest_file = os.path.join(filter_dir, filename_split[0], count, filename_split[1])
+                while os.path.exists(dest_file):
                     count = incr_count(count)
-                moved_files.append(os.path.join(self.filter_dir, filename_split[0], count, filename[1]))
+                    dest_file = os.path.join(filter_dir, filename_split[0], count, filename_split[1])
+                shutil.copy(file, dest_file)
+                moved_files.append(dest_file)
             else:
-                moved_files.append(self.filter_dir + filename)
+                dest_file = os.path.join(filter_dir, filename)
+                shutil.copy(file, dest_file)
+                moved_files.append(dest_file + '\n')
 
         return moved_files
 
