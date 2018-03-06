@@ -9,7 +9,6 @@ import sys
 
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
-from util.FileActions import hardlink_files, remove_files
 from util.FileProperties import DuplicateFilters
 from util.Logging import log_levels
 
@@ -82,43 +81,25 @@ def main():
                       for filter_method in args.filters)
     filtered_groups = DuplicateFilters(filters=filter_methods, filenames=paths, conditions=conditions.values())
 
-    def grp_action_link(groups):
-        for group_result in groups:
-            if len(group_result) >= args.threshold:
-                first, *others = group_result
-                hardlink_files(itertools.repeat(first), others)
-
-    def grp_action_remove(groups):
-        for group_result in groups:
-            if len(group_result) >= args.threshold:
-                remove_files(group_result[1:])
-
-    # Take the first file in a group as the source,
-    # and remove and then hard link the source file to each target path
-    if group_action == "link":
-        filtered_groups = list(filtered_groups)
-        grp_action_link(filtered_groups)
-
-    # Removes all but the first first identified in the group
-    elif group_action == "remove":
-        grp_action_remove(filtered_groups)
+    if group_action:
+        group_action(filtered_groups)
 
     # Custom shell action supplied by --exec-group
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
     # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
     # Also includes expansion of {..}, just includes filename extension
-    elif type(group_action) is functools.partial:
-        for index, results in enumerate(filtered_groups):
-            if len(results) >= args.threshold:
-                # Take each filters output and label f1: 1st_output, fn: n_output...
-                # Strip filter_output because of embedded newline
-                labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
-                                   for filter_number, filter_output
-                                   in enumerate(filtered_groups.filter_hashes[index])}
-                for result in results:
-                    # Executes the command given and returns its output if available
-                    command_string = group_action(result, **labeled_filters)
-                    print(command_string, end='')  # Shell commands already have newline
+    # if type(group_action) is functools.partial:
+    #     for index, results in enumerate(filtered_groups):
+    #         if len(results) >= args.threshold:
+    #             # Take each filters output and label f1: 1st_output, fn: n_output...
+    #             # Strip filter_output because of embedded newline
+    #             labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
+    #                                for filter_number, filter_output
+    #                                in enumerate(filtered_groups.filter_hashes[index])}
+    #             for result in results:
+    #                 # Executes the command given and returns its output if available
+    #                 command_string = group_action(result, **labeled_filters)
+    #                 print(command_string, end='')  # Shell commands already have newline
     else:
         if args.interactive is True:
             # If interactive, it will list the grouped files and then need to act on it.

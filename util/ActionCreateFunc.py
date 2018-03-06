@@ -1,9 +1,33 @@
-import os
-
-from util.ActionGroupFunc import ActionTemplate
 import itertools
+import os
+import subprocess
 
-class RemoveFiles(ActionTemplate):
+from functools import partial
+
+from util.Templates import ActionAppendCreateFunc
+from util.Templates import StringExpansionFunc
+
+
+class ActionAppendShell(ActionAppendCreateFunc):
+    def _process(self, template):
+        template_format = StringExpansionFunc(template)
+        shell_command = partial(self._invoke_shell, command=template_format)
+        return shell_command
+
+    def _invoke_shell(self, *args, command, **kwargs) -> str:
+        args = (shlex.quote(arg) for arg in args)
+        try:
+            output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
+        except subprocess.CalledProcessError as e:
+            print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+            return ''
+        except KeyError as e:
+            print("Filter", e, "not found")
+            exit(1)
+        return output
+
+
+class ActionAppendRemove(ActionAppendCreateFunc):
     def _process(self, template):
         return self.remove_files
 
@@ -20,16 +44,16 @@ class RemoveFiles(ActionTemplate):
         return removed_files
 
 
-class HardlinkAction(ActionTemplate)
+class ActionAppendLink(ActionAppendCreateFunc):
     def _process(self, template):
         return self.hardlink_files
 
     def hardlink_files(self, group_files: iter) -> list:
         linked_files = list()
         for group in group_files:
-            source_file = itertools.repeat(group[0])
+            source_file = group[0]
 
-            for source_file, filename in zip(source_files, group):
+            for filename in group:
                 print("Linking {source_file} -> {filename}".format(source_file=source_file, filename=filename))
                 try:
                     pass
@@ -41,7 +65,7 @@ class HardlinkAction(ActionTemplate)
         return linked_files
 
 
-class ActionMerge(ActionTemplate):
+class ActionAppendMerge(ActionAppendCreateFunc):
     def _process(self, template):
         self.overwrite_flags = {
             "COUNT": self._count,
@@ -86,11 +110,6 @@ class ActionMerge(ActionTemplate):
                 while os.path.exists(os.path.join(self.filter_dir, filename_split[0], count, filename[1])):
                     count = incr_count(count)
                 print(os.path.join(self.filter_dir, filename_split[0], count, filename[1]))
-
-
-
-
-
 
     def _ignore(self, filter_group):
         pass

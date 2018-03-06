@@ -6,7 +6,7 @@ import string
 # It takes a argument of template which should be a string
 # and passes it to _process which should return a function will be called
 # with a filename.
-class ActionTemplate(argparse._AppendAction):
+class ActionAppendCreateFunc(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         _copy = argparse._copy
         _ensure_value = argparse._ensure_value
@@ -31,10 +31,26 @@ class ActionTemplate(argparse._AppendAction):
 
 # This overrides the .format string, to allow for greater control of how .format works
 # Additional formats can be specified with a new letter of spec
-class TemplateFunc(string.Formatter):
-    def __init__(self, template, aliases):
+class StringExpansionFunc(string.Formatter):
+    '''
+        Based on parallel notation including
+        {}  : filename
+        {.} : filename with extension removed
+        {/} : basename of filename
+        {//}: dirname of file
+        {/.}: dirname of file with extension removed
+    '''
+
+    def __init__(self, template):
         self.template = template
-        self.aliases = aliases
+        self.aliases = {
+            "{}": "{0:s}",
+            "{.}": "{0:a}",
+            "{/}": "{0:b}",
+            "{//}": "{0:c}",
+            "{/.}": "{0:e}",
+            "{..}": "{0:f}",
+        }
 
         for key, alias in self.aliases.items():
             self.template = self.template.replace(key, alias)
