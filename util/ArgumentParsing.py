@@ -1,6 +1,5 @@
 import os
 
-from util.ActionCreateFilter import ActionAppendRegexFilter, ActionAppendShellFilter
 from util.ActionCreateFilter import ActionSelectFilter
 from util.ActionCreateFunc import ActionSelectGroupFunc
 

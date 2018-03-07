@@ -4,13 +4,13 @@ import argparse
 import logging
 import os
 import sys
+from collections import OrderedDict
 
 import util.ActionCreateFilter
 from util.ActionCreateFilter import DuplicateFilters
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.Logging import log_levels
-from collections import OrderedDict
 
 
 def main():
