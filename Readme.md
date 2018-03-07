@@ -16,14 +16,11 @@
 
 ## Syntax
 ```buildoutcfg
-usage: groupby.py [-h]
-                  [-f {partial_md5,md5,sha256,modified,accessed,size,filename,file}]
-                  [--regex FILTERS] [-s FILTERS] [-x GROUP_ACTION] [--remove]
-                  [--link] [--include INCLUDE] [--exclude EXCLUDE]
-                  [--dir-include DIR_INCLUDE] [--dir-exclude DIR_EXCLUDE]
-                  [--dir-hidden] [-r] [-t THRESHOLD] [--basic-formatting]
-                  [--max-depth MAX_DEPTH] [--empty-file] [--follow-symbolic]
-                  [--interactive] [-v]
+usage: groupby.py [-h] [-f FILTERS] [-x GROUP_ACTION] [--include INCLUDE]
+                  [--exclude EXCLUDE] [--dir-include DIR_INCLUDE]
+                  [--dir-exclude DIR_EXCLUDE] [--dir-hidden] [-r]
+                  [-t THRESHOLD] [--basic-formatting] [--max-depth MAX_DEPTH]
+                  [--empty-file] [--follow-symbolic] [--interactive] [-v]
                   [directory [directory ...]]
 
 positional arguments:
@@ -31,17 +28,11 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f {partial_md5,md5,sha256,modified,accessed,size,filename,file}, --filters {partial_md5,md5,sha256,modified,accessed,size,filename,file}
-                        Default: size md5
-  --regex FILTERS
-  -s FILTERS, --shell FILTERS
+  -f FILTERS, --filters FILTERS
                         Filenames represented as {}: --shell "du {} | cut -f1"
   -x GROUP_ACTION, --exec-group GROUP_ACTION
                         Filenames represented as {}, filters as {f1}, {fn}...:
                         --exec-group "echo {} {f1}"
-  --remove              Remove Duplicates, last flag applies of remove or link
-  --link                Replaces Duplicates with Hard Links of Source, last
-                        flag applies of remove or link
   --include INCLUDE
   --exclude EXCLUDE
   --dir-include DIR_INCLUDE
@@ -57,6 +48,15 @@ optional arguments:
   --interactive
   -v, --verbosity
 ```
+## Smart Selection
+*groupby* uses the context of the argument to select which method of filter or group command
+### Filter
+Filters have 3 types
+* Builtins
+* Shell
+* Regular Expression
+
+Builtins include 
 
 ## Custom Commands
 *groupby* supports execution of commands on grouped files.
