@@ -8,10 +8,10 @@ from functools import partial
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import StringExpansionFunc
 
-from util.ActionCreateFilter import disk_size, modification_date
+from util.ActionCreateFilter import FileProperties
 
 
-class ActionSelect(ActionAppendCreateFunc, StringExpansionFunc):
+class ActionSelectGroupFunc(ActionAppendCreateFunc, StringExpansionFunc):
     def _process(self, template):
         self.builtins = {
             "link": ActionAppendLink,
@@ -19,8 +19,10 @@ class ActionSelect(ActionAppendCreateFunc, StringExpansionFunc):
             "merge": ActionAppendMerge,
         }
         selected_class_func = self.check_group_exec_type(template)
+        templated_func = selected_class_func()
 
-        return selected_class_func(template)
+        print(selected_class_func.__name__)
+        return templated_func(template)
 
     def check_group_exec_type(self, template):
         def valid_regex(regex):
@@ -37,7 +39,10 @@ class ActionSelect(ActionAppendCreateFunc, StringExpansionFunc):
             return ActionAppendExecShell
 
 
-class ActionAppendExecShell(ActionAppendCreateFunc):
+class ActionAppendExecShell:
+    def __call__(self, *args, **kwargs):
+        return self._process(*args, **kwargs)
+
     def _process(self, template):
         template_format = StringExpansionFunc(template)
         shell_command = partial(self._group_invoke_shell, command=template_format)
@@ -63,7 +68,7 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
         return output
 
 
-class ActionAppendRemove(ActionAppendCreateFunc):
+class ActionAppendRemove:
     def _process(self, template):
         return self.remove_files
 
@@ -206,6 +211,15 @@ class ActionAppendMerge(ActionAppendCreateFunc):
         return moved_files
 
     def _condition(self, filter_dir, filter_group):
+        def modification_date(filename: str) -> str:
+            modification_time = os.path.getmtime(filename)
+            modified_datetime = datetime.datetime.fromtimestamp(modification_time)
+            return str(modified_datetime)
+
+        def disk_size(filename: str) -> str:
+            byte_usage = os.path.getsize(filename)
+            return str(byte_usage)
+
         conditions = {
             'LARGER': lambda file1, file2: disk_size(file1) > disk_size(file2),
             'SMALLER' : lambda file1, file2: disk_size(file1) < disk_size(file2),
