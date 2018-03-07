@@ -1,9 +1,15 @@
 import argparse
+import codecs
 import datetime
 import hashlib
 import os
 import string
 from collections import OrderedDict
+from util.Logging import func_call
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # This inherits the action="append" of argparse
@@ -22,6 +28,7 @@ class ActionAppendCreateFunc(argparse._AppendAction):
         # Trigger when nargs a list
         if isinstance(values, (list, tuple)):
             for template in values:
+                template = codecs.escape_decode(bytes(template, "utf-8"))[0].decode("utf-8")
                 callable_ = self._process(template)
                 items.append(callable_)
         else:
@@ -128,6 +135,7 @@ class FileProperties:
 
 
     @staticmethod
+    @func_call
     def access_date(filename: str) -> str:
         access_time = os.path.getmtime(filename)
         access_datetime = datetime.datetime.fromtimestamp(access_time)
@@ -135,6 +143,7 @@ class FileProperties:
 
 
     @staticmethod
+    @func_call
     def modification_date(filename: str) -> str:
         modification_time = os.path.getmtime(filename)
         modified_datetime = datetime.datetime.fromtimestamp(modification_time)
@@ -142,18 +151,21 @@ class FileProperties:
 
 
     @staticmethod
+    @func_call
     def file_name(filename: str) -> str:
         file_basename = os.path.basename(filename)
         return str(file_basename)
 
 
     @staticmethod
+    @func_call
     def disk_size(filename: str, *args) -> str:
         byte_usage = os.path.getsize(filename)
         return str(byte_usage)
 
 
     @staticmethod
+    @func_call
     def md5_sum(filename, chunk_size=65536) -> str:
         checksumer = hashlib.md5()
         for chunk in FileProperties._iter_read(filename, chunk_size):
@@ -162,6 +174,7 @@ class FileProperties:
         return str(file_hash)
 
     @staticmethod
+    @func_call
     def sha256_sum(filename, chunk_size=65536) -> str:
         checksumer = hashlib.sha256()
         for chunk in FileProperties._iter_read(filename, chunk_size):
@@ -171,6 +184,7 @@ class FileProperties:
 
 
     @staticmethod
+    @func_call
     def partial_md5_sum(filename, chunk_size=65536, chunks_read=200) -> str:
         checksumer = hashlib.md5()
         with open(filename, 'rb') as file:
@@ -183,6 +197,7 @@ class FileProperties:
 
 
     @staticmethod
+    @func_call
     def direct_compare(filename) -> bytes:
         with open(filename, 'rb') as file:
             data = file.read()
