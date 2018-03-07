@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 
 import argparse
-import functools
-import itertools
 import logging
 import os
 import sys
+from collections import OrderedDict
 
+import util.ActionCreateFilter
+from util.ActionCreateFilter import DuplicateFilters
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
-from util.FileActions import hardlink_files, remove_files
-from util.FileProperties import DuplicateFilters
 from util.Logging import log_levels
-
-import util.FileProperties
 
 
 def main():
@@ -22,7 +19,7 @@ def main():
         mnr=sys.version_info.minor)
     assert sys.version_info >= (3, 4), assert_statement
 
-    available_filters = util.FileProperties.list_filters()
+    available_filters = util.ActionCreateFilter.FileProperties().filters
 
     def negation(func):
         def wrapper(*args, **kwargs):
@@ -82,49 +79,23 @@ def main():
                       for filter_method in args.filters)
     filtered_groups = DuplicateFilters(filters=filter_methods, filenames=paths, conditions=conditions.values())
 
-    def grp_action_link(groups):
-        for group_result in groups:
-            if len(group_result) >= args.threshold:
-                first, *others = group_result
-                hardlink_files(itertools.repeat(first), others)
-
-    def grp_action_remove(groups):
-        for group_result in groups:
-            if len(group_result) >= args.threshold:
-                remove_files(group_result[1:])
-
-    # Take the first file in a group as the source,
-    # and remove and then hard link the source file to each target path
-    if group_action == "link":
-        filtered_groups = list(filtered_groups)
-        grp_action_link(filtered_groups)
-
-    # Removes all but the first first identified in the group
-    elif group_action == "remove":
-        grp_action_remove(filtered_groups)
-
     # Custom shell action supplied by --exec-group
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
     # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
     # Also includes expansion of {..}, just includes filename extension
-    elif type(group_action) is functools.partial:
+    if group_action:
         for index, results in enumerate(filtered_groups):
             if len(results) >= args.threshold:
                 # Take each filters output and label f1: 1st_output, fn: n_output...
                 # Strip filter_output because of embedded newline
-                labeled_filters = {"f{fn}".format(fn=filter_number + 1): filter_output.strip()
-                                   for filter_number, filter_output
-                                   in enumerate(filtered_groups.filter_hashes[index])}
-                for result in results:
-                    # Executes the command given and returns its output if available
-                    command_string = group_action(result, **labeled_filters)
-                    print(command_string, end='')  # Shell commands already have newline
+                labeled_filters = OrderedDict()
+                for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[index]):
+                    labeled_filters["f{fn}".format(fn=filter_number + 1)] = filter_output.strip()
+                command_string = group_action(results, **labeled_filters)
+                for output in command_string:
+                    print(output, end='')
+            print('')
     else:
-        if args.interactive is True:
-            # If interactive, it will list the grouped files and then need to act on it.
-            # Because output is through a generator, generate all results and store them
-            filtered_groups = tuple(filtered_groups)
-
         # Print all groups.
         for index, result in enumerate(filtered_groups):
             if len(result) >= args.threshold:
@@ -139,26 +110,6 @@ def main():
                         print('\n'.join((str(grp).rjust(len(grp) + 4) for grp in groups)), end='\n\n')
                     else:
                         print('')
-
-        # A messy implementation to a interactive dialog
-        if args.interactive is True:
-            action_on_grouped = None
-            try:
-                while action_on_grouped not in {"1", "2", "3", "exit" "link", "remove"}:
-                    action_on_grouped = str(input("Select action: \n1) link \n2) remove\n3) exit\n"))
-                if action_on_grouped in {"3", "exit"}:
-                    raise KeyboardInterrupt
-            except KeyboardInterrupt:
-                exit("\nExiting...")
-
-            interactive_actions = {
-                "1": grp_action_link,
-                "link": grp_action_link,
-                "2": grp_action_remove,
-                "remove": grp_action_remove,
-            }
-            action_on_grouped = action_on_grouped.lower()
-            interactive_actions[action_on_grouped](filtered_groups)
 
 
 if __name__ == '__main__':
