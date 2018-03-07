@@ -1,12 +1,39 @@
 import os
 import shlex
 import subprocess
+import re
 import shutil
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import StringExpansionFunc
 
+from util.ActionCreateFilter import disk_size, modification_date
+
+
+class ActionSelect(ActionAppendCreateFunc, StringExpansionFunc):
+    def _process(self, template):
+        self.builtins = {
+            "link": ActionAppendLink,
+            "remove": ActionAppendRemove,
+            "merge": ActionAppendMerge,
+        }
+        selected_class_func = self.check_group_exec_type(template)
+        selected_class_func(template)
+
+    def check_group_exec_type(self, template):
+        def valid_regex(regex):
+            try:
+                re.compile(regex)
+                return True
+            except re.error:
+                return False
+
+        if template in self.builtins:
+            return self.builtins[template]
+        elif any((alias in template
+               for alias in self.aliases)):
+            return ActionAppendExecShell
 
 
 class ActionAppendExecShell(ActionAppendCreateFunc):
@@ -114,6 +141,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
 
     def _abstract_call(self, filtered_group, *, condition, merge_dir, overwrite_method, **kwargs):
 
+        self.condition = condition
         filter_dir = os.path.join(merge_dir, *kwargs.values())
         os.makedirs(filter_dir)
         output = overwrite_method(filter_dir, filter_group=filtered_group)
@@ -176,5 +204,26 @@ class ActionAppendMerge(ActionAppendCreateFunc):
 
         return moved_files
 
-    def _condition(self, filter_group, *, condition):
+    def _condition(self, filter_dir, filter_group):
+        conditions = {
+            'LARGER': lambda file1, file2: disk_size(file1) > disk_size(file2),
+            'SMALLER' : lambda file1, file2: disk_size(file1) < disk_size(file2),
+            'NEWER'  : lambda file1, file2: modification_date(file1) < modification_date(file2),
+            'OLDER'  : lambda file1, file2: modification_date(file1) > modification_date(file2),
+        }
+        condition = conditions[self.condition.upper()]
+        moved_files = list()
+
+        for file in filter_group:
+            filename = os.path.split(file)[1]
+            dest_dir_file = os.path.join(filter_dir, filename)
+            if os.path.exists(dest_dir_file):
+                if condition(file, dest_dir_file):
+                    shutil.copy(file, dest_dir_file)
+            else:
+                dest_dir_file = os.path.join(filter_dir, filename)
+                shutil.copy(file, dest_dir_file)
+                moved_files.append(dest_dir_file + '\n')
+
+        return moved_files
         pass

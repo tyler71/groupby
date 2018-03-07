@@ -5,7 +5,8 @@ from util.ActionCreateFilter import list_filters
 from util.ActionCreateFunc import ActionAppendExecShell, \
     ActionAppendMerge, \
     ActionAppendLink, \
-    ActionAppendRemove
+    ActionAppendRemove, \
+    ActionSelect
 
 
 def parser_logic(parser):
@@ -19,6 +20,10 @@ def parser_logic(parser):
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
                         action=ActionAppendShellFilter)
+    parser.add_argument('-z',
+                        dest="group_action",
+                        help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
+                        action=ActionSelect)
     parser.add_argument('-x', '--exec-group',
                         dest="group_action",
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",

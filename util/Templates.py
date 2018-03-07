@@ -42,16 +42,17 @@ class StringExpansionFunc(string.Formatter):
         {/.}: dirname of file with extension removed
     '''
 
+    aliases = {
+        "{}": "{0:s}",
+        "{.}": "{0:a}",
+        "{/}": "{0:b}",
+        "{//}": "{0:c}",
+        "{/.}": "{0:e}",
+        "{..}": "{0:f}",
+    }
     def __init__(self, template):
         self.template = template
-        self.aliases = {
-            "{}": "{0:s}",
-            "{.}": "{0:a}",
-            "{/}": "{0:b}",
-            "{//}": "{0:c}",
-            "{/.}": "{0:e}",
-            "{..}": "{0:f}",
-        }
+        self.aliases = StringExpansionFunc.aliases
 
         for key, alias in self.aliases.items():
             self.template = self.template.replace(key, alias)
