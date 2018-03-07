@@ -11,6 +11,12 @@ from util.Templates import ActionAppendCreateFunc, StringExpansionFunc, FileProp
 _whitespace = re.compile('^([\n \t\r]|)+$')
 
 
+class OrderedDefaultListDict(OrderedDict):
+    def __missing__(self, key):
+        self[key] = value = []
+        return value
+
+
 class ActionSelectFilter(ActionAppendCreateFunc, StringExpansionFunc):
     def _process(self, template):
         self.filters = FileProperties().filters
@@ -30,18 +36,26 @@ class ActionSelectFilter(ActionAppendCreateFunc, StringExpansionFunc):
             except re.error:
                 return False
 
+        # These are builtin filters, functions
+        # instead of a class
         if template in self.filters:
             return self.filters[template]
+        # If contains a alias like {} it is likely
+        # a shell command
         elif any((alias in template
                   for alias in self.aliases)):
             return ActionAppendShellFilter()
+        # Finally, a valid regular expression will then
+        # be treated as such.
+        # Last to be checked since most likely to be a
+        # false positive
         elif valid_regex(template):
             return ActionAppendRegexFilter()
         else:
             print("No valid methods")
             exit(1)
 
-
+# Used with ActionSelectFilter
 class ActionAppendShellFilter:
     def __call__(self, *args, **kwargs):
         return self._process(*args, **kwargs)
@@ -63,7 +77,7 @@ class ActionAppendShellFilter:
             exit(1)
         return output
 
-
+# Used with ActionSelectFilter
 class ActionAppendRegexFilter:
     def __call__(self, *args, **kwargs):
         return self._process(*args, **kwargs)
@@ -79,12 +93,6 @@ class ActionAppendRegexFilter:
 
         result = pattern.search(quoted_dir)
         return result.group() if result else ""
-
-
-class OrderedDefaultListDict(OrderedDict):
-    def __missing__(self, key):
-        self[key] = value = []
-        return value
 
 
 class DuplicateFilters:

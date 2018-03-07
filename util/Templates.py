@@ -11,17 +11,23 @@ from collections import OrderedDict
 # and passes it to _process which should return a function will be called
 # with a filename.
 class ActionAppendCreateFunc(argparse._AppendAction):
+    # Internal logic for AppendAction
     def __call__(self, parser, namespace, values, option_string=None):
         _copy = argparse._copy
         _ensure_value = argparse._ensure_value
 
         items = _copy.copy(_ensure_value(namespace, self.dest, []))
+
+    # / Internal Logic
+        # Trigger when nargs a list
         if isinstance(values, (list, tuple)):
             for template in values:
                 callable_ = self._process(template)
                 items.append(callable_)
         else:
             template = values
+            # All subclasses should return a callable when called with _process
+            # Whatever that is
             callable_ = self._process(template)
             items.append(callable_)
 

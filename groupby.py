@@ -79,7 +79,10 @@ def main():
                       for filter_method in args.filters)
     filtered_groups = DuplicateFilters(filters=filter_methods, filenames=paths, conditions=conditions.values())
 
-    # Custom shell action supplied by --exec-group
+    # Smart action selected with 2 possible options
+    # * Builtins
+    # * Shell Action
+    # Custom action supplied by -x, --exec-group
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
     # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
     # Also includes expansion of {..}, just includes filename extension
