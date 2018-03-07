@@ -19,7 +19,8 @@ class ActionSelect(ActionAppendCreateFunc, StringExpansionFunc):
             "merge": ActionAppendMerge,
         }
         selected_class_func = self.check_group_exec_type(template)
-        selected_class_func(template)
+
+        return selected_class_func(template)
 
     def check_group_exec_type(self, template):
         def valid_regex(regex):
@@ -32,7 +33,7 @@ class ActionSelect(ActionAppendCreateFunc, StringExpansionFunc):
         if template in self.builtins:
             return self.builtins[template]
         elif any((alias in template
-               for alias in self.aliases)):
+                  for alias in self.aliases)):
             return ActionAppendExecShell
 
 
