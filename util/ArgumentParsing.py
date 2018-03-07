@@ -10,7 +10,7 @@ def parser_logic(parser):
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
                         action=ActionSelectFilter)
-    parser.add_argument('-x',
+    parser.add_argument('-x', '--exec-group',
                         dest="group_action",
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
                         action=ActionSelectGroupFunc)

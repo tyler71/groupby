@@ -10,7 +10,7 @@ from util.Templates import StringExpansionFunc
 
 
 class ActionSelectGroupFunc(ActionAppendCreateFunc, StringExpansionFunc):
-    def _process(self, template):
+    def _process(self, template, value=None):
         self.builtins = {
             "link": ActionAppendLink,
             "remove": ActionAppendRemove,
@@ -34,6 +34,11 @@ class ActionSelectGroupFunc(ActionAppendCreateFunc, StringExpansionFunc):
         elif any((alias in template
                   for alias in self.aliases)):
             return ActionAppendExecShell
+        elif "merge:" in template:
+            return ActionAppendMerge
+        else:
+            "No valid group exec detected"
+            exit(1)
 
 
 class ActionAppendExecShell:
@@ -122,10 +127,14 @@ class ActionAppendMerge:
         if ":" in mergedir_flag:
             mergedir_flag = mergedir_flag.split(":")
             if len(mergedir_flag) == 2:
-                merge_dir, overwrite_flag = mergedir_flag
+                _, merge_dir = mergedir_flag
+                overwrite_flag = None
                 condition = None
-            elif len(mergedir_flag) == 3:
-                merge_dir, overwrite_flag, condition = mergedir_flag
+            if len(mergedir_flag) == 3:
+                _, merge_dir, overwrite_flag = mergedir_flag
+                condition = None
+            elif len(mergedir_flag) == 4:
+                _, merge_dir, overwrite_flag, condition = mergedir_flag
         else:
             merge_dir = mergedir_flag
             condition = None
@@ -140,7 +149,7 @@ class ActionAppendMerge:
         if overwrite_flag is not None and overwrite_flag.upper() == 'CONDITION':
             assert condition is not None
 
-        if overwrite_flag.upper() in overwrite_flags:
+        if overwrite_flag is not None and overwrite_flag.upper() in overwrite_flags:
             overwrite_method = overwrite_flags[overwrite_flag.upper()]
         else:
             overwrite_method = self._count

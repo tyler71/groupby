@@ -53,6 +53,7 @@ class StringExpansionFunc(string.Formatter):
         "{/.}": "{0:e}",
         "{..}": "{0:f}",
     }
+
     def __init__(self, template):
         self.template = template
         self.aliases = StringExpansionFunc.aliases
