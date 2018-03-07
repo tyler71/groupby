@@ -1,14 +1,12 @@
 import os
-import shlex
-import subprocess
 import re
+import shlex
 import shutil
+import subprocess
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import StringExpansionFunc
-
-from util.ActionCreateFilter import FileProperties
 
 
 class ActionSelectGroupFunc(ActionAppendCreateFunc, StringExpansionFunc):
@@ -21,7 +19,6 @@ class ActionSelectGroupFunc(ActionAppendCreateFunc, StringExpansionFunc):
         selected_class_func = self.check_group_exec_type(template)
         templated_func = selected_class_func()
 
-        print(selected_class_func.__name__)
         return templated_func(template)
 
     def check_group_exec_type(self, template):
