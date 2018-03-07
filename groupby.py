@@ -96,11 +96,6 @@ def main():
                     print(output, end='')
             print('')
     else:
-        if args.interactive is True:
-            # If interactive, it will list the grouped files and then need to act on it.
-            # Because output is through a generator, generate all results and store them
-            filtered_groups = tuple(filtered_groups)
-
         # Print all groups.
         for index, result in enumerate(filtered_groups):
             if len(result) >= args.threshold:
@@ -115,26 +110,6 @@ def main():
                         print('\n'.join((str(grp).rjust(len(grp) + 4) for grp in groups)), end='\n\n')
                     else:
                         print('')
-
-        # A messy implementation to a interactive dialog
-        if args.interactive is True:
-            action_on_grouped = None
-            try:
-                while action_on_grouped not in {"1", "2", "3", "exit" "link", "remove"}:
-                    action_on_grouped = str(input("Select action: \n1) link \n2) remove\n3) exit\n"))
-                if action_on_grouped in {"3", "exit"}:
-                    raise KeyboardInterrupt
-            except KeyboardInterrupt:
-                exit("\nExiting...")
-
-            interactive_actions = {
-                "1": grp_action_link,
-                "link": grp_action_link,
-                "2": grp_action_remove,
-                "remove": grp_action_remove,
-            }
-            action_on_grouped = action_on_grouped.lower()
-            interactive_actions[action_on_grouped](filtered_groups)
 
 
 if __name__ == '__main__':
