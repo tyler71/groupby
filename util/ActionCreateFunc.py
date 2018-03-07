@@ -66,6 +66,9 @@ class ActionAppendExecShell:
 
 
 class ActionAppendRemove:
+    def __call__(self, *args, **kwargs):
+        return self._process(*args, **kwargs)
+
     def _process(self, template):
         return self.remove_files
 
@@ -82,7 +85,10 @@ class ActionAppendRemove:
         return removed_files
 
 
-class ActionAppendLink(ActionAppendCreateFunc):
+class ActionAppendLink:
+    def __call__(self, *args, **kwargs):
+        return self._process(*args, **kwargs)
+
     def _process(self, template):
         return self.hardlink_files
 
@@ -101,7 +107,10 @@ class ActionAppendLink(ActionAppendCreateFunc):
         return linked_files
 
 
-class ActionAppendMerge(ActionAppendCreateFunc):
+class ActionAppendMerge:
+    def __call__(self, *args, **kwargs):
+        return self._process(*args, **kwargs)
+
     def _process(self, template):
         mergedir_flag = template
         overwrite_flags = {
@@ -178,7 +187,6 @@ class ActionAppendMerge(ActionAppendCreateFunc):
 
         return moved_files
 
-
     def _ignore(self, filter_dir, filter_group):
         moved_files = list()
 
@@ -238,4 +246,3 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 moved_files.append(dest_dir_file + '\n')
 
         return moved_files
-        pass

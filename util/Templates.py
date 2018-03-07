@@ -149,16 +149,15 @@ class FileProperties:
     @staticmethod
     def md5_sum(filename, chunk_size=65536) -> str:
         checksumer = hashlib.md5()
-        for chunk in _iter_read(filename, chunk_size):
+        for chunk in FileProperties._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
         return str(file_hash)
 
-
     @staticmethod
     def sha256_sum(filename, chunk_size=65536) -> str:
         checksumer = hashlib.sha256()
-        for chunk in _iter_read(filename, chunk_size):
+        for chunk in FileProperties._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
         return str(file_hash)
