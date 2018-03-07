@@ -1,43 +1,19 @@
 import os
 
 from util.ActionCreateFilter import ActionAppendRegexFilter, ActionAppendShellFilter
-from util.ActionCreateFilter import list_filters
-from util.ActionCreateFunc import ActionAppendExecShell, \
-    ActionAppendMerge, \
-    ActionAppendLink, \
-    ActionAppendRemove
+from util.ActionCreateFilter import ActionSelectFilter
+from util.ActionCreateFunc import ActionSelectGroupFunc
 
 
 def parser_logic(parser):
-    available_filters = list_filters()
-    parser.add_argument('-f', "--filters",
-                        choices=available_filters.keys(),
-                        help="Default: size md5",
-                        action="append")
-    parser.add_argument('-E', '--regex', dest="filters", action=ActionAppendRegexFilter)
-    parser.add_argument('-s', '--shell',
+    parser.add_argument('-f', '--filters',
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
-                        action=ActionAppendShellFilter)
-    parser.add_argument('-x', '--exec-group',
+                        action=ActionSelectFilter)
+    parser.add_argument('-x',
                         dest="group_action",
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
-                        action=ActionAppendExecShell)
-    parser.add_argument('--remove',
-                        dest="group_action",
-                        action=ActionAppendRemove,
-                        help="Remove Duplicates, last flag applies of remove or link ",
-                        nargs='?',  # Not used; needed for compatibility
-                        const="remove")  # Not used
-    parser.add_argument('--merge',
-                        dest="group_action",
-                        action=ActionAppendMerge)
-    parser.add_argument('--link',
-                        dest="group_action",
-                        action=ActionAppendLink,
-                        help="Replaces Duplicates with Hard Links of Source, last flag applies of remove or link",
-                        const="link",  # Not used
-                        nargs='?')  # Not used; needed for compatibility
+                        action=ActionSelectGroupFunc)
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
     parser.add_argument('--dir-include', action='append')

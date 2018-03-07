@@ -19,7 +19,7 @@ def main():
         mnr=sys.version_info.minor)
     assert sys.version_info >= (3, 4), assert_statement
 
-    available_filters = util.ActionCreateFilter.list_filters()
+    available_filters = util.ActionCreateFilter.FileProperties().filters
 
     def negation(func):
         def wrapper(*args, **kwargs):
