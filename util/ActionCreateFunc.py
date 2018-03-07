@@ -2,7 +2,9 @@ import os
 import re
 import shlex
 import shutil
+import logging
 import subprocess
+import datetime
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc
@@ -173,20 +175,29 @@ class ActionAppendMerge:
         def incr_count(count):
             return str(int(count) + 1).zfill(len(count))
 
+        def create_file_path(dir, filename, count=None, fileext=None):
+            if count is not None:
+                filename = '_'.join([filename, count])
+            if fileext is not None:
+                filename = ''.join([filename + fileext])
+            dest_dir_file = os.path.join(dir, filename)
+            return dest_dir_file
+
         moved_files = list()
 
         for file in filter_group:
             filename = os.path.split(file)[1]
             filename_split = filename.split('.')
-            if os.path.exists(os.path.join(filter_dir, filename)):
-                count = '0001'
+
+            dest_dir_file = os.path.join(filter_dir, filename)
+            if os.path.exists(dest_dir_file):
+                count = '0000'
                 dest_dir = filter_dir
-                dest_file = os.path.join(filename_split[0] + "_{}.".format(count) + filename_split[1])
-                dest_dir_file = os.path.join(dest_dir, dest_file)
+                dest_dir_file = create_file_path(dest_dir, filename)
                 while os.path.exists(dest_dir_file):
-                    print(dest_dir_file)
                     count = incr_count(count)
                     dest_file = os.path.join(filename_split[0] + "_{}.".format(count) + filename_split[1])
+                    dest_dir_file = os.path.join(dest_dir, dest_file)
                 shutil.copy(file, dest_dir_file)
                 moved_files.append(dest_dir_file)
             else:
@@ -248,6 +259,7 @@ class ActionAppendMerge:
             dest_dir_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_dir_file):
                 if condition(file, dest_dir_file):
+                    logging.info("{} overwriting {}".format(file, dest_dir_file))
                     shutil.copy(file, dest_dir_file)
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
