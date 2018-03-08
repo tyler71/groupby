@@ -7,7 +7,7 @@
 * Predefined filters or use your own
 * Regular Expression filter
 * Supports similar GNU Parallel notation
-* Use filter output for each group in custom commands
+* Execute commands on each grouped file
 * Ignore or prefer specific directories or files
 * Ignores (unless specified)
   * Hidden directories
@@ -16,11 +16,13 @@
 
 ## Syntax
 ```buildoutcfg
-usage: groupby.py [-h] [-f FILTERS] [-x GROUP_ACTION] [--include INCLUDE]
-                  [--exclude EXCLUDE] [--dir-include DIR_INCLUDE]
-                  [--dir-exclude DIR_EXCLUDE] [--dir-hidden] [-r]
-                  [-t THRESHOLD] [--basic-formatting] [--max-depth MAX_DEPTH]
-                  [--empty-file] [--follow-symbolic] [--interactive] [-v]
+usage: groupby.py [-h] [-f FILTERS] [-E FILTERS] [-s FILTERS]
+                  [-x GROUP_ACTION] [-m GROUP_ACTION] [--exec-remove]
+                  [--exec-link] [--include INCLUDE] [--exclude EXCLUDE]
+                  [--dir-include DIR_INCLUDE] [--dir-exclude DIR_EXCLUDE]
+                  [--dir-hidden] [-r] [-t THRESHOLD] [--basic-formatting]
+                  [--max-depth MAX_DEPTH] [--empty-file] [--follow-symbolic]
+                  [-v]
                   [directory [directory ...]]
 
 positional arguments:
@@ -28,11 +30,16 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f FILTERS, --filters FILTERS
+  -f FILTERS, --filter FILTERS
                         Filenames represented as {}: --shell "du {} | cut -f1"
+  -E FILTERS, --filter-regex FILTERS
+  -s FILTERS, --filter-shell FILTERS
   -x GROUP_ACTION, --exec-group GROUP_ACTION
                         Filenames represented as {}, filters as {f1}, {fn}...:
                         --exec-group "echo {} {f1}"
+  -m GROUP_ACTION, --exec-merge GROUP_ACTION
+  --exec-remove
+  --exec-link
   --include INCLUDE
   --exclude EXCLUDE
   --dir-include DIR_INCLUDE
@@ -45,20 +52,21 @@ optional arguments:
   --max-depth MAX_DEPTH
   --empty-file          Allow comparision of empty files
   --follow-symbolic     Allow following of symbolic links for compare
-  --interactive
   -v, --verbosity
 ```
-## Smart Selection
-*groupby* uses the context of the argument to select which method of filter or group command
-### Filter
+## Filter
 Filters have 3 types
 * Builtins
 * Shell
 * Regular Expression
 
-Builtins include 
+Filters are applied as defined
 
-## Custom Commands
+### Builtins
+
+
+
+## Group Commands
 *groupby* supports execution of commands on grouped files.
 To assist with this, brace expansion of the following syntax is observed:
 ```buildoutcfg
