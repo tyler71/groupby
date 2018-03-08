@@ -1,18 +1,23 @@
 import os
 
-from util.ActionCreateFilter import ActionSelectFilter
-from util.ActionCreateFunc import ActionSelectGroupFunc
+from util.ActionCreateFilter import ActionAppendRegexFilter, ActionAppendShellFilter, ActionAppendFilePropertyFilter
+from util.ActionCreateFunc import ActionAppendExecShell, ActionAppendMerge, remove_files, hardlink_files
 
 
 def parser_logic(parser):
-    parser.add_argument('-f', '--filters',
+    parser.add_argument('-f', '--filter',
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
-                        action=ActionSelectFilter)
+                        action=ActionAppendFilePropertyFilter)
+    parser.add_argument('-E', '--filter-regex', dest="filters", action=ActionAppendRegexFilter)
+    parser.add_argument('-s', '--filter-shell', dest="filters", action=ActionAppendShellFilter)
     parser.add_argument('-x', '--exec-group',
                         dest="group_action",
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
-                        action=ActionSelectGroupFunc)
+                        action=ActionAppendExecShell)
+    parser.add_argument('-m', '--exec-merge', dest="group_action", action=ActionAppendMerge)
+    parser.add_argument('--exec-remove', const=remove_files, dest="group_action", action='append_const')
+    parser.add_argument('--exec-link', const=hardlink_files, dest="group_action", action='append_const')
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
     parser.add_argument('--dir-include', action='append')
