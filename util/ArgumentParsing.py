@@ -18,11 +18,16 @@ def parser_logic(parser):
     parser.add_argument('-E', '--filter-regex', dest="filters", action=ActionAppendRegexFilter)
     parser.add_argument('-s', '--filter-shell', dest="filters", action=ActionAppendShellFilter)
 
-    parser.add_argument('-x', '--exec-group',
+    parser.add_argument('-x', '--exec-shell',
                         dest="group_action",
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
                         action=ActionAppendExecShell)
-    parser.add_argument('-m', '--exec-merge', dest="group_action", action=ActionAppendMerge)
+    parser.add_argument('-m', '--exec-merge',
+                        dest="group_action",
+                        metavar="merge_dir",
+                        action=ActionAppendMerge,
+                        help='Includes 4 options including COUNT, IGNORE, ERROR and CONDITION'
+                        )
     parser.add_argument('--exec-remove', const=remove_files, dest="group_action", action='append_const')
     parser.add_argument('--exec-link', const=hardlink_files, dest="group_action", action='append_const')
 
