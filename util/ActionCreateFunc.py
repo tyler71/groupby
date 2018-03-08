@@ -11,42 +11,39 @@ from util.Templates import ActionAppendCreateFunc
 from util.Templates import StringExpansionFunc
 
 
-class ActionSelectGroupFunc(ActionAppendCreateFunc, StringExpansionFunc):
-    def _process(self, template, value=None):
-        self.builtins = {
-            "link": ActionAppendLink,
-            "remove": ActionAppendRemove,
-            "merge": ActionAppendMerge,
-        }
-        selected_class_func = self.check_group_exec_type(template)
-        templated_func = selected_class_func()
+# class ActionSelectGroupFunc(ActionAppendCreateFunc, StringExpansionFunc):
+#     def _process(self, template, value=None):
+#         self.builtins = {
+#             "link": ActionAppendLink,
+#             "remove": ActionAppendRemove,
+#             "merge": ActionAppendMerge,
+#         }
+#         selected_class_func = self.check_group_exec_type(template)
+#         templated_func = selected_class_func()
+#
+#         return templated_func(template)
+#
+#     def check_group_exec_type(self, template):
+#         def valid_regex(regex):
+#             try:
+#                 re.compile(regex)
+#                 return True
+#             except re.error:
+#                 return False
+#
+#         if template in self.builtins:
+#             return self.builtins[template]
+#         elif any((alias in template
+#                   for alias in self.aliases)):
+#             return ActionAppendExecShell
+#         elif "merge:" in template:
+#             return ActionAppendMerge
+#         else:
+#             "No valid group exec detected"
+#             exit(1)
 
-        return templated_func(template)
 
-    def check_group_exec_type(self, template):
-        def valid_regex(regex):
-            try:
-                re.compile(regex)
-                return True
-            except re.error:
-                return False
-
-        if template in self.builtins:
-            return self.builtins[template]
-        elif any((alias in template
-                  for alias in self.aliases)):
-            return ActionAppendExecShell
-        elif "merge:" in template:
-            return ActionAppendMerge
-        else:
-            "No valid group exec detected"
-            exit(1)
-
-
-class ActionAppendExecShell:
-    def __call__(self, *args, **kwargs):
-        return self._process(*args, **kwargs)
-
+class ActionAppendExecShell(ActionAppendCreateFunc, StringExpansionFunc):
     def _process(self, template):
         template_format = StringExpansionFunc(template)
         shell_command = partial(self._group_invoke_shell, command=template_format)
@@ -72,52 +69,35 @@ class ActionAppendExecShell:
         return output
 
 
-class ActionAppendRemove:
-    def __call__(self, *args, **kwargs):
-        return self._process(*args, **kwargs)
-
-    def _process(self, template):
-        return self.remove_files
-
-    def remove_files(self, filtered_group: iter, **kwargs) -> list:
-        removed_files = list()
-        for filename in filtered_group:
-            try:
-                pass
-                removed_files.append("Removing {file}\n".format(file=filename))
-                # os.remove(filename)
-                # removed_files.append(filename)
-            except FileNotFoundError:
-                print("Not Found")
-        return removed_files
+def remove_files(filtered_group: iter, **kwargs) -> list:
+    removed_files = list()
+    for filename in filtered_group:
+        try:
+            pass
+            removed_files.append("Removing {file}\n".format(file=filename))
+            # os.remove(filename)
+            # removed_files.append(filename)
+        except FileNotFoundError:
+            print("Not Found")
+    return removed_files
 
 
-class ActionAppendLink:
-    def __call__(self, *args, **kwargs):
-        return self._process(*args, **kwargs)
+def hardlink_files(filtered_group: iter, **kwargs) -> list:
+    linked_files = list()
+    source_file = filtered_group[0]
 
-    def _process(self, template):
-        return self.hardlink_files
-
-    def hardlink_files(self, filtered_group: iter, **kwargs) -> list:
-        linked_files = list()
-        source_file = filtered_group[0]
-
-        for filename in filtered_group:
-            try:
-                pass
-                linked_files.append("Linking {source_file} -> {filename}\n".format(source_file=source_file, filename=filename))
-                # os.remove(filename)
-                # os.link(source_file, filename)
-            except FileNotFoundError:
-                print("Not Found")
-        return linked_files
+    for filename in filtered_group:
+        try:
+            pass
+            linked_files.append("Linking {source_file} -> {filename}\n".format(source_file=source_file, filename=filename))
+            # os.remove(filename)
+            # os.link(source_file, filename)
+        except FileNotFoundError:
+            print("Not Found")
+    return linked_files
 
 
-class ActionAppendMerge:
-    def __call__(self, *args, **kwargs):
-        return self._process(*args, **kwargs)
-
+class ActionAppendMerge(ActionAppendCreateFunc):
     def _process(self, template):
         mergedir_flag = template
         overwrite_flags = {
@@ -129,14 +109,10 @@ class ActionAppendMerge:
         if ":" in mergedir_flag:
             mergedir_flag = mergedir_flag.split(":")
             if len(mergedir_flag) == 2:
-                _, merge_dir = mergedir_flag
-                overwrite_flag = None
+                merge_dir, overwrite_flag = mergedir_flag
                 condition = None
             if len(mergedir_flag) == 3:
-                _, merge_dir, overwrite_flag = mergedir_flag
-                condition = None
-            elif len(mergedir_flag) == 4:
-                _, merge_dir, overwrite_flag, condition = mergedir_flag
+                merge_dir, overwrite_flag, condition = mergedir_flag
         else:
             merge_dir = mergedir_flag
             condition = None
@@ -183,8 +159,6 @@ class ActionAppendMerge:
             dest_dir_file = os.path.join(dir, filename)
             return dest_dir_file
 
-        moved_files = list()
-
         for file in filter_group:
             filename = os.path.split(file)[1]
             filename_split = filename.split('.')
@@ -199,13 +173,11 @@ class ActionAppendMerge:
                     dest_file = os.path.join(filename_split[0] + "_{}.".format(count) + filename_split[1])
                     dest_dir_file = os.path.join(dest_dir, dest_file)
                 shutil.copy(file, dest_dir_file)
-                moved_files.append(dest_dir_file)
+                yield dest_dir_file + '\n'
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                moved_files.append(dest_dir_file + '\n')
-
-        return moved_files
+                yield dest_dir_file + '\n'
 
     def _ignore(self, filter_dir, filter_group):
         moved_files = list()
