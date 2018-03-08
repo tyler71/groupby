@@ -130,12 +130,11 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 exit(1)
         else:
             overwrite_method = self._count
-            
+
         if os.path.exists(merge_dir):
             raise IsADirectoryError("{} already exists".format(merge_dir))
         else:
             os.makedirs(merge_dir)
-
 
         callable_ = partial(self._abstract_call,
                             condition=condition,
