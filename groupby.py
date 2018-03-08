@@ -6,7 +6,6 @@ import os
 import sys
 from collections import OrderedDict
 
-from util.ActionCreateFilter import ActionAppendFilePropertyFilter
 from util.ActionCreateFilter import DuplicateFilters
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
@@ -20,8 +19,6 @@ def main():
         mjr=sys.version_info.major,
         mnr=sys.version_info.minor)
     assert sys.version_info >= (3, 4), assert_statement
-
-    available_filters = ActionAppendFilePropertyFilter.filters()
 
     def negation(func):
         def wrapper(*args, **kwargs):
@@ -76,11 +73,6 @@ def main():
                                           )
              )
 
-    # Get first (blocking) filter method, group other filter methods
-    # filter_methods = (available_filters[filter_method]
-    #                   if type(filter_method) is str
-    #                   else filter_method
-    #                   for filter_method in args.filters)
     filtered_groups = DuplicateFilters(filters=args.filters, filenames=paths, conditions=conditions.values())
 
     # Smart action selected with 2 possible options
