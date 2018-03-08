@@ -21,7 +21,7 @@ def main():
         mnr=sys.version_info.minor)
     assert sys.version_info >= (3, 4), assert_statement
 
-    # available_filters = ActionAppendFilePropertyFilter
+    available_filters = ActionAppendFilePropertyFilter.filters()
 
     def negation(func):
         def wrapper(*args, **kwargs):
@@ -60,7 +60,7 @@ def main():
     args.threshold = args.threshold if args.threshold > 1 else 1
 
     # Default filtering methods
-    #args.filters = args.filters if args.filters else ["size", "md5"]
+    # args.filters = args.filters if args.filters else ["size", "md5"]
 
     # Get all file paths
     # Usage of set to remove group directory entries
