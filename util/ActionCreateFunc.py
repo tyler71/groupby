@@ -1,10 +1,9 @@
+import datetime
+import logging
 import os
-import re
 import shlex
 import shutil
-import logging
 import subprocess
-import datetime
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc

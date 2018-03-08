@@ -1,11 +1,6 @@
 import argparse
-import codecs
-import datetime
-import hashlib
 import os
 import string
-from collections import OrderedDict
-from util.Logging import func_call
 
 import logging
 
@@ -44,8 +39,6 @@ class ActionAppendCreateFunc(argparse._AppendAction):
         # should take a template
         # and return a function allowing it to be called with a string
         raise (ValueError, "Expected to be extended in subclass")
-
-
 
 
 # This overrides the .format string, to allow for greater control of how .format works
