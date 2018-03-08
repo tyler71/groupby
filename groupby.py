@@ -6,7 +6,7 @@ import os
 import sys
 from collections import OrderedDict
 
-from util.ActionCreateFilter import DuplicateFilters
+from util.ActionCreateFilter import DuplicateFilters, ActionAppendFilePropertyFilter
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.Logging import log_levels
@@ -57,7 +57,9 @@ def main():
     args.threshold = args.threshold if args.threshold > 1 else 1
 
     # Default filtering methods
-    # args.filters = args.filters if args.filters else ["size", "md5"]
+    if not args.filters:
+        args.filters = [ActionAppendFilePropertyFilter.disk_size,
+                        ActionAppendFilePropertyFilter.md5_sum]
 
     # Get all file paths
     # Usage of set to remove group directory entries

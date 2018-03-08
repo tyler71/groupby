@@ -1,7 +1,7 @@
-import datetime
-import hashlib
 import os
 import re
+import datetime
+import hashlib
 import shlex
 import subprocess
 import logging
@@ -71,10 +71,9 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         )
         return filters
 
-    @classmethod
-    def _process(cls, template):
+    def _process(self, template):
         func_name = template
-        return cls.filters()[func_name]
+        return self.filters()[func_name]
 
     # Used with checksum functions
     def _iter_read(filename: str, chunk_size=65536) -> bytes:
@@ -82,44 +81,44 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             for chunk in iter(lambda: file.read(chunk_size), b''):
                 yield chunk
 
-    @classmethod
-    def access_date(cls, filename: str) -> str:
+    @staticmethod
+    def access_date(filename: str) -> str:
         access_time = os.path.getmtime(filename)
         access_datetime = datetime.datetime.fromtimestamp(access_time)
         return str(access_datetime)
 
-    @classmethod
-    def modification_date(cls, filename: str) -> str:
+    @staticmethod
+    def modification_date(filename: str) -> str:
         modification_time = os.path.getmtime(filename)
         modified_datetime = datetime.datetime.fromtimestamp(modification_time)
         return str(modified_datetime)
-    @classmethod
-    def file_name(cls, filename: str) -> str:
+    @staticmethod
+    def file_name(filename: str) -> str:
         file_basename = os.path.basename(filename)
         return str(file_basename)
 
-    @classmethod
-    def disk_size(cls, filename: str, *args) -> str:
+    @staticmethod
+    def disk_size(filename: str, *args) -> str:
         byte_usage = os.path.getsize(filename)
         return str(byte_usage)
 
-    def md5_sum(cls, filename, chunk_size=65536) -> str:
+    def md5_sum(filename, chunk_size=65536) -> str:
         checksumer = hashlib.md5()
         for chunk in ActionAppendFilePropertyFilter._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
         return str(file_hash)
 
-    @classmethod
-    def sha256_sum(cls, filename, chunk_size=65536) -> str:
+    @staticmethod
+    def sha256_sum(filename, chunk_size=65536) -> str:
         checksumer = hashlib.sha256()
         for chunk in ActionAppendFilePropertyFilter._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
         return str(file_hash)
 
-    @classmethod
-    def partial_md5_sum(cls, filename, chunk_size=65536, chunks_read=200) -> str:
+    @staticmethod
+    def partial_md5_sum(filename, chunk_size=65536, chunks_read=200) -> str:
         checksumer = hashlib.md5()
         with open(filename, 'rb') as file:
             for null in range(0, chunks_read):
@@ -129,7 +128,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
                 checksumer.update(chunk)
         return checksumer.hexdigest()
 
-    @classmethod
+    @staticmethod
     def direct_compare(cls, filename) -> bytes:
         with open(filename, 'rb') as file:
             data = file.read()
