@@ -119,18 +119,23 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             condition = None
             overwrite_flag = None
 
+        if overwrite_flag is not None and overwrite_flag.upper() == 'CONDITION':
+            assert condition is not None
+
+        if overwrite_flag is not None:
+            try:
+                overwrite_method = overwrite_flags[overwrite_flag.upper()]
+            except KeyError as e:
+                print('{} is not a valid key'.format(e))
+                exit(1)
+        else:
+            overwrite_method = self._count
+            
         if os.path.exists(merge_dir):
             raise IsADirectoryError("{} already exists".format(merge_dir))
         else:
             os.makedirs(merge_dir)
 
-        if overwrite_flag is not None and overwrite_flag.upper() == 'CONDITION':
-            assert condition is not None
-
-        if overwrite_flag is not None and overwrite_flag.upper() in overwrite_flags:
-            overwrite_method = overwrite_flags[overwrite_flag.upper()]
-        else:
-            overwrite_method = self._count
 
         callable_ = partial(self._abstract_call,
                             condition=condition,
