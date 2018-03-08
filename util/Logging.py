@@ -11,7 +11,7 @@ log_levels = {
     1: "CRITICAL"
 }
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 def func_call(func):
     ''' Takes func and logs its call as DEBUG '''
@@ -19,7 +19,7 @@ def func_call(func):
     @wraps(func)
     def wrapper_func(*args, **kwargs):
         result = func(*args, **kwargs)
-        logger.debug('function({args} {kwargs}) -> {result}'.format(
+        log.debug('function({args} {kwargs}) -> {result}'.format(
             function=func.__qualname__,
             args=args,
             kwargs=kwargs,

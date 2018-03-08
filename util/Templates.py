@@ -9,7 +9,7 @@ from util.Logging import func_call
 
 import logging
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 # This inherits the action="append" of argparse

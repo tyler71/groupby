@@ -14,6 +14,8 @@ from util.Logging import log_levels
 
 
 def main():
+
+
     assert_statement = "Requires Python{mjr}.{mnr} or greater".format(
         mjr=sys.version_info.major,
         mnr=sys.version_info.minor)
@@ -35,17 +37,19 @@ def main():
     parser = parser_logic(parser)
     args = parser.parse_args()
 
-    if args.follow_symbolic is True:
-        conditions.pop("not_symbolic_link")
-    if args.empty_file is True:
-        conditions.pop("not_empty")
-
     if args.verbosity:
         logging.basicConfig(level=log_levels.get(args.verbosity, 3),
                             stream=sys.stderr,
                             format='[%(levelname)s] %(message)s')
     else:
         logging.disable(logging.CRITICAL)
+    log = logging.getLogger(__name__)
+
+    if args.follow_symbolic is True:
+        conditions.pop("not_symbolic_link")
+    if args.empty_file is True:
+        conditions.pop("not_empty")
+
 
     # Choose only last group action
     if args.group_action:
@@ -107,7 +111,7 @@ def main():
                     print('\n'.join((str(grp)) for grp in result), end='\n')
                 else:
                     source_file, *groups = result
-                    logging.info(' -> '.join(filtered_groups.filter_hashes[index]))
+                    log.info(' -> '.join(filtered_groups.filter_hashes[index]))
                     print(source_file)
                     if groups:
                         print('\n'.join((str(grp).rjust(len(grp) + 4) for grp in groups)), end='\n\n')

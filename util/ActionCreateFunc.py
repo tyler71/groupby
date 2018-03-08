@@ -10,6 +10,7 @@ from functools import partial
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import StringExpansionFunc
 
+log = logging.getLogger(__name__)
 
 class ActionSelectGroupFunc(ActionAppendCreateFunc, StringExpansionFunc):
     def _process(self, template, value=None):
@@ -143,8 +144,7 @@ class ActionAppendMerge:
             overwrite_flag = None
 
         if os.path.exists(merge_dir):
-            print(IsADirectoryError)
-            exit()
+            raise IsADirectoryError("{} already exists".format(merge_dir))
         else:
             os.makedirs(merge_dir)
 
@@ -212,7 +212,9 @@ class ActionAppendMerge:
 
         for file in filter_group:
             filename = os.path.split(file)[1]
-            if os.path.exists(os.path.join(filter_dir, filename)):
+            dest_file = os.path.join(filter_dir, filename)
+            if os.path.exists(dest_file):
+                log.info("{} Exists, Ignoring {}".format(dest_file, file))
                 continue
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
@@ -259,7 +261,7 @@ class ActionAppendMerge:
             dest_dir_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_dir_file):
                 if condition(file, dest_dir_file):
-                    logging.info("{} overwriting {}".format(file, dest_dir_file))
+                    log.info("{} overwriting {}".format(file, dest_dir_file))
                     shutil.copy(file, dest_dir_file)
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)

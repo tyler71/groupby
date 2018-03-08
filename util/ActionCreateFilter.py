@@ -2,6 +2,7 @@ import os
 import re
 import shlex
 import subprocess
+import logging
 from collections import OrderedDict
 from functools import partial
 
@@ -10,6 +11,7 @@ from util.Templates import ActionAppendCreateFunc, StringExpansionFunc, FileProp
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
 
+log = logging.getLogger(__name__)
 
 class OrderedDefaultListDict(OrderedDict):
     def __missing__(self, key):
@@ -54,6 +56,7 @@ class ActionSelectFilter(ActionAppendCreateFunc, StringExpansionFunc):
         else:
             print("No valid methods")
             exit(1)
+
 
 # Used with ActionSelectFilter
 class ActionAppendShellFilter:
