@@ -13,8 +13,6 @@ from util.Logging import log_levels
 
 
 def main():
-
-
     assert_statement = "Requires Python{mjr}.{mnr} or greater".format(
         mjr=sys.version_info.major,
         mnr=sys.version_info.minor)
@@ -47,14 +45,8 @@ def main():
     if args.empty_file is True:
         conditions.pop("not_empty")
 
-
     # Choose only last group action
-    if args.group_action:
-        group_action = args.group_action[-1]
-    else:
-        group_action = None
-
-    args.threshold = args.threshold if args.threshold > 1 else 1
+    group_action = args.group_action[-1] if args.group_action else None
 
     # Default filtering method
     if not args.filters:
