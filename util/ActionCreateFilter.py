@@ -1,15 +1,19 @@
 import os
 import re
+import datetime
+import hashlib
 import shlex
 import subprocess
+import logging
 from collections import OrderedDict
 from functools import partial
 
-from util.Templates import ActionAppendCreateFunc, StringExpansionFunc, FileProperties
+from util.Templates import ActionAppendCreateFunc, StringExpansionFunc
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
 
+log = logging.getLogger(__name__)
 
 class OrderedDefaultListDict(OrderedDict):
     def __missing__(self, key):
@@ -17,49 +21,7 @@ class OrderedDefaultListDict(OrderedDict):
         return value
 
 
-class ActionSelectFilter(ActionAppendCreateFunc, StringExpansionFunc):
-    def _process(self, template):
-        self.filters = FileProperties().filters
-        selected_filter = self.check_filter_type(template)
-        if template in self.filters:
-            templated_func = selected_filter
-        else:
-            templated_func = selected_filter(template)
-
-        return templated_func
-
-    def check_filter_type(self, template):
-        def valid_regex(regex):
-            try:
-                re.compile(regex)
-                return True
-            except re.error:
-                return False
-
-        # These are builtin filters, functions
-        # instead of a class
-        if template in self.filters:
-            return self.filters[template]
-        # If contains a alias like {} it is likely
-        # a shell command
-        elif any((alias in template
-                  for alias in self.aliases)):
-            return ActionAppendShellFilter()
-        # Finally, a valid regular expression will then
-        # be treated as such.
-        # Last to be checked since most likely to be a
-        # false positive
-        elif valid_regex(template):
-            return ActionAppendRegexFilter()
-        else:
-            print("No valid methods")
-            exit(1)
-
-# Used with ActionSelectFilter
-class ActionAppendShellFilter:
-    def __call__(self, *args, **kwargs):
-        return self._process(*args, **kwargs)
-
+class ActionAppendShellFilter(ActionAppendCreateFunc):
     def _process(self, template):
         template_format = StringExpansionFunc(template)
         shell_command = partial(self._invoke_shell, command=template_format)
@@ -77,11 +39,8 @@ class ActionAppendShellFilter:
             exit(1)
         return output
 
-# Used with ActionSelectFilter
-class ActionAppendRegexFilter:
-    def __call__(self, *args, **kwargs):
-        return self._process(*args, **kwargs)
 
+class ActionAppendRegexFilter(ActionAppendCreateFunc):
     def _process(self, template):
         template = re.compile(template)
         regex_pattern = partial(self._re_match, pattern=template)
@@ -93,6 +52,87 @@ class ActionAppendRegexFilter:
 
         result = pattern.search(quoted_dir)
         return result.group() if result else ""
+
+
+class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
+    @classmethod
+    def filters(cls):
+        filters = OrderedDict(
+            {
+                "partial_md5": cls.partial_md5_sum,
+                "md5": cls.md5_sum,
+                "sha256": cls.sha256_sum,
+                "modified": cls.modification_date,
+                "accessed": cls.access_date,
+                "size": cls.disk_size,
+                "filename": cls.file_name,
+                "file": cls.direct_compare,
+            }
+        )
+        return filters
+
+    def _process(self, template):
+        func_name = template
+        return self.filters()[func_name]
+
+    # Used with checksum functions
+    def _iter_read(filename: str, chunk_size=65536) -> bytes:
+        with open(filename, 'rb') as file:
+            for chunk in iter(lambda: file.read(chunk_size), b''):
+                yield chunk
+
+    @staticmethod
+    def access_date(filename: str) -> str:
+        access_time = os.path.getmtime(filename)
+        access_datetime = datetime.datetime.fromtimestamp(access_time)
+        return str(access_datetime)
+
+    @staticmethod
+    def modification_date(filename: str) -> str:
+        modification_time = os.path.getmtime(filename)
+        modified_datetime = datetime.datetime.fromtimestamp(modification_time)
+        return str(modified_datetime)
+    @staticmethod
+    def file_name(filename: str) -> str:
+        file_basename = os.path.basename(filename)
+        return str(file_basename)
+
+    @staticmethod
+    def disk_size(filename: str, *args) -> str:
+        byte_usage = os.path.getsize(filename)
+        return str(byte_usage)
+
+    def md5_sum(filename, chunk_size=65536) -> str:
+        checksumer = hashlib.md5()
+        for chunk in ActionAppendFilePropertyFilter._iter_read(filename, chunk_size):
+            checksumer.update(chunk)
+        file_hash = checksumer.hexdigest()
+        return str(file_hash)
+
+    @staticmethod
+    def sha256_sum(filename, chunk_size=65536) -> str:
+        checksumer = hashlib.sha256()
+        for chunk in ActionAppendFilePropertyFilter._iter_read(filename, chunk_size):
+            checksumer.update(chunk)
+        file_hash = checksumer.hexdigest()
+        return str(file_hash)
+
+    @staticmethod
+    def partial_md5_sum(filename, chunk_size=65536, chunks_read=200) -> str:
+        checksumer = hashlib.md5()
+        with open(filename, 'rb') as file:
+            for null in range(0, chunks_read):
+                chunk = file.read(chunk_size)
+                if chunk == b'':
+                    break
+                checksumer.update(chunk)
+        return checksumer.hexdigest()
+
+    @staticmethod
+    def direct_compare(cls, filename) -> bytes:
+        with open(filename, 'rb') as file:
+            data = file.read()
+        return data
 
 
 class DuplicateFilters:

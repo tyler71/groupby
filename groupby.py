@@ -6,20 +6,19 @@ import os
 import sys
 from collections import OrderedDict
 
-import util.ActionCreateFilter
-from util.ActionCreateFilter import DuplicateFilters
+from util.ActionCreateFilter import DuplicateFilters, ActionAppendFilePropertyFilter
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.Logging import log_levels
 
 
 def main():
+
+
     assert_statement = "Requires Python{mjr}.{mnr} or greater".format(
         mjr=sys.version_info.major,
         mnr=sys.version_info.minor)
     assert sys.version_info >= (3, 4), assert_statement
-
-    available_filters = util.ActionCreateFilter.FileProperties().filters
 
     def negation(func):
         def wrapper(*args, **kwargs):
@@ -35,17 +34,19 @@ def main():
     parser = parser_logic(parser)
     args = parser.parse_args()
 
-    if args.follow_symbolic is True:
-        conditions.pop("not_symbolic_link")
-    if args.empty_file is True:
-        conditions.pop("not_empty")
-
     if args.verbosity:
         logging.basicConfig(level=log_levels.get(args.verbosity, 3),
                             stream=sys.stderr,
                             format='[%(levelname)s] %(message)s')
     else:
         logging.disable(logging.CRITICAL)
+    log = logging.getLogger(__name__)
+
+    if args.follow_symbolic is True:
+        conditions.pop("not_symbolic_link")
+    if args.empty_file is True:
+        conditions.pop("not_empty")
+
 
     # Choose only last group action
     if args.group_action:
@@ -55,8 +56,10 @@ def main():
 
     args.threshold = args.threshold if args.threshold > 1 else 1
 
-    # Default filtering methods
-    args.filters = args.filters if args.filters else ["size", "md5"]
+    # Default filtering method
+    if not args.filters:
+        args.filters = [ActionAppendFilePropertyFilter.disk_size,
+                        ActionAppendFilePropertyFilter.md5_sum]
 
     # Get all file paths
     # Usage of set to remove group directory entries
@@ -72,12 +75,7 @@ def main():
                                           )
              )
 
-    # Get first (blocking) filter method, group other filter methods
-    filter_methods = (available_filters[filter_method]
-                      if type(filter_method) is str
-                      else filter_method
-                      for filter_method in args.filters)
-    filtered_groups = DuplicateFilters(filters=filter_methods, filenames=paths, conditions=conditions.values())
+    filtered_groups = DuplicateFilters(filters=args.filters, filenames=paths, conditions=conditions.values())
 
     # Smart action selected with 2 possible options
     # * Builtins
@@ -107,7 +105,7 @@ def main():
                     print('\n'.join((str(grp)) for grp in result), end='\n')
                 else:
                     source_file, *groups = result
-                    logging.info(' -> '.join(filtered_groups.filter_hashes[index]))
+                    log.info(' -> '.join(filtered_groups.filter_hashes[index]))
                     print(source_file)
                     if groups:
                         print('\n'.join((str(grp).rjust(len(grp) + 4) for grp in groups)), end='\n\n')
