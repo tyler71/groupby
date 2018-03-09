@@ -56,7 +56,7 @@ def main():
 
     args.threshold = args.threshold if args.threshold > 1 else 1
 
-    # Default filtering methods
+    # Default filtering method
     if not args.filters:
         args.filters = [ActionAppendFilePropertyFilter.disk_size,
                         ActionAppendFilePropertyFilter.md5_sum]

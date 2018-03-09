@@ -15,16 +15,17 @@ def parser_logic(parser):
                         choices=ActionAppendFilePropertyFilter.filters(),
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
                         action=ActionAppendFilePropertyFilter)
-    parser.add_argument('-E', '--filter-regex', dest="filters", action=ActionAppendRegexFilter)
-    parser.add_argument('-s', '--filter-shell', dest="filters", action=ActionAppendShellFilter)
+    parser.add_argument('-E', '--filter-regex', metavar='EXPRESSION', dest="filters", action=ActionAppendRegexFilter)
+    parser.add_argument('-s', '--filter-shell', metavar='COMMAND', dest="filters", action=ActionAppendShellFilter)
 
     parser.add_argument('-x', '--exec-shell',
                         dest="group_action",
+                        metavar='COMMAND',
                         help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
                         action=ActionAppendExecShell)
     parser.add_argument('-m', '--exec-merge',
                         dest="group_action",
-                        metavar="merge_dir",
+                        metavar="DIRECTORY",
                         action=ActionAppendMerge,
                         help='Includes 4 options including COUNT, IGNORE, ERROR and CONDITION'
                         )

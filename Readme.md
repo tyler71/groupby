@@ -83,7 +83,7 @@ To assist with this, brace expansion of the following syntax is observed:
 # Filter output
 {fn} -> output
 ```
-With the exceptions of {..} and {fn}, this brace expansion is a similar syntax to [GNU Parallel](https://www.gnu.org/software/parallel/)
+With the exceptions of `{..}` and `{fn}`, this brace expansion is a similar syntax to [GNU Parallel](https://www.gnu.org/software/parallel/)
 
 ## Filters
 *groupby* supports three kinds of filters
@@ -200,15 +200,20 @@ If unspecified, defaults to COUNT
 
 ##### Count
 Syntax: `--exec-merge testdir:COUNT`
+
 Add a increment count. `foo.mp4` -> `foo_0001.mp4`
 ##### Ignore
 Syntax: `--exec-merge testdir:IGNORE`
+
 Ignore existing files
 ##### Error
 Syntax: `--exec-merge testdir:ERROR`
+
 Raise a error and kill the program
+
 ##### Condition
 Syntax: `--exec-merge testdir:CONDITION:OPTION`
+
 Condition provides 4 options to allow precise control of overwriting
 * NEWER
 * OLDER
