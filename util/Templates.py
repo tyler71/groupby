@@ -14,34 +14,27 @@ log = logging.getLogger(__name__)
 class ActionAppendCreateFunc(argparse._AppendAction):
     # Internal logic for AppendAction
     def __call__(self, parser, namespace, values, option_string=None):
-        _copy = argparse._copy
-        _ensure_value = argparse._ensure_value
-
-        items = _copy.copy(_ensure_value(namespace, self.dest, []))
-
-    # / Internal Logic
         # Trigger when nargs a list
         if isinstance(values, (list, tuple)):
+            values_list = list()
             for template in values:
                 template = codecs.escape_decode(bytes(template, "utf-8"))[0].decode("utf-8")
                 callable_ = self._process(template)
-                items.append(callable_)
+                values_list.append(callable_)
+            values = values_list
         else:
             template = values
             # All subclasses should return a callable when called with _process
             # Whatever that is
+            template = codecs.escape_decode(bytes(template, "utf-8"))[0].decode("utf-8")
             callable_ = self._process(template)
-            items.append(callable_)
-
-        setattr(namespace, self.dest, items)
+            values = callable_
+        super().__call__(parser, namespace, values, option_string)
 
     def _process(self, template):
         # should take a template
         # and return a function allowing it to be called with a string
         raise (ValueError, "Expected to be extended in subclass")
-
-
-
 
 # This overrides the .format string, to allow for greater control of how .format works
 # Additional formats can be specified with a new letter of spec
