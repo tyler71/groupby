@@ -7,11 +7,11 @@ import subprocess
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc
-from util.Templates import StringExpansionFunc
+from util.Templates import BraceExpansion
 
 log = logging.getLogger(__name__)
 
-# class ActionSelectGroupFunc(ActionAppendCreateFunc, StringExpansionFunc):
+# class ActionSelectGroupFunc(ActionAppendCreateFunc, BraceExpansion):
 #     def _process(self, template, value=None):
 #         self.builtins = {
 #             "link": ActionAppendLink,
@@ -43,9 +43,9 @@ log = logging.getLogger(__name__)
 #             exit(1)
 
 
-class ActionAppendExecShell(ActionAppendCreateFunc, StringExpansionFunc):
+class ActionAppendExecShell(ActionAppendCreateFunc):
     def _process(self, template):
-        template_format = StringExpansionFunc(template)
+        template_format = BraceExpansion(template)
         shell_command = partial(self._group_invoke_shell, command=template_format)
         return shell_command
 

@@ -8,7 +8,7 @@ import logging
 from collections import OrderedDict
 from functools import partial
 
-from util.Templates import ActionAppendCreateFunc, StringExpansionFunc
+from util.Templates import ActionAppendCreateFunc, BraceExpansion
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
@@ -23,7 +23,7 @@ class OrderedDefaultListDict(OrderedDict):
 
 class ActionAppendShellFilter(ActionAppendCreateFunc):
     def _process(self, template):
-        template_format = StringExpansionFunc(template)
+        template_format = BraceExpansion(template)
         shell_command = partial(self._invoke_shell, command=template_format)
         return shell_command
 

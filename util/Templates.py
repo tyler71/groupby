@@ -36,9 +36,10 @@ class ActionAppendCreateFunc(argparse._AppendAction):
         # and return a function allowing it to be called with a string
         raise (ValueError, "Expected to be extended in subclass")
 
+
 # This overrides the .format string, to allow for greater control of how .format works
 # Additional formats can be specified with a new letter of spec
-class StringExpansionFunc(string.Formatter):
+class BraceExpansion(string.Formatter):
     '''
         Based on parallel notation including
         {}  : filename
@@ -48,18 +49,16 @@ class StringExpansionFunc(string.Formatter):
         {/.}: dirname of file with extension removed
     '''
 
-    aliases = {
-        "{}": "{0:s}",
-        "{.}": "{0:a}",
-        "{/}": "{0:b}",
-        "{//}": "{0:c}",
-        "{/.}": "{0:e}",
-        "{..}": "{0:f}",
-    }
-
     def __init__(self, template):
         self.template = template
-        self.aliases = StringExpansionFunc.aliases
+        self.aliases = {
+            "{}": "{0:s}",
+            "{.}": "{0:a}",
+            "{/}": "{0:b}",
+            "{//}": "{0:c}",
+            "{/.}": "{0:e}",
+            "{..}": "{0:f}",
+        }
 
         for key, alias in self.aliases.items():
             self.template = self.template.replace(key, alias)
