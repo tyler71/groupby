@@ -1,7 +1,7 @@
 import argparse
 import os
 import string
-
+import codecs
 import logging
 
 log = logging.getLogger(__name__)

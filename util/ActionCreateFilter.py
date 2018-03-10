@@ -76,7 +76,8 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         return self.filters()[func_name]
 
     # Used with checksum functions
-    def _iter_read(filename: str, chunk_size=65536) -> bytes:
+    @classmethod
+    def _iter_read(cls, filename: str, chunk_size=65536) -> bytes:
         with open(filename, 'rb') as file:
             for chunk in iter(lambda: file.read(chunk_size), b''):
                 yield chunk
@@ -92,6 +93,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         modification_time = os.path.getmtime(filename)
         modified_datetime = datetime.datetime.fromtimestamp(modification_time)
         return str(modified_datetime)
+
     @staticmethod
     def file_name(filename: str) -> str:
         file_basename = os.path.basename(filename)
@@ -102,6 +104,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         byte_usage = os.path.getsize(filename)
         return str(byte_usage)
 
+    @staticmethod
     def md5_sum(filename, chunk_size=65536) -> str:
         checksumer = hashlib.md5()
         for chunk in ActionAppendFilePropertyFilter._iter_read(filename, chunk_size):
