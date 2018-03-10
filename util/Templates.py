@@ -68,7 +68,8 @@ class BraceExpansion(string.Formatter):
     def __call__(self, *args, **kwargs):
         return self.format(self.template, *args, **kwargs)
 
-    def _quote(self, string):
+    @staticmethod
+    def _quote(string):
         return shlex.quote(string)
 
     def format_field(self, value, spec):
@@ -76,30 +77,31 @@ class BraceExpansion(string.Formatter):
         if spec.endswith("a"):
             split_ext = os.path.splitext(value)
             value_no_ext = split_ext[0]
-            value = self._quote(value_no_ext)
+            value = value_no_ext
             spec = spec[:-1] + 's'
         # {/} notation: basename of list()file
         if spec.endswith("b"):
             split_filename = os.path.split(value)[1]
-            value = self._quote(split_filename)
+            value = split_filename
             spec = spec[:-1] + 's'
         # {//} notation: directory of filename)
         if spec.endswith("c"):
             split_dir = os.path.split(value)[0]
-            value = self._quote(split_dir)
+            value = split_dir
             spec = spec[:-1] + 's'
         # {/.} notation: basename of file, with ext removed
         if spec.endswith("e"):
             no_dir = os.path.split(value)[1]
             split_ext = os.path.splitext(no_dir)[0]
-            value = self._quote(split_ext)
+            value = split_ext
             spec = spec[:-1] + 's'
         # {..} expanded notation: extension of file
         if spec.endswith("f"):
             ext = os.path.splitext(value)[1]
-            value = self._quote(ext)
+            value = ext
             spec = spec[:-1] + 's'
-        return super().format_field(value, spec)
+        quoted_value = self._quote(value)
+        return super().format_field(quoted_value, spec)
 
 
 def invoke_shell(*args, command, **kwargs) -> str:
