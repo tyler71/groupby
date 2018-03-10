@@ -42,11 +42,17 @@ class ActionAppendShellFilter(ActionAppendCreateFunc):
 
 class ActionAppendRegexFilter(ActionAppendCreateFunc):
     def _process(self, template):
-        template = re.compile(template)
+        try:
+            template = re.compile(template)
+        except Exception as e:
+            err_msg = 'Expression "{expr}" generated this error\n{err}'
+            print(err_msg.format(expr=template, err=e))
+            exit(1)
         regex_pattern = partial(self._re_match, pattern=template)
         return regex_pattern
 
     def _re_match(self, filename, *, pattern) -> str:
+        assert isinstance(pattern, re._pattern_type)
         split_file = os.path.split(filename)[1]
         quoted_dir = shlex.quote(split_file)
 
