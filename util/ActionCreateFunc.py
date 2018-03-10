@@ -61,10 +61,14 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
         try:
             output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
         except subprocess.CalledProcessError as e:
-            print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-            return ''
+            msg = 'Command: "{cmd}" generated a code [{code}]\n' \
+                  'Output: {output}'
+            print(msg.format(cmd=e.cmd,
+                             code=e.returncode,
+                             output=e.output))
+            exit(1)
         except KeyError as e:
-            print("Filter", e, "not found")
+            print("Filter {}, not found".format(e))
             exit(1)
         return output
 
