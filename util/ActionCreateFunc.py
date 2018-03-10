@@ -1,13 +1,12 @@
 import datetime
 import logging
 import os
-import shlex
 import shutil
-import subprocess
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import BraceExpansion
+from util.Templates import invoke_shell
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +42,7 @@ log = logging.getLogger(__name__)
 #             exit(1)
 
 
-class ActionAppendExecShell(ActionAppendCreateFunc):
+class ActionAppendExecShell(ActionAppendCreateFunc, InvokeShell):
     def _process(self, template):
         template_format = BraceExpansion(template)
         shell_command = partial(self._group_invoke_shell, command=template_format)
@@ -52,25 +51,10 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
     def _group_invoke_shell(self, filtered_group, command, **kwargs):
         command_outputs = list()
         for file in filtered_group:
-            output = self._invoke_shell(file, command=command, **kwargs)
+            output = invoke_shell(file, command=command, **kwargs)
             command_outputs.append(output)
         return command_outputs
 
-    def _invoke_shell(self, *args, command, **kwargs) -> str:
-        args = (shlex.quote(arg) for arg in args)
-        try:
-            output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
-        except subprocess.CalledProcessError as e:
-            msg = 'Command: "{cmd}" generated a code [{code}]\n' \
-                  'Output: {output}'
-            print(msg.format(cmd=e.cmd,
-                             code=e.returncode,
-                             output=e.output))
-            exit(1)
-        except KeyError as e:
-            print("Filter {}, not found".format(e))
-            exit(1)
-        return output
 
 
 def remove_files(filtered_group: iter, **kwargs) -> list:

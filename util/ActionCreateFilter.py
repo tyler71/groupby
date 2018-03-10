@@ -3,12 +3,14 @@ import re
 import datetime
 import hashlib
 import shlex
-import subprocess
 import logging
 from collections import OrderedDict
 from functools import partial
 
-from util.Templates import ActionAppendCreateFunc, BraceExpansion
+from util.Templates import ActionAppendCreateFunc, \
+    BraceExpansion, \
+
+from util.Templates import invoke_shell
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
@@ -24,20 +26,8 @@ class OrderedDefaultListDict(OrderedDict):
 class ActionAppendShellFilter(ActionAppendCreateFunc):
     def _process(self, template):
         template_format = BraceExpansion(template)
-        shell_command = partial(self._invoke_shell, command=template_format)
+        shell_command = partial(invoke_shell, command=template_format)
         return shell_command
-
-    def _invoke_shell(self, *args, command, **kwargs) -> str:
-        args = (shlex.quote(arg) for arg in args)
-        try:
-            output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
-        except subprocess.CalledProcessError as e:
-            print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-            return ''
-        except KeyError as e:
-            print("Filter", e, "not found")
-            exit(1)
-        return output
 
 
 class ActionAppendRegexFilter(ActionAppendCreateFunc):
