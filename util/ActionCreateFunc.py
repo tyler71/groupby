@@ -42,9 +42,10 @@ log = logging.getLogger(__name__)
 #             exit(1)
 
 
-class ActionAppendExecShell(ActionAppendCreateFunc, InvokeShell):
+class ActionAppendExecShell(ActionAppendCreateFunc):
     def _process(self, template):
         template_format = BraceExpansion(template)
+
         shell_command = partial(self._group_invoke_shell, command=template_format)
         return shell_command
 

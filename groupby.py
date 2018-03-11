@@ -90,17 +90,28 @@ def main():
             print('')
     else:
         # Print all groups.
-        for index, result in enumerate(filtered_groups):
-            if len(result) >= args.threshold:
+        for index, groups in enumerate(filtered_groups):
+            if len(groups) >= args.threshold:
                 if args.basic_formatting:
                     logging.info(' -> '.join(filtered_groups.filter_hashes[index]))
-                    print('\n'.join((str(grp)) for grp in result), end='\n')
+                    print('\n'.join((str(grp)) for grp in groups), end='\n')
                 else:
-                    source_file, *groups = result
+                    source_file, *group = groups
                     log.info(' -> '.join(filtered_groups.filter_hashes[index]))
-                    print(source_file)
-                    if groups:
-                        print('\n'.join((str(grp).rjust(len(grp) + 4) for grp in groups)), end='\n\n')
+                    try:
+                        # Test to see if filename is valid utf-8
+                        print(source_file)
+                    except UnicodeEncodeError as e:
+                        source_file = "Invalid Filename Encoding"
+                        print(source_file)
+                    if len(group) > 0:
+                        for result in group:
+                            try:
+                                str(result).encode("utf-8")
+                            except UnicodeEncodeError:
+                                result = "Invalid Filename Encoding"
+                            print(result.rjust(len(result) + 4))
+                        print("\n\n")
                     else:
                         print('')
 

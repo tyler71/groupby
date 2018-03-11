@@ -8,7 +8,7 @@ from collections import OrderedDict
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc, \
-    BraceExpansion, \
+    BraceExpansion
 
 from util.Templates import invoke_shell
 

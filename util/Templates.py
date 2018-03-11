@@ -54,7 +54,7 @@ class BraceExpansion(string.Formatter):
     def __init__(self, template):
         self.template = template
         self.aliases = {
-            "{}": "{0:s}",
+            "{}": "{0:z}",
             "{.}": "{0:a}",
             "{/}": "{0:b}",
             "{//}": "{0:c}",
@@ -74,6 +74,13 @@ class BraceExpansion(string.Formatter):
 
     def format_field(self, value, spec):
 
+        # {} notation: normal output
+        # Intercepted from {0:s} (string)
+        # to be shell escaped
+        if spec.endswith("z"):
+            value = value
+            spec = spec[:-1] + 's'
+        # {.} notation: extension removed
         if spec.endswith("a"):
             split_ext = os.path.splitext(value)
             value_no_ext = split_ext[0]
@@ -100,13 +107,15 @@ class BraceExpansion(string.Formatter):
             ext = os.path.splitext(value)[1]
             value = ext
             spec = spec[:-1] + 's'
-        quoted_value = self._quote(value)
-        return super().format_field(quoted_value, spec)
+
+        value = self._quote(value)
+        return super().format_field(value, spec)
 
 
 def invoke_shell(*args, command, **kwargs) -> str:
     try:
-        output = subprocess.check_output(command(*args, **kwargs), shell=True).decode('utf8')
+        output = subprocess.check_output(command(*args, **kwargs), shell=True)
+        output = output.decode('utf-8')
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
@@ -114,6 +123,9 @@ def invoke_shell(*args, command, **kwargs) -> str:
                          code=e.returncode,
                          output=e.output))
         exit(1)
+    except UnicodeDecodeError as e:
+        print("Output is not valid UTF-8\n{}".format(e))
+        exit()
     except KeyError as e:
         print("Filter {}, not found".format(e))
         exit(1)
