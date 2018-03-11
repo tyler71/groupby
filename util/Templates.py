@@ -119,14 +119,14 @@ def invoke_shell(*args, command, **kwargs) -> str:
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
-        print(msg.format(cmd=e.cmd,
-                         code=e.returncode,
-                         output=e.output))
+        log.error(msg.format(cmd=e.cmd,
+                             code=e.returncode,
+                             output=e.output))
         exit(1)
     except UnicodeDecodeError as e:
-        print("Output is not valid UTF-8\n{}".format(e))
-        exit()
+        log.warning(e)
+        output = "Invalid Filename Encoding\n"
     except KeyError as e:
-        print("Filter {}, not found".format(e))
+        log.error("Filter {}, not found".format(e))
         exit(1)
     return output

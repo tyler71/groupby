@@ -67,7 +67,7 @@ def remove_files(filtered_group: iter, **kwargs) -> list:
             # os.remove(filename)
             # removed_files.append(filename)
         except FileNotFoundError:
-            print("Not Found")
+            log.warning("Not Found")
     return removed_files
 
 
@@ -82,7 +82,7 @@ def hardlink_files(filtered_group: iter, **kwargs) -> list:
             # os.remove(filename)
             # os.link(source_file, filename)
         except FileNotFoundError:
-            print("Not Found")
+            log.warning("Not Found")
     return linked_files
 
 
@@ -114,7 +114,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             try:
                 overwrite_method = overwrite_flags[overwrite_flag.upper()]
             except KeyError as e:
-                print('{} is not a valid key'.format(e))
+                log.error('{} is not a valid key'.format(e))
                 exit(1)
         else:
             overwrite_method = self._count
