@@ -10,6 +10,7 @@ from util.ActionCreateFilter import DuplicateFilters, ActionAppendFilePropertyFi
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.Logging import log_levels
+from util.Templates import unicode_check
 
 
 def main():
@@ -83,8 +84,8 @@ def main():
                 # Strip filter_output because of embedded newline
                 labeled_filters = OrderedDict()
                 for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[index]):
-                    labeled_filters["f{fn}".format(fn=filter_number + 1)] = filter_output.strip()
-                command_string = group_action(results, **labeled_filters)
+                    labeled_filters["f{fn}".format(fn=filter_number + 1)] = unicode_check(filter_output).strip()
+                command_string = group_action(results, index=index, **labeled_filters)
                 for output in command_string:
                     print(output, end='')
             print('')
@@ -93,24 +94,20 @@ def main():
         for index, groups in enumerate(filtered_groups):
             if len(groups) >= args.threshold:
                 if args.basic_formatting:
-                    logging.info(' -> '.join(filtered_groups.filter_hashes[index]))
-                    print('\n'.join((str(grp)) for grp in groups), end='\n')
+                    log.info(' -> '.join(unicode_check(filter_output)
+                                         for filter_output
+                                         in filtered_groups.filter_hashes[index]))
+                    print('\n'.join((unicode_check(grp)) for grp in groups), end='\n')
                 else:
                     source_file, *group = groups
-                    log.info(' -> '.join(filtered_groups.filter_hashes[index]))
-                    try:
-                        # Test to see if filename is valid utf-8
-                        print(source_file)
-                    except UnicodeEncodeError as e:
-                        source_file = "Invalid Filename Encoding"
-                        print(source_file)
+                    log.info(' -> '.join(unicode_check(filter_output)
+                                         for filter_output
+                                         in filtered_groups.filter_hashes[index]))
+                    print(unicode_check(source_file))
                     if len(group) > 0:
                         for result in group:
-                            try:
-                                str(result).encode("utf-8")
-                            except UnicodeEncodeError:
-                                result = "Invalid Filename Encoding"
-                            print(result.rjust(len(result) + 4))
+                            padding = len(unicode_check(result)) + 4
+                            print(unicode_check(result).rjust(padding))
                         print("\n\n")
                     else:
                         print('')

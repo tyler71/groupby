@@ -119,7 +119,7 @@ def invoke_shell(*args, command, **kwargs) -> str:
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
-        log.error(msg.format(cmd=e.cmd,
+        log.warning(msg.format(cmd=e.cmd,
                              code=e.returncode,
                              output=e.output))
         exit(1)
@@ -130,3 +130,11 @@ def invoke_shell(*args, command, **kwargs) -> str:
         log.error("Filter {}, not found".format(e))
         exit(1)
     return output
+
+
+def unicode_check(message):
+    try:
+        message.encode("utf-8")
+    except UnicodeEncodeError:
+        message = "Invalid Filename Encoding"
+    return message
