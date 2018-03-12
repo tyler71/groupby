@@ -40,22 +40,13 @@ def main():
                             format='[%(levelname)s] %(message)s')
     else:
         logging.disable(logging.CRITICAL)
-    log = logging.getLogger(__name__)
 
+    # Directory condition modifying
     if args.follow_symbolic is True:
         conditions.pop("not_symbolic_link")
     if args.empty_file is True:
         conditions.pop("not_empty")
 
-    # Choose only last group action
-    group_action = args.group_action[-1] if args.group_action else print_results
-
-    # Default filtering method
-    if not args.filters:
-        args.filters = [ActionAppendFilePropertyFilter.disk_size,
-                        ActionAppendFilePropertyFilter.md5_sum]
-
-    # Get all file paths
     # Usage of set to remove group directory entries
     paths = (path for directory in set(args.directories)
              for path in directory_search(directory,
@@ -69,8 +60,18 @@ def main():
                                           )
              )
 
+    # Default filtering method
+    if not args.filters:
+        args.filters = [ActionAppendFilePropertyFilter.disk_size,
+                        ActionAppendFilePropertyFilter.md5_sum]
+
     filtered_groups = DuplicateFilters(filters=args.filters, filenames=paths, conditions=conditions.values())
 
+    # Choose only last group action
+    if args.group_action:
+        group_action = args.group_action[-1]
+    else:
+        group_action = print_results
     # Smart action selected with 2 possible options
     # * Builtins
     # * Shell Action

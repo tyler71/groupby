@@ -35,7 +35,7 @@ class ActionAppendRegexFilter(ActionAppendCreateFunc):
         try:
             template = re.compile(template)
         except Exception as e:
-            err_msg = 'Expression "{expr}" generated this error\n{err}'
+            err_msg = 'Regex "{expr}" generated this error\n{err}'
             log.error(err_msg.format(expr=template, err=e))
             exit(1)
         regex_pattern = partial(self._re_match, pattern=template)
