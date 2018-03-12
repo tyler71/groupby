@@ -11,6 +11,7 @@ from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.Logging import log_levels
 from util.Templates import unicode_check
+from util.Templates import negation
 from util.ActionCreateFunc import print_results
 
 
@@ -19,16 +20,6 @@ def main():
         mjr=sys.version_info.major,
         mnr=sys.version_info.minor)
     assert sys.version_info >= (3, 4), assert_statement
-
-    def negation(func):
-        def wrapper(*args, **kwargs):
-            return not func(*args, **kwargs)
-        return wrapper
-    conditions = {
-        "is_file": os.path.isfile,
-        "not_symbolic_link": negation(os.path.islink),
-        "not_empty": lambda filename: os.path.getsize(filename) > 0,
-    }
 
     parser = argparse.ArgumentParser()
     parser = parser_logic(parser)
@@ -41,13 +32,7 @@ def main():
     else:
         logging.disable(logging.CRITICAL)
 
-    # Directory condition modifying
-    if args.follow_symbolic is True:
-        conditions.pop("not_symbolic_link")
-    if args.empty_file is True:
-        conditions.pop("not_empty")
-
-    # Usage of set to remove group directory entries
+    # Usage of set to remove directories specified multiple times
     paths = (path for directory in set(args.directories)
              for path in directory_search(directory,
                                           recursive=args.recursive,
@@ -65,20 +50,24 @@ def main():
         args.filters = [ActionAppendFilePropertyFilter.disk_size,
                         ActionAppendFilePropertyFilter.md5_sum]
 
+    conditions = {
+        "is_file": os.path.isfile,
+        "not_symbolic_link": negation(os.path.islink),
+        "not_empty": lambda filename: os.path.getsize(filename) > 0,
+    }
+    # Directory condition modifying
+    if args.follow_symbolic is True:
+        conditions.pop("not_symbolic_link")
+    if args.empty_file is True:
+        conditions.pop("not_empty")
+
     filtered_groups = DuplicateFilters(filters=args.filters, filenames=paths, conditions=conditions.values())
 
-    # Choose only last group action
+    # With no action defined, just print the results
     if args.group_action:
         group_action = args.group_action[-1]
     else:
         group_action = print_results
-    # Smart action selected with 2 possible options
-    # * Builtins
-    # * Shell Action
-    # Custom action supplied by -x, --exec-group
-    # Uses references to tracked filters in filter_hashes as {f1} {fn}
-    # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
-    # Also includes expansion of {..}, just includes filename extension
     for index, results in enumerate(filtered_groups):
         if len(results) >= args.threshold:
             # Take each filters output and label f1: 1st_output, fn: n_output...

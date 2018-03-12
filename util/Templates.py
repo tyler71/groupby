@@ -138,3 +138,10 @@ def unicode_check(message):
     except UnicodeEncodeError:
         message = "Invalid Filename Encoding"
     return message
+
+
+def negation(func):
+
+    def wrapper(*args, **kwargs):
+        return not func(*args, **kwargs)
+    return wrapper

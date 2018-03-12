@@ -43,14 +43,14 @@ log = logging.getLogger(__name__)
 #             exit(1)
 
 
-def print_results(filtered_group, *, basic_formatting=False, **kwargs):
+def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
     output = list()
     if basic_formatting:
-        log.info(' -> '.join(filter_output for filter_output in kwargs.values()))
+        log.info(' -> '.join(filter_output for filter_output in labeled_filters.values()))
         output.append(unicode_check(grp) for grp in filtered_group)
     else:
         source_file, *group = filtered_group
-        log.info(' -> '.join(filter_output for filter_output in kwargs.values()))
+        log.info(' -> '.join(filter_output for filter_output in labeled_filters.values()))
         output.append(unicode_check(source_file) + '\n')
         if len(group) > 0:
             for result in group:
