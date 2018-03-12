@@ -11,6 +11,7 @@ from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.Logging import log_levels
 from util.Templates import unicode_check
+from util.ActionCreateFunc import print_results
 
 
 def main():
@@ -47,7 +48,7 @@ def main():
         conditions.pop("not_empty")
 
     # Choose only last group action
-    group_action = args.group_action[-1] if args.group_action else None
+    group_action = args.group_action[-1] if args.group_action else print_results
 
     # Default filtering method
     if not args.filters:
@@ -77,40 +78,17 @@ def main():
     # Uses references to tracked filters in filter_hashes as {f1} {fn}
     # Uses parallel brace expansion, {}, {.}, {/}, {//}, {/.}
     # Also includes expansion of {..}, just includes filename extension
-    if group_action:
-        for index, results in enumerate(filtered_groups):
-            if len(results) >= args.threshold:
-                # Take each filters output and label f1: 1st_output, fn: n_output...
-                # Strip filter_output because of embedded newline
-                labeled_filters = OrderedDict()
-                for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[index]):
-                    labeled_filters["f{fn}".format(fn=filter_number + 1)] = unicode_check(filter_output).strip()
-                command_string = group_action(results, index=index, **labeled_filters)
-                for output in command_string:
-                    print(output, end='')
-            print('')
-    else:
-        # Print all groups.
-        for index, groups in enumerate(filtered_groups):
-            if len(groups) >= args.threshold:
-                if args.basic_formatting:
-                    log.info(' -> '.join(unicode_check(filter_output)
-                                         for filter_output
-                                         in filtered_groups.filter_hashes[index]))
-                    print('\n'.join((unicode_check(grp)) for grp in groups), end='\n')
-                else:
-                    source_file, *group = groups
-                    log.info(' -> '.join(unicode_check(filter_output)
-                                         for filter_output
-                                         in filtered_groups.filter_hashes[index]))
-                    print(unicode_check(source_file))
-                    if len(group) > 0:
-                        for result in group:
-                            padding = len(unicode_check(result)) + 4
-                            print(unicode_check(result).rjust(padding))
-                        print("\n\n")
-                    else:
-                        print('')
+    for index, results in enumerate(filtered_groups):
+        if len(results) >= args.threshold:
+            # Take each filters output and label f1: 1st_output, fn: n_output...
+            # Strip filter_output because of embedded newline
+            labeled_filters = OrderedDict()
+            for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[index]):
+                labeled_filters["f{fn}".format(fn=filter_number + 1)] = unicode_check(filter_output).strip()
+            command_string = group_action(results, **labeled_filters)
+            for output in command_string:
+                print(output, end='')
+        print('')
 
 
 if __name__ == '__main__':

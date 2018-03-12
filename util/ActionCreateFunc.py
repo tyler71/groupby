@@ -7,6 +7,7 @@ from functools import partial
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import BraceExpansion
 from util.Templates import invoke_shell
+from util.Templates import unicode_check
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +43,23 @@ log = logging.getLogger(__name__)
 #             exit(1)
 
 
+def print_results(filtered_group, *, basic_formatting=False, **kwargs):
+    output = list()
+    if basic_formatting:
+        log.info(' -> '.join(filter_output for filter_output in kwargs.values()))
+        output.append(unicode_check(grp) for grp in filtered_group)
+    else:
+        source_file, *group = filtered_group
+        log.info(' -> '.join(filter_output for filter_output in kwargs.values()))
+        output.append(unicode_check(source_file) + '\n')
+        if len(group) > 0:
+            for result in group:
+                padding = len(unicode_check(result)) + 4
+                output.append(unicode_check(result).rjust(padding) + '\n')
+    return output
+
+
+
 class ActionAppendExecShell(ActionAppendCreateFunc):
     def _process(self, template):
         template_format = BraceExpansion(template)
@@ -55,7 +73,6 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
             output = invoke_shell(file, command=command, **kwargs)
             command_outputs.append(output)
         return command_outputs
-
 
 
 def remove_files(filtered_group: iter, **kwargs) -> list:
