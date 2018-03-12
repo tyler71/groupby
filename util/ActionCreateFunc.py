@@ -11,53 +11,21 @@ from util.Templates import unicode_check
 
 log = logging.getLogger(__name__)
 
-# class ActionSelectGroupFunc(ActionAppendCreateFunc, BraceExpansion):
-#     def _process(self, template, value=None):
-#         self.builtins = {
-#             "link": ActionAppendLink,
-#             "remove": ActionAppendRemove,
-#             "merge": ActionAppendMerge,
-#         }
-#         selected_class_func = self.check_group_exec_type(template)
-#         templated_func = selected_class_func()
-#
-#         return templated_func(template)
-#
-#     def check_group_exec_type(self, template):
-#         def valid_regex(regex):
-#             try:
-#                 re.compile(regex)
-#                 return True
-#             except re.error:
-#                 return False
-#
-#         if template in self.builtins:
-#             return self.builtins[template]
-#         elif any((alias in template
-#                   for alias in self.aliases)):
-#             return ActionAppendExecShell
-#         elif "merge:" in template:
-#             return ActionAppendMerge
-#         else:
-#             "No valid group exec detected"
-#             exit(1)
-
 
 def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
     output = list()
-    if basic_formatting:
+    if basic_formatting is True:
         log.info(' -> '.join(filter_output for filter_output in labeled_filters.values()))
         output.append(unicode_check(grp) for grp in filtered_group)
     else:
-        source_file, *group = filtered_group
+        first_filename, *group = filtered_group
         log.info(' -> '.join(filter_output for filter_output in labeled_filters.values()))
-        output.append(unicode_check(source_file) + '\n')
+        output.append(unicode_check(first_filename) + '\n')
         if len(group) > 0:
-            for result in group:
-                padding = len(unicode_check(result)) + 4
-                output.append(unicode_check(result).rjust(padding) + '\n')
+            for filename in group:
+                padding = len(unicode_check(filename)) + 4
+                output.append(unicode_check(filename).rjust(padding) + '\n')
     return output
-
 
 
 class ActionAppendExecShell(ActionAppendCreateFunc):
@@ -250,3 +218,34 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 moved_files.append(dest_dir_file + '\n')
 
         return moved_files
+
+# class ActionSelectGroupFunc(ActionAppendCreateFunc, BraceExpansion):
+#     def _process(self, template, value=None):
+#         self.builtins = {
+#             "link": ActionAppendLink,
+#             "remove": ActionAppendRemove,
+#             "merge": ActionAppendMerge,
+#         }
+#         selected_class_func = self.check_group_exec_type(template)
+#         templated_func = selected_class_func()
+#
+#         return templated_func(template)
+#
+#     def check_group_exec_type(self, template):
+#         def valid_regex(regex):
+#             try:
+#                 re.compile(regex)
+#                 return True
+#             except re.error:
+#                 return False
+#
+#         if template in self.builtins:
+#             return self.builtins[template]
+#         elif any((alias in template
+#                   for alias in self.aliases)):
+#             return ActionAppendExecShell
+#         elif "merge:" in template:
+#             return ActionAppendMerge
+#         else:
+#             "No valid group exec detected"
+#             exit(1)
