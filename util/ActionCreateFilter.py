@@ -1,15 +1,14 @@
-import os
-import re
 import datetime
 import hashlib
-import shlex
 import logging
+import os
+import re
+import shlex
 from collections import OrderedDict
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc, \
     BraceExpansion
-
 from util.Templates import invoke_shell
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )

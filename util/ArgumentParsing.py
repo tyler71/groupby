@@ -1,11 +1,11 @@
 import os
 
 from util.ActionCreateFilter import ActionAppendRegexFilter, \
-    ActionAppendShellFilter,\
+    ActionAppendShellFilter, \
     ActionAppendFilePropertyFilter
-from util.ActionCreateFunc import ActionAppendExecShell,\
-    ActionAppendMerge,\
-    remove_files,\
+from util.ActionCreateFunc import ActionAppendExecShell, \
+    ActionAppendMerge, \
+    remove_files, \
     hardlink_files
 
 

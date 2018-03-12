@@ -7,12 +7,12 @@ import sys
 from collections import OrderedDict
 
 from util.ActionCreateFilter import DuplicateFilters, ActionAppendFilePropertyFilter
+from util.ActionCreateFunc import print_results
 from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.Logging import log_levels
-from util.Templates import unicode_check
 from util.Templates import negation
-from util.ActionCreateFunc import print_results
+from util.Templates import unicode_check
 
 
 def main():

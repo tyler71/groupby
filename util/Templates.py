@@ -1,10 +1,10 @@
 import argparse
-import os
-import string
 import codecs
 import logging
-import subprocess
+import os
 import shlex
+import string
+import subprocess
 
 log = logging.getLogger(__name__)
 
@@ -120,8 +120,8 @@ def invoke_shell(*args, command, **kwargs) -> str:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
         log.warning(msg.format(cmd=e.cmd,
-                             code=e.returncode,
-                             output=e.output))
+                               code=e.returncode,
+                               output=e.output))
         exit(1)
     except UnicodeDecodeError as e:
         log.warning(e)
