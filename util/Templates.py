@@ -1,4 +1,5 @@
 import argparse
+import sys
 import codecs
 import logging
 import os
@@ -115,28 +116,27 @@ class BraceExpansion(string.Formatter):
 def invoke_shell(*args, command, **kwargs) -> str:
     try:
         output = subprocess.check_output(command(*args, **kwargs), shell=True)
-        output = output.decode('utf-8')
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
         log.warning(msg.format(cmd=e.cmd,
                                code=e.returncode,
-                               output=e.output))
+                               output=sanitize_string(e.output)))
         exit(1)
-    except UnicodeDecodeError as e:
-        log.warning(e)
-        output = "Invalid Filename Encoding\n"
     except KeyError as e:
         log.error("Filter {}, not found".format(e))
         exit(1)
+    output = sanitize_string(output)
     return output
 
 
-def unicode_check(message):
-    try:
-        message.encode("utf-8")
-    except UnicodeEncodeError:
-        message = "Invalid Filename Encoding"
+def sanitize_string(message):
+    encode_type = sys.getfilesystemencoding()
+    if isinstance(message, str):
+        message = message.encode(encode_type, errors='replace')
+        message = message.decode(encode_type)
+    elif isinstance(message, bytes):
+        message = message.decode(encode_type, errors='replace')
     return message
 
 

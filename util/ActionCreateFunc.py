@@ -7,7 +7,7 @@ from functools import partial
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import BraceExpansion
 from util.Templates import invoke_shell
-from util.Templates import unicode_check
+from util.Templates import sanitize_string
 
 log = logging.getLogger(__name__)
 
@@ -16,15 +16,15 @@ def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
     output = list()
     if basic_formatting is True:
         log.info(' -> '.join(filter_output for filter_output in labeled_filters.values()))
-        output.append(unicode_check(grp) for grp in filtered_group)
+        output.append(sanitize_string(grp) for grp in filtered_group)
     else:
         first_filename, *group = filtered_group
         log.info(' -> '.join(filter_output for filter_output in labeled_filters.values()))
-        output.append(unicode_check(first_filename) + '\n')
+        output.append(sanitize_string(first_filename) + '\n')
         if len(group) > 0:
             for filename in group:
-                padding = len(unicode_check(filename)) + 4
-                output.append(unicode_check(filename).rjust(padding) + '\n')
+                padding = len(sanitize_string(filename)) + 4
+                output.append(sanitize_string(filename).rjust(padding) + '\n')
     return output
 
 
