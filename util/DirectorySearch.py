@@ -86,11 +86,22 @@ def file_include_exclude(files, *, directory, include, exclude):
 
 
 def hidden_in_dir(directory):
-    result = [True
-              if fragment_dir.startswith('.')
-              else False
-              for fragment_dir in directory.split('/')]
-    return True if any(result) else False
+    # Windows portion
+    # https://stackoverflow.com/a/14063074
+    split_directory = os.path.normpath(directory).split(os.sep)
+    if os.name == 'nt':
+        import win32api, win32con
+        # Tests if a hidden windows directory
+        for fragment_dir in split_directory:
+            attribute = win32api.GetFileAttributes(fragment_dir)
+            if attribute and (win32con.FILE_ATTRIBUTE_HIDDEN or win32con.FILE_ATTRIBUTE_SYSTEM):
+                return True
+        return False
+    else:
+        for fragment_dir in split_directory:
+            if fragment_dir.startswith('.'):
+                return True
+        return False
 
 
 if __name__ == '__main__':
