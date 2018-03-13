@@ -1,6 +1,6 @@
 # **groupby**
 
-*groupby* is a dedicated tool for grouping filenames by their properties.
+*groupby* is a dedicated tool for grouping files by their properties.
 
 ## Features
 * Simple to use: `groupy` will return grouped results in current directory
@@ -16,15 +16,15 @@
 
 ## Syntax
 ```buildoutcfg
-usage: groupby.py [-h]
-                  [-f {partial_md5,md5,sha256,modified,accessed,size,filename,file}]
-                  [-E FILTERS] [-s FILTERS] [-x GROUP_ACTION] [-m merge_dir]
-                  [--exec-remove] [--exec-link] [--include INCLUDE]
-                  [--exclude EXCLUDE] [--dir-include DIR_INCLUDE]
-                  [--dir-exclude DIR_EXCLUDE] [--dir-hidden] [-r]
-                  [-t THRESHOLD] [--basic-formatting] [--max-depth MAX_DEPTH]
-                  [--empty-file] [--follow-symbolic] [-v]
-                  [directory [directory ...]]
+usage: groupby [-h]
+               [-f {partial_md5,md5,sha256,modified,accessed,size,filename,file}]
+               [-E EXPRESSION] [-s COMMAND] [-x COMMAND] [-m DIRECTORY]
+               [--exec-remove] [--exec-link] [--include INCLUDE]
+               [--exclude EXCLUDE] [--dir-include DIR_INCLUDE]
+               [--dir-exclude DIR_EXCLUDE] [--dir-hidden] [-r] [-g SIZE]
+               [--basic-formatting] [--max-depth MAX_DEPTH] [--empty-file]
+               [--follow-symbolic] [-v]
+               [directory [directory ...]]
 
 positional arguments:
   directory
@@ -33,12 +33,12 @@ optional arguments:
   -h, --help            show this help message and exit
   -f {partial_md5,md5,sha256,modified,accessed,size,filename,file}, --filter {partial_md5,md5,sha256,modified,accessed,size,filename,file}
                         Filenames represented as {}: --shell "du {} | cut -f1"
-  -E FILTERS, --filter-regex FILTERS
-  -s FILTERS, --filter-shell FILTERS
-  -x GROUP_ACTION, --exec-shell GROUP_ACTION
+  -E EXPRESSION, --filter-regex EXPRESSION
+  -s COMMAND, --filter-shell COMMAND
+  -x COMMAND, --exec-shell COMMAND
                         Filenames represented as {}, filters as {f1}, {fn}...:
                         --exec-group "echo {} {f1}"
-  -m merge_dir, --exec-merge merge_dir
+  -m DIRECTORY, --exec-merge DIRECTORY
                         Includes 4 options including COUNT, IGNORE, ERROR and
                         CONDITION
   --exec-remove
