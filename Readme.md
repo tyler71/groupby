@@ -49,7 +49,7 @@ optional arguments:
   --dir-exclude DIR_EXCLUDE
   --dir-hidden
   -r, --recursive
-  -t THRESHOLD, --threshold THRESHOLD
+  -g SIZE, --group-size SIZE
                         Minimum number of files in each group
   --basic-formatting
   --max-depth MAX_DEPTH

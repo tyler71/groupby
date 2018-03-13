@@ -69,7 +69,7 @@ def main():
     else:
         group_action = print_results
     for index, results in enumerate(filtered_groups):
-        if len(results) >= args.threshold:
+        if len(results) >= args.group_size:
             # Take each filters output and label f1: 1st_output, fn: n_output...
             # Strip filter_output because of embedded newline
             labeled_filters = OrderedDict()
@@ -78,6 +78,9 @@ def main():
             command_string = group_action(results, **labeled_filters)
             for output in command_string:
                 print(output, end='')
+        else:
+            # Removes extra blank newlines
+            continue
         print('')
 
 

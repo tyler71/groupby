@@ -71,8 +71,6 @@ class BraceExpansion(string.Formatter):
 
     def format_field(self, value, spec):
         # {} notation: normal output
-        # Intercepted from {0:s} (string)
-        # to be shell escaped
         if spec.endswith("z"):
             value = value
             spec = spec[:-1] + 's'
@@ -114,6 +112,7 @@ class EscapedBraceExpansion(BraceExpansion):
         value = super().format_field(value, spec)
         value = shlex.quote(value)
         return value
+
 
 def invoke_shell(*args, command, **kwargs) -> str:
     try:

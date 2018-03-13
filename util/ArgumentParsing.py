@@ -39,7 +39,8 @@ def parser_logic(parser):
     parser.add_argument('--dir-hidden', action='store_true')
 
     parser.add_argument('-r', '--recursive', action='store_true')
-    parser.add_argument('-t', '--threshold', type=int, default=1, help="Minimum number of files in each group")
+    parser.add_argument('-g', '--group-size', metavar="SIZE", type=int, default=1,
+                        help="Minimum number of files in each group")
     parser.add_argument("--basic-formatting", action="store_true")
     parser.add_argument("--max-depth", type=int)
     parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
