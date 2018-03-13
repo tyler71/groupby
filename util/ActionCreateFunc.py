@@ -5,7 +5,7 @@ import shutil
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc
-from util.Templates import BraceExpansion
+from util.Templates import EscapedBraceExpansion
 from util.Templates import invoke_shell
 from util.Templates import sanitize_string
 
@@ -30,7 +30,7 @@ def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
 
 class ActionAppendExecShell(ActionAppendCreateFunc):
     def _process(self, template):
-        template_format = BraceExpansion(template)
+        template_format = EscapedBraceExpansion(template)
 
         shell_command = partial(self._group_invoke_shell, command=template_format)
         return shell_command
@@ -219,7 +219,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
 
         return moved_files
 
-# class ActionSelectGroupFunc(ActionAppendCreateFunc, BraceExpansion):
+# class ActionSelectGroupFunc(ActionAppendCreateFunc, EscapedBraceExpansion):
 #     def _process(self, template, value=None):
 #         self.builtins = {
 #             "link": ActionAppendLink,

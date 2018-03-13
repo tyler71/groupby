@@ -69,12 +69,7 @@ class BraceExpansion(string.Formatter):
     def __call__(self, *args, **kwargs):
         return self.format(self.template, *args, **kwargs)
 
-    @staticmethod
-    def _quote(string):
-        return shlex.quote(string)
-
     def format_field(self, value, spec):
-
         # {} notation: normal output
         # Intercepted from {0:s} (string)
         # to be shell escaped
@@ -108,10 +103,17 @@ class BraceExpansion(string.Formatter):
             ext = os.path.splitext(value)[1]
             value = ext
             spec = spec[:-1] + 's'
-
-        value = self._quote(value)
         return super().format_field(value, spec)
 
+
+class EscapedBraceExpansion(BraceExpansion):
+    def __init__(self, template):
+        super().__init__(template)
+
+    def format_field(self, value, spec):
+        value = super().format_field(value, spec)
+        value = shlex.quote(value)
+        return value
 
 def invoke_shell(*args, command, **kwargs) -> str:
     try:
@@ -119,7 +121,7 @@ def invoke_shell(*args, command, **kwargs) -> str:
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
-        log.warning(msg.format(cmd=e.cmd,
+        log.warning(msg.format(cmd=sanitize_string(e.cmd),
                                code=e.returncode,
                                output=sanitize_string(e.output)))
         exit(1)
@@ -130,18 +132,17 @@ def invoke_shell(*args, command, **kwargs) -> str:
     return output
 
 
-def sanitize_string(message):
+def sanitize_string(msg):
     encode_type = sys.getfilesystemencoding()
-    if isinstance(message, str):
-        message = message.encode(encode_type, errors='replace')
-        message = message.decode(encode_type)
-    elif isinstance(message, bytes):
-        message = message.decode(encode_type, errors='replace')
-    return message
+    if isinstance(msg, str):
+        msg = msg.encode(encode_type, errors='replace')
+        msg = msg.decode(encode_type)
+    elif isinstance(msg, bytes):
+        msg = msg.decode(encode_type, errors='replace')
+    return msg
 
 
 def negation(func):
-
     def wrapper(*args, **kwargs):
         return not func(*args, **kwargs)
     return wrapper
