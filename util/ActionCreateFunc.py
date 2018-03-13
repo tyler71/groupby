@@ -13,13 +13,13 @@ log = logging.getLogger(__name__)
 
 
 def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
-    output = list()
+    log.info(' -> '.join(sanitize_string(filter_output) for filter_output in labeled_filters.values()))
     if basic_formatting is True:
-        log.info(' -> '.join(filter_output for filter_output in labeled_filters.values()))
-        output.append(sanitize_string(grp) for grp in filtered_group)
+        output = (sanitize_string(grp)
+                  for grp in filtered_group)
     else:
+        output = list()
         first_filename, *group = filtered_group
-        log.info(' -> '.join(filter_output for filter_output in labeled_filters.values()))
         output.append(sanitize_string(first_filename) + '\n')
         if len(group) > 0:
             for filename in group:
