@@ -78,22 +78,20 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             "COUNT": self._count,
             "IGNORE": self._ignore,
             "ERROR": self._error,
-            "CONDITION": self._condition,
+
+            "LARGER": partial(self._condition, condition='LARGER'),
+            "SMALLER": partial(self._condition, condition='SMALLER'),
+            "NEWER": partial(self._condition, condition='NEWER'),
+            "OLDER": partial(self._condition, condition='OLDER'),
         }
+
         if ":" in mergedir_flag:
             mergedir_flag = mergedir_flag.split(":")
             if len(mergedir_flag) == 2:
                 merge_dir, overwrite_flag = mergedir_flag
-                condition = None
-            if len(mergedir_flag) == 3:
-                merge_dir, overwrite_flag, condition = mergedir_flag
         else:
             merge_dir = mergedir_flag
-            condition = None
             overwrite_flag = None
-
-        if overwrite_flag is not None and overwrite_flag.upper() == 'CONDITION':
-            assert condition is not None
 
         if overwrite_flag is not None:
             try:
@@ -110,14 +108,11 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             os.makedirs(merge_dir)
 
         callable_ = partial(self._abstract_call,
-                            condition=condition,
                             merge_dir=merge_dir,
                             overwrite_method=overwrite_method)
         return callable_
 
-    def _abstract_call(self, filtered_group, *, condition, merge_dir, overwrite_method, **kwargs):
-
-        self.condition = condition
+    def _abstract_call(self, filtered_group, *, merge_dir, overwrite_method, **kwargs):
         filter_dir = os.path.join(merge_dir, *kwargs.values())
         os.makedirs(filter_dir)
         output = overwrite_method(filter_dir, filter_group=filtered_group)
@@ -186,7 +181,9 @@ class ActionAppendMerge(ActionAppendCreateFunc):
 
         return moved_files
 
-    def _condition(self, filter_dir, filter_group):
+    def _condition(self, filter_dir, filter_group, *, condition=None):
+        assert condition is not None
+
         def modification_date(filename: str) -> str:
             modification_time = os.path.getmtime(filename)
             modified_datetime = datetime.datetime.fromtimestamp(modification_time)
@@ -202,7 +199,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             'NEWER'  : lambda file1, file2: modification_date(file1) < modification_date(file2),
             'OLDER'  : lambda file1, file2: modification_date(file1) > modification_date(file2),
         }
-        condition = conditions[self.condition.upper()]
+        condition = conditions[condition.upper()]
         moved_files = list()
 
         for file in filter_group:
