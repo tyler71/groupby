@@ -15,17 +15,15 @@ log = logging.getLogger(__name__)
 def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
     log.info(' -> '.join(sanitize_string(filter_output) for filter_output in labeled_filters.values()))
     if basic_formatting is True:
-        output = (sanitize_string(grp)
-                  for grp in filtered_group)
+        for grp in filtered_group:
+            yield sanitize_string(grp) + '\n'
     else:
-        output = list()
         first_filename, *group = filtered_group
-        output.append(sanitize_string(first_filename) + '\n')
+        yield sanitize_string(first_filename) + '\n'
         if len(group) > 0:
             for filename in group:
                 padding = len(sanitize_string(filename)) + 4
-                output.append(sanitize_string(filename).rjust(padding) + '\n')
-    return output
+                yield sanitize_string(filename).rjust(padding) + '\n'
 
 
 class ActionAppendExecShell(ActionAppendCreateFunc):
@@ -36,17 +34,16 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
         return shell_command
 
     def _group_invoke_shell(self, filtered_group, command, **kwargs):
-        command_outputs = list()
         for file in filtered_group:
             output = invoke_shell(file, command=command, **kwargs)
-            command_outputs.append(output)
-        return command_outputs
+            output = sanitize_string(output)
+            yield output
 
 
 def remove_files(filtered_group: iter, **kwargs) -> list:
     for filename in filtered_group:
         try:
-            yield "Removing {file}\n".format(file=sanitize_string(filename))
+            log.info("Removing {file}\n".format(file=sanitize_string(filename)))
             os.remove(filename)
         except FileNotFoundError:
             log.warning("{} Not Found".format(sanitize_string(filename)))
@@ -57,9 +54,9 @@ def hardlink_files(filtered_group: iter, **kwargs) -> list:
 
     for filename in filtered_group:
         try:
-            yield "Linking {source_file} -> {filename}\n".format(
+            log.info("Linking {source_file} -> {filename}\n".format(
                 source_file=sanitize_string(source_file),
-                filename=sanitize_string(filename))
+                filename=sanitize_string(filename)))
             os.remove(filename)
             os.link(source_file, filename)
         except FileNotFoundError:
