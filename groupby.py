@@ -16,10 +16,6 @@ from util.Templates import sanitize_string
 
 
 def main():
-    assert_statement = "Requires Python{mjr}.{mnr} or greater".format(
-        mjr=sys.version_info.major,
-        mnr=sys.version_info.minor)
-    assert sys.version_info >= (3, 4), assert_statement
 
     parser = argparse.ArgumentParser()
     parser = parser_logic(parser)
