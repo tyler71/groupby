@@ -24,7 +24,8 @@ def main():
     if args.verbosity:
         logging.basicConfig(level=log_levels.get(args.verbosity, 3),
                             stream=sys.stderr,
-                            format='[%(levelname)s] %(message)s')
+                            format='[%(levelname)s] %(message)s',
+                            )
     else:
         logging.disable(logging.CRITICAL)
 
@@ -43,8 +44,9 @@ def main():
 
     # Default filtering method
     if not args.filters:
-        args.filters = [ActionAppendFilePropertyFilter.disk_size,
-                        ActionAppendFilePropertyFilter.md5_sum]
+        size = ActionAppendFilePropertyFilter.disk_size
+        md5  = ActionAppendFilePropertyFilter.md5_sum
+        args.filters = [size, md5]
 
     conditions = {
         "is_file": os.path.isfile,
@@ -85,4 +87,4 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         print("")
-        exit(1)
+        exit(0)
