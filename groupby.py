@@ -75,9 +75,7 @@ def main():
             labeled_filters = OrderedDict()
             for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[index]):
                 labeled_filters["f{fn}".format(fn=filter_number + 1)] = sanitize_string(filter_output).strip()
-            command_string = group_action(results,
-                                          basic_formatting=args.basic_formatting,
-                                          **labeled_filters)
+            command_string = group_action(results, **labeled_filters)
             for output in command_string:
                 print(output, end='')
         else:
