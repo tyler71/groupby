@@ -40,27 +40,28 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
             yield output
 
 
-def remove_files(filtered_group: iter, **kwargs) -> list:
+def remove_files(filtered_group: iter, **kwargs):
     for filename in filtered_group:
         try:
-            log.info("Removing {file}\n".format(file=sanitize_string(filename)))
+            log.info("Removing {file}".format(file=sanitize_string(filename)))
             os.remove(filename)
         except FileNotFoundError:
             log.warning("{} Not Found".format(sanitize_string(filename)))
+    return None
 
 
-def hardlink_files(filtered_group: iter, **kwargs) -> list:
-    source_file = filtered_group[0]
-
-    for filename in filtered_group:
+def hardlink_files(filtered_group: iter, **kwargs):
+    source_file, *others = filtered_group
+    for filename in others:
         try:
-            log.info("Linking {source_file} -> {filename}\n".format(
+            log.info("Linking {source_file} -> {filename}".format(
                 source_file=sanitize_string(source_file),
                 filename=sanitize_string(filename)))
             os.remove(filename)
             os.link(source_file, filename)
         except FileNotFoundError:
             log.warning("{} Not Found".format(sanitize_string(filename)))
+    return None
 
 
 class ActionAppendMerge(ActionAppendCreateFunc):

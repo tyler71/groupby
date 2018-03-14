@@ -74,8 +74,11 @@ def main():
             for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[index]):
                 labeled_filters["f{fn}".format(fn=filter_number + 1)] = sanitize_string(filter_output).strip()
             command_string = group_action(results, **labeled_filters)
-            for output in command_string:
-                print(sanitize_string(output), end='')
+            if command_string is not None:
+                for output in command_string:
+                    print(sanitize_string(output), end='')
+            else:
+                continue
         else:
             # Removes extra blank newlines
             continue
