@@ -1,11 +1,11 @@
 import argparse
-import sys
 import codecs
 import logging
 import os
 import shlex
 import string
 import subprocess
+import sys
 
 log = logging.getLogger(__name__)
 
@@ -120,9 +120,9 @@ def invoke_shell(*args, command, **kwargs) -> str:
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
-        log.warning(msg.format(cmd=sanitize_string(e.cmd),
-                               code=e.returncode,
-                               output=sanitize_string(e.output)))
+        log.error(msg.format(cmd=sanitize_string(e.cmd),
+                             code=e.returncode,
+                             output=sanitize_string(e.output)))
         exit(1)
     except KeyError as e:
         log.error("Filter {}, not found".format(e))

@@ -13,6 +13,7 @@ log_levels = {
 
 log = logging.getLogger(__name__)
 
+
 def func_call(func):
     ''' Takes func and logs its call as DEBUG '''
 

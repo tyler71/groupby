@@ -197,8 +197,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             return str(byte_usage)
 
         conditions = {
-            'LARGER': lambda file1, file2: disk_size(file1) > disk_size(file2),
-            'SMALLER' : lambda file1, file2: disk_size(file1) < disk_size(file2),
+            'LARGER' : lambda file1, file2: disk_size(file1) > disk_size(file2),
+            'SMALLER': lambda file1, file2: disk_size(file1) < disk_size(file2),
             'NEWER'  : lambda file1, file2: modification_date(file1) < modification_date(file2),
             'OLDER'  : lambda file1, file2: modification_date(file1) > modification_date(file2),
         }
