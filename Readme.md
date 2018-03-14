@@ -192,12 +192,15 @@ In other words, `merge_directory/output_of_fn`
 Each additional filter will create a new subdirectory.
 
 
-Merge also has 4 different methods for handling existing file conflicts.
+Merge also has 7 different methods for handling existing file conflicts.
 If unspecified, defaults to COUNT
 * COUNT
 * IGNORE
 * ERROR
-* CONDITION
+* NEWER
+* OLDER
+* LARGER
+* SMALLER
 
 ##### Count
 Syntax: `--exec-merge testdir:COUNT`
@@ -212,20 +215,14 @@ Syntax: `--exec-merge testdir:ERROR`
 
 Raise a error and kill the program
 
-##### Condition
-Syntax: `--exec-merge testdir:CONDITION:OPTION`
+##### CONDITION
+There are 4 conditional types of conflicting filename handling
 
-Condition provides 4 options to allow precise control of overwriting
-* NEWER
-* OLDER
-* LARGER
-* SMALLER
-
-Each test is completed target file against the already copied file.
+Each test is completed with the target file compared against the already copied file.
 The result is only the CONDITION of files are copied over.
 For example,
 ```
-groupby -f size --exec-merge testdir:CONDITION:SMALLER
+groupby -f size --exec-merge testdir:SMALLER
 ```
 Will result in only the smaller of conflicting files to exist
 ### Shell
