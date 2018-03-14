@@ -27,24 +27,26 @@ def parser_logic(parser):
                         dest="group_action",
                         metavar="DIRECTORY",
                         action=ActionAppendMerge,
-                        help='Includes 4 options including COUNT, IGNORE, ERROR and CONDITION'
+                        help='Includes 4 options including {merge_options}'.format(
+                            merge_options=' '.join(ActionAppendMerge.overwrite_flags().keys()))
                         )
     parser.add_argument('--exec-remove', const=remove_files, dest="group_action", action='append_const')
     parser.add_argument('--exec-link', const=hardlink_files, dest="group_action", action='append_const')
 
+    parser.add_argument('-r', '--recursive', action='store_true')
     parser.add_argument('--include', action='append')
     parser.add_argument('--exclude', action='append')
     parser.add_argument('--dir-include', action='append')
     parser.add_argument('--dir-exclude', action='append')
     parser.add_argument('--dir-hidden', action='store_true')
-
-    parser.add_argument('-r', '--recursive', action='store_true')
-    parser.add_argument('-g', '--group-size', metavar="SIZE", type=int, default=1,
-                        help="Minimum number of files in each group")
-    parser.add_argument("--basic-formatting", action="store_true")
     parser.add_argument("--max-depth", type=int)
     parser.add_argument('--empty-file', action='store_true', help="Allow comparision of empty files")
     parser.add_argument('--follow-symbolic', action='store_true', help="Allow following of symbolic links for compare")
+
+    parser.add_argument('-g', '--group-size', metavar="SIZE", type=int, default=1,
+                        help="Minimum number of files in each group")
+    parser.add_argument("--basic-formatting", action="store_true",
+                        help='No indenting or empty newlines in standard output')
     parser.add_argument('-v', '--verbosity', default=3, action="count")
     parser.add_argument('directories',
                         default=[os.getcwd()],

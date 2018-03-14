@@ -72,18 +72,22 @@ def hardlink_files(filtered_group: iter, **kwargs) -> list:
 
 
 class ActionAppendMerge(ActionAppendCreateFunc):
+    @classmethod
+    def overwrite_flags(cls):
+        flags = {
+            "COUNT": cls._count,
+            "IGNORE": cls._ignore,
+            "ERROR": cls._error,
+
+            "LARGER": partial(cls._condition, condition='LARGER'),
+            "SMALLER": partial(cls._condition, condition='SMALLER'),
+            "NEWER": partial(cls._condition, condition='NEWER'),
+            "OLDER": partial(cls._condition, condition='OLDER'),
+            }
+        return flags
+
     def _process(self, template):
         mergedir_flag = template
-        overwrite_flags = {
-            "COUNT": self._count,
-            "IGNORE": self._ignore,
-            "ERROR": self._error,
-
-            "LARGER": partial(self._condition, condition='LARGER'),
-            "SMALLER": partial(self._condition, condition='SMALLER'),
-            "NEWER": partial(self._condition, condition='NEWER'),
-            "OLDER": partial(self._condition, condition='OLDER'),
-        }
 
         if ":" in mergedir_flag:
             mergedir_flag = mergedir_flag.split(":")
@@ -95,7 +99,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
 
         if overwrite_flag is not None:
             try:
-                overwrite_method = overwrite_flags[overwrite_flag.upper()]
+                overwrite_method = self.overwrite_flags()[overwrite_flag.upper()]
             except KeyError as e:
                 log.error('{} is not a valid key'.format(e))
                 exit(1)
@@ -103,7 +107,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             overwrite_method = self._count
 
         if os.path.exists(merge_dir):
-            raise IsADirectoryError("{} already exists".format(merge_dir))
+            log.error("{} already exists".format(merge_dir))
+            exit(1)
         else:
             os.makedirs(merge_dir)
 
@@ -112,13 +117,15 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                             overwrite_method=overwrite_method)
         return callable_
 
-    def _abstract_call(self, filtered_group, *, merge_dir, overwrite_method, **kwargs):
-        filter_dir = os.path.join(merge_dir, *kwargs.values())
+    @staticmethod
+    def _abstract_call(filtered_group, *, merge_dir, overwrite_method, **labeled_filters):
+        filter_dir = os.path.join(merge_dir, *labeled_filters.values())
         os.makedirs(filter_dir)
         output = overwrite_method(filter_dir, filter_group=filtered_group)
         return output
 
-    def _count(self, filter_dir, filter_group):
+    @staticmethod
+    def _count(filter_dir, filter_group):
         # This keeps the left padding of 0's
         def incr_count(count):
             return str(int(count) + 1).zfill(len(count))
@@ -156,7 +163,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 shutil.copy(file, dest_dir_file)
                 yield sanitize_string(dest_dir_file) + '\n'
 
-    def _ignore(self, filter_dir, filter_group):
+    @staticmethod
+    def _ignore(filter_dir, filter_group):
 
         for file in filter_group:
             filename = os.path.split(file)[1]
@@ -172,7 +180,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 shutil.copy(file, dest_dir_file)
                 yield sanitize_string(dest_dir_file) + '\n'
 
-    def _error(self, filter_dir, filter_group):
+    def _error(filter_dir, filter_group):
         for file in filter_group:
             filename = os.path.split(file)[1]
             dest_dir_file = os.path.join(filter_dir, filename)
@@ -184,7 +192,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 shutil.copy(file, dest_dir_file)
                 yield sanitize_string(dest_dir_file) + '\n'
 
-    def _condition(self, filter_dir, filter_group, *, condition=None):
+    @staticmethod
+    def _condition(filter_dir, filter_group, *, condition=None):
         assert condition is not None
 
         def modification_date(filename: str) -> str:
