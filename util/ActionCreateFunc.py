@@ -1,5 +1,4 @@
 import datetime
-import sys
 import logging
 import os
 import shutil
@@ -148,6 +147,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                     else:
                         dest_file = os.path.join(filename_split[0] + "_{}".format(count) + filename_split[1])
                     dest_dir_file = os.path.join(dest_dir, dest_file)
+                log.info('Incrementing {} to {}'.format(sanitize_string(filename), dest_file))
                 shutil.copy(file, dest_dir_file)
                 yield sanitize_string(dest_dir_file) + '\n'
             else:
@@ -156,24 +156,21 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 yield sanitize_string(dest_dir_file) + '\n'
 
     def _ignore(self, filter_dir, filter_group):
-        moved_files = list()
 
         for file in filter_group:
             filename = os.path.split(file)[1]
             dest_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_file):
-                log.info("{} Exists, Ignoring {}".format(dest_file, file))
+                log.info("{} Exists, Ignoring {}".format(
+                    sanitize_string(dest_file),
+                    sanitize_string(file)))
                 continue
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                moved_files.append(dest_dir_file + '\n')
-
-        return moved_files
+                yield sanitize_string(dest_dir_file) + '\n'
 
     def _error(self, filter_dir, filter_group):
-        moved_files = list()
-
         for file in filter_group:
             filename = os.path.split(file)[1]
             if os.path.exists(os.path.join(filter_dir, filename)):
@@ -181,9 +178,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                moved_files.append(dest_dir_file + '\n')
-
-        return moved_files
+                yield sanitize_string(dest_dir_file) + '\n'
 
     def _condition(self, filter_dir, filter_group, *, condition=None):
         assert condition is not None
@@ -204,19 +199,19 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             'OLDER'  : lambda file1, file2: modification_date(file1) > modification_date(file2),
         }
         condition = conditions[condition.upper()]
-        moved_files = list()
 
         for file in filter_group:
             filename = os.path.split(file)[1]
             dest_dir_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_dir_file):
                 if condition(file, dest_dir_file):
-                    log.info("{} overwriting {}".format(file, sanitize_string(dest_dir_file)))
+                    log.info("{} overwriting {}".format(sanitize_string(file),
+                                                        sanitize_string(dest_dir_file)))
                     shutil.copy(file, dest_dir_file)
+                    yield sanitize_string(dest_dir_file) + '\n'
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                moved_files.append(sanitize_string(dest_dir_file) + '\n')
+                yield sanitize_string(dest_dir_file) + '\n'
 
-        return moved_files
 
