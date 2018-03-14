@@ -100,7 +100,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             overwrite_method = self._count
 
         if os.path.exists(merge_dir):
-            log.error("{} already exists".format(merge_dir))
+            log.error("{} already exists".format(sanitize_string(merge_dir)))
             exit(1)
         else:
             os.makedirs(merge_dir)
@@ -148,7 +148,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                         dest_file = os.path.join(filename_split[0] + "_{}".format(count) + filename_split[1])
                     dest_dir_file = os.path.join(dest_dir, dest_file)
                 log.info('Incrementing {} to {}'.format(sanitize_string(filename),
-                                                        dest_file))
+                                                        sanitize_string(dest_file)))
                 shutil.copy(file, dest_dir_file)
                 yield sanitize_string(dest_dir_file) + '\n'
             else:
