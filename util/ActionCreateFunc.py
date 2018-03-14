@@ -147,7 +147,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                     else:
                         dest_file = os.path.join(filename_split[0] + "_{}".format(count) + filename_split[1])
                     dest_dir_file = os.path.join(dest_dir, dest_file)
-                log.info('Incrementing {} to {}'.format(sanitize_string(filename), dest_file))
+                log.info('Incrementing {} to {}'.format(sanitize_string(filename),
+                                                        dest_file))
                 shutil.copy(file, dest_dir_file)
                 yield sanitize_string(dest_dir_file) + '\n'
             else:
@@ -161,9 +162,10 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             filename = os.path.split(file)[1]
             dest_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_file):
-                log.info("{} Exists, Ignoring {}".format(
+                msg = "{} Exists, Ignoring {}".format(
                     sanitize_string(dest_file),
-                    sanitize_string(file)))
+                    sanitize_string(file))
+                log.info(msg)
                 continue
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
@@ -173,8 +175,10 @@ class ActionAppendMerge(ActionAppendCreateFunc):
     def _error(self, filter_dir, filter_group):
         for file in filter_group:
             filename = os.path.split(file)[1]
-            if os.path.exists(os.path.join(filter_dir, filename)):
-                raise FileExistsError
+            dest_dir_file = os.path.join(filter_dir, filename)
+            if os.path.exists(dest_dir_file):
+                log.error('{} already exists, exiting'.format(sanitize_string(dest_dir_file)))
+                exit(1)
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
