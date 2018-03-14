@@ -1,4 +1,5 @@
 import datetime
+import sys
 import logging
 import os
 import shutil
@@ -123,17 +124,17 @@ class ActionAppendMerge(ActionAppendCreateFunc):
         def incr_count(count):
             return str(int(count) + 1).zfill(len(count))
 
-        def create_file_path(dir, filename, count=None, fileext=None):
+        def create_file_path(dir_, filename, count=None, fileext=None):
             if count is not None:
                 filename = '_'.join([filename, count])
             if fileext is not None:
                 filename = ''.join([filename + fileext])
-            dest_dir_file = os.path.join(dir, filename)
+            dest_dir_file = os.path.join(dir_, filename)
             return dest_dir_file
 
         for file in filter_group:
             filename = os.path.split(file)[1]
-            filename_split = filename.split('.')
+            filename_split = os.path.splitext(filename)
 
             dest_dir_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_dir_file):
@@ -142,14 +143,17 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 dest_dir_file = create_file_path(dest_dir, filename)
                 while os.path.exists(dest_dir_file):
                     count = incr_count(count)
-                    dest_file = os.path.join(filename_split[0] + "_{}.".format(count) + filename_split[1])
+                    if filename_split[1] == '':
+                        dest_file = os.path.join(filename_split[0] + "_{}".format(count))
+                    else:
+                        dest_file = os.path.join(filename_split[0] + "_{}".format(count) + filename_split[1])
                     dest_dir_file = os.path.join(dest_dir, dest_file)
                 shutil.copy(file, dest_dir_file)
-                yield dest_dir_file + '\n'
+                yield sanitize_string(dest_dir_file) + '\n'
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                yield dest_dir_file + '\n'
+                yield sanitize_string(dest_dir_file) + '\n'
 
     def _ignore(self, filter_dir, filter_group):
         moved_files = list()
@@ -207,42 +211,12 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             dest_dir_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_dir_file):
                 if condition(file, dest_dir_file):
-                    log.info("{} overwriting {}".format(file, dest_dir_file))
+                    log.info("{} overwriting {}".format(file, sanitize_string(dest_dir_file)))
                     shutil.copy(file, dest_dir_file)
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                moved_files.append(dest_dir_file + '\n')
+                moved_files.append(sanitize_string(dest_dir_file) + '\n')
 
         return moved_files
 
-# class ActionSelectGroupFunc(ActionAppendCreateFunc, EscapedBraceExpansion):
-#     def _process(self, template, value=None):
-#         self.builtins = {
-#             "link": ActionAppendLink,
-#             "remove": ActionAppendRemove,
-#             "merge": ActionAppendMerge,
-#         }
-#         selected_class_func = self.check_group_exec_type(template)
-#         templated_func = selected_class_func()
-#
-#         return templated_func(template)
-#
-#     def check_group_exec_type(self, template):
-#         def valid_regex(regex):
-#             try:
-#                 re.compile(regex)
-#                 return True
-#             except re.error:
-#                 return False
-#
-#         if template in self.builtins:
-#             return self.builtins[template]
-#         elif any((alias in template
-#                   for alias in self.aliases)):
-#             return ActionAppendExecShell
-#         elif "merge:" in template:
-#             return ActionAppendMerge
-#         else:
-#             "No valid group exec detected"
-#             exit(1)

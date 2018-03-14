@@ -77,7 +77,7 @@ def main():
                 labeled_filters["f{fn}".format(fn=filter_number + 1)] = sanitize_string(filter_output).strip()
             command_string = group_action(results, **labeled_filters)
             for output in command_string:
-                print(output, end='')
+                print(sanitize_string(output), end='')
         else:
             # Removes extra blank newlines
             continue
