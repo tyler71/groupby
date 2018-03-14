@@ -52,7 +52,7 @@ def remove_files(filtered_group: iter, **kwargs) -> list:
             # os.remove(filename)
             # removed_files.append(filename)
         except FileNotFoundError:
-            log.warning("Not Found")
+            log.warning("{} Not Found".format(sanitize_string(filename)))
     return removed_files
 
 
@@ -67,7 +67,7 @@ def hardlink_files(filtered_group: iter, **kwargs) -> list:
             # os.remove(filename)
             # os.link(source_file, filename)
         except FileNotFoundError:
-            log.warning("Not Found")
+            log.warning("{} Not Found".format(sanitize_string(filename)))
     return linked_files
 
 

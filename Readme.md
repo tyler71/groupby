@@ -19,11 +19,11 @@
 usage: groupby [-h]
                [-f {partial_md5,md5,sha256,modified,accessed,size,filename,file}]
                [-E EXPRESSION] [-s COMMAND] [-x COMMAND] [-m DIRECTORY]
-               [--exec-remove] [--exec-link] [--include INCLUDE]
-               [--exclude EXCLUDE] [--dir-include DIR_INCLUDE]
-               [--dir-exclude DIR_EXCLUDE] [--dir-hidden] [-r] [-g SIZE]
-               [--basic-formatting] [--max-depth MAX_DEPTH] [--empty-file]
-               [--follow-symbolic] [-v]
+               [--exec-remove] [--exec-link] [--exec-basic-formatting] [-r]
+               [--include INCLUDE] [--exclude EXCLUDE]
+               [--dir-include DIR_INCLUDE] [--dir-exclude DIR_EXCLUDE]
+               [--dir-hidden] [--max-depth MAX_DEPTH] [--empty-file]
+               [--follow-symbolic] [-g SIZE] [-v]
                [directory [directory ...]]
 
 positional arguments:
@@ -39,22 +39,23 @@ optional arguments:
                         Filenames represented as {}, filters as {f1}, {fn}...:
                         --exec-group "echo {} {f1}"
   -m DIRECTORY, --exec-merge DIRECTORY
-                        Includes 4 options including COUNT, IGNORE, ERROR and
-                        CONDITION
+                        Includes 4 options including COUNT IGNORE ERROR LARGER
+                        SMALLER NEWER OLDER
   --exec-remove
   --exec-link
+  --exec-basic-formatting
+                        No indenting or empty newlines in standard output
+  -r, --recursive
   --include INCLUDE
   --exclude EXCLUDE
   --dir-include DIR_INCLUDE
   --dir-exclude DIR_EXCLUDE
   --dir-hidden
-  -r, --recursive
-  -g SIZE, --group-size SIZE
-                        Minimum number of files in each group
-  --basic-formatting
   --max-depth MAX_DEPTH
   --empty-file          Allow comparision of empty files
   --follow-symbolic     Allow following of symbolic links for compare
+  -g SIZE, --group-size SIZE
+                        Minimum number of files in each group
   -v, --verbosity
 ```
 

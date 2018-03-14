@@ -1,12 +1,13 @@
 import os
-
+from functools import partial
 from util.ActionCreateFilter import ActionAppendRegexFilter, \
     ActionAppendShellFilter, \
     ActionAppendFilePropertyFilter
 from util.ActionCreateFunc import ActionAppendExecShell, \
     ActionAppendMerge, \
     remove_files, \
-    hardlink_files
+    hardlink_files, \
+    print_results
 
 
 def parser_logic(parser):
@@ -32,6 +33,12 @@ def parser_logic(parser):
                         )
     parser.add_argument('--exec-remove', const=remove_files, dest="group_action", action='append_const')
     parser.add_argument('--exec-link', const=hardlink_files, dest="group_action", action='append_const')
+    parser.add_argument("--exec-basic-formatting",
+                        const=partial(print_results, basic_formatting=True),
+                        dest="group_action",
+                        action="append_const",
+                        help='No indenting or empty newlines in standard output',
+                        )
 
     parser.add_argument('-r', '--recursive', action='store_true')
     parser.add_argument('--include', action='append')
@@ -45,8 +52,6 @@ def parser_logic(parser):
 
     parser.add_argument('-g', '--group-size', metavar="SIZE", type=int, default=1,
                         help="Minimum number of files in each group")
-    parser.add_argument("--basic-formatting", action="store_true",
-                        help='No indenting or empty newlines in standard output')
     parser.add_argument('-v', '--verbosity', default=3, action="count")
     parser.add_argument('directories',
                         default=[os.getcwd()],
