@@ -18,20 +18,21 @@ class ActionAppendCreateFunc(argparse._AppendAction):
     # Internal logic for AppendAction
     def __call__(self, parser, namespace, values, option_string=None):
         # Trigger when nargs a list
-        if isinstance(values, (list, tuple)):
-            values_list = list()
-            for template in values:
-                template = codecs.escape_decode(bytes(template, "utf-8"))[0].decode("utf-8")
-                callable_ = self._process(template)
-                values_list.append(callable_)
-            values = values_list
-        else:
+        if isinstance(values, str):
             template = values
             # All subclasses should return a callable when called with _process
             # Whatever that is
             template = codecs.escape_decode(bytes(template, "utf-8"))[0].decode("utf-8")
             callable_ = self._process(template)
             values = callable_
+        else:
+            values_list = list()
+            for template in values:
+                template = codecs.escape_decode(bytes(template, "utf-8"))[0].decode("utf-8")
+                callable_ = self._process(template)
+                values_list.append(callable_)
+            values = values_list
+
         super().__call__(parser, namespace, values, option_string)
 
     def _process(self, template):
