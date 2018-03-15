@@ -85,6 +85,14 @@ To assist with this, brace expansion of the following syntax is observed:
 ```
 With the exceptions of `{..}` and `{fn}`, this brace expansion is a similar syntax to [GNU Parallel](https://www.gnu.org/software/parallel/)
 
+Filenames with invalid encoding or with characters with special meaning to the shell are quoted.
+For example `echo {}; echo malicous_command` will be quoted to prevent `echo malcious_command` from being run
+
+Invalid encoding is also sanitized before printing to the screen, however group actions can be completed on it
+
+For example, a file with invalid encoding will be replaced with `?`  `R??ڀ?2??z?&?̀?????B?A?I?P?CvJ??` prior to printing on the screen
+but file actions will be done on the original filename
+
 ## Filters
 *groupby* supports two kinds of filters
 * builtin
@@ -103,7 +111,7 @@ Filters are completed in order, left to right as specified on each file discover
 * **file**: returns the byte data
 
 #### Customizing Builtin
-These filters allow additional specification of the output
+Additionally, these filters allow additional specification of the output
 * sha
 * modified
 * accessed
@@ -134,7 +142,7 @@ For example, `-f modified:HOUR` will group files that have been modified in the 
 ##### FILENAME
 [Python based regular expressions](https://docs.python.org/3/library/re.html) are permitted on filenames
 
-Syntax: `-f filename:'EXPRESSION`
+Syntax: `-f filename:'EXPRESSION'`
 
 Filenames often carry unique information about a file, such as
 * resolution for videos
