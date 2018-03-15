@@ -13,7 +13,8 @@ log = logging.getLogger(__name__)
 
 
 def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
-    log.info(' -> '.join(sanitize_string(filter_output) for filter_output in labeled_filters.values()))
+    log.info(' -> '.join(sanitize_string(filter_output)
+                         for filter_output in labeled_filters.values()))
     if basic_formatting is True:
         for grp in filtered_group:
             yield grp + '\n'
