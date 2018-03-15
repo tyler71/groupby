@@ -108,6 +108,21 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         regex_pattern = _re_match(filename, pattern=expr)
         return regex_pattern
 
+    @classmethod
+    def _datetime_round(cls, datetime_, rounding=None):
+        rounding_level = {
+            'MICRO'  : lambda dt: dt.replace(microsecond=0),
+            'SECOND' : lambda dt: dt.replace(microsecond=0),
+            'MINUTE' : lambda dt: dt.replace(microsecond=0, second=0),
+            'HOUR'   : lambda dt: dt.replace(microsecond=0, second=0, minute=0),
+            'DAY'    : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0),
+            'MONTH'  : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0, day=1),
+            'YEAR'   : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0, day=1, month=1),
+            'WEEKDAY': lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0).weekday(),
+        }
+        return rounding_level[rounding.upper()](datetime_)
+        # day hour microsecond minute month second weekday year
+
     # Used with checksum functions
     @classmethod
     def _iter_read(cls, filename: str, chunk_size=65536) -> bytes:
@@ -115,16 +130,20 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             for chunk in iter(lambda: file.read(chunk_size), b''):
                 yield chunk
 
-    @staticmethod
-    def access_date(filename: str) -> str:
+    @classmethod
+    def access_date(cls, filename: str, rounding=None) -> str:
         access_time = os.path.getmtime(filename)
         access_datetime = datetime.datetime.fromtimestamp(access_time)
+        if rounding is not None:
+            access_datetime = cls._datetime_round(access_datetime, rounding)
         return str(access_datetime)
 
-    @staticmethod
-    def modification_date(filename: str) -> str:
+    @classmethod
+    def modification_date(cls, filename: str, rounding=None) -> str:
         modification_time = os.path.getmtime(filename)
         modified_datetime = datetime.datetime.fromtimestamp(modification_time)
+        if rounding is not None:
+            modified_datetime = cls._datetime_round(modified_datetime, rounding)
         return str(modified_datetime)
 
     @classmethod
