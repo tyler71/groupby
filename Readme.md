@@ -34,7 +34,6 @@ optional arguments:
   -h, --help            show this help message and exit
   -f {partial_md5,md5,sha256,modified,accessed,size,filename,file}, --filter {partial_md5,md5,sha256,modified,accessed,size,filename,file}
                         Filenames represented as {}: --shell "du {} | cut -f1"
-  -E EXPRESSION, --filter-regex EXPRESSION
   -s COMMAND, --filter-shell COMMAND
   -x COMMAND, --exec-shell COMMAND
                         Filenames represented as {}, filters as {f1}, {fn}...:
@@ -97,13 +96,58 @@ Filters are completed in order, left to right as specified on each file discover
 ### Builtin Filters
 *groupby* comes with several builtin filters including
 * **md5**:  complete full md5 checksum
-* **sha256**: complete full sha256 checksum
+* **sha**: complete full sha checksum
 * **partial_md5**: md5 checksum of the first 12mb of a file
 * **modified**: returns the modified date
 * **accessed**: returns the accessed date
 * **size**: returns the size in bytes
 * **filename**: returns the filename
 * **file**: returns the byte data
+
+#### Customizing Builtin
+These filters allow additional specification of the output
+* sha
+* modified
+* accessed
+* size
+* filename
+
+The syntax follows a common format of `filter:OPTION`, delimited by a '`:`'
+##### SHA
+SHA permits multiple checksum levels to group by.
+
+Syntax: `-f sha:OPTION`
+
+**options**: `1`, `224`, `256`, `384`, `512`, `3_224`, `3_256`, `3_384`, `3_512`
+
+For example, `-f sha:256` will invoke a sha256 checksum on the file
+
+##### DATETIME
+Modified and Accessed permit rounding of their reported times.
+
+Syntax: `-f modified:OPTION` / 
+        `-f accessed:OPTION`
+
+**options**: `MICRO`, `SECOND`, `MINUTE`, `HOUR`, `DAY`, `MONTH`, `YEAR`, `WEEKDAY`
+
+For example, `-f modified:HOUR` will group files that have been modified in the same hour
+
+
+##### FILENAME
+Regular Expressions are permitted on filenames
+
+Syntax: `-f filename:'EXPRESSION`
+
+For example, `-f filename:'\.\w{3}$'` will output filenames ending with a '.' followed by 3 alphanumeric characters
+
+##### SIZE
+Size permit rounding of reported byte size
+
+Syntax: `-f size:OPTION`
+
+**options**: `B`, `KB`, `MB`, `GB`, `TB`, `PB`, `EB`, `ZB`, `YB`
+
+For example, `-f size:MB` will output filenames rounded by the nearest MegaByte
 
 ### Shell Filters
 Shell filters, invoked with `-s`/`--filter-shell` require the use of brace expansion to know which file to act on.
