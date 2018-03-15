@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import math
 import logging
 import os
 import re
@@ -67,8 +68,27 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         return filters
 
     def _process(self, template):
-        func_name = template
-        return self.filters()[func_name]
+        if ":" in template:
+            func_name, rounding = template.split(":")
+            func_name = self.filters()[func_name]
+            filter_func = partial(func_name, rounding=rounding)
+        else:
+            func_name = template
+            filter_func = self.filters()[func_name]
+
+        return filter_func
+
+    @classmethod
+    # https://stackoverflow.com/a/14822210
+    def _bytes_round(cls, size_bytes, rounding='KB'):
+        rounding = rounding.upper()
+        size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+        if size_bytes == 0:
+            return "0.0{}".format(size_name[size_name.index(rounding)])
+        p = math.pow(1024, size_name.index(rounding))
+        s = round(size_bytes / p, 0)
+        output = "{}{}".format(s, size_name[size_name.index(rounding)])
+        return output
 
     # Used with checksum functions
     @classmethod
@@ -94,9 +114,11 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         file_basename = os.path.basename(filename)
         return str(file_basename)
 
-    @staticmethod
-    def disk_size(filename: str, *args) -> str:
+    @classmethod
+    def disk_size(cls, filename: str, *, rounding=False) -> str:
         byte_usage = os.path.getsize(filename)
+        if rounding is not False:
+            byte_usage = cls._bytes_round(byte_usage, rounding=rounding)
         return str(byte_usage)
 
     @staticmethod

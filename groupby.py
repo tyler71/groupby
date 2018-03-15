@@ -16,7 +16,6 @@ from util.Templates import sanitize_string
 
 
 def main():
-
     parser = argparse.ArgumentParser()
     parser = parser_logic(parser)
     args = parser.parse_args()
