@@ -16,14 +16,14 @@ def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
     log.info(' -> '.join(sanitize_string(filter_output) for filter_output in labeled_filters.values()))
     if basic_formatting is True:
         for grp in filtered_group:
-            yield sanitize_string(grp) + '\n'
+            yield grp + '\n'
     else:
         first_filename, *group = filtered_group
-        yield sanitize_string(first_filename) + '\n'
+        yield first_filename + '\n'
         if len(group) > 0:
             for filename in group:
-                padding = len(sanitize_string(filename)) + 4
-                yield sanitize_string(filename).rjust(padding) + '\n'
+                padding = len(filename) + 4
+                yield filename.rjust(padding) + '\n'
 
 
 class ActionAppendExecShell(ActionAppendCreateFunc):
@@ -36,7 +36,6 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
     def _group_invoke_shell(self, filtered_group, command, **kwargs):
         for file in filtered_group:
             output = invoke_shell(file, command=command, **kwargs)
-            output = sanitize_string(output)
             yield output
 
 
@@ -150,11 +149,11 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 log.info('Incrementing {} to {}'.format(sanitize_string(filename),
                                                         sanitize_string(dest_file)))
                 shutil.copy(file, dest_dir_file)
-                yield sanitize_string(dest_dir_file) + '\n'
+                yield dest_dir_file + '\n'
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                yield sanitize_string(dest_dir_file) + '\n'
+                yield dest_dir_file + '\n'
 
     @staticmethod
     def _ignore(filter_dir, filter_group):
@@ -171,7 +170,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                yield sanitize_string(dest_dir_file) + '\n'
+                yield dest_dir_file + '\n'
 
     def _error(filter_dir, filter_group):
         for file in filter_group:
@@ -183,7 +182,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                yield sanitize_string(dest_dir_file) + '\n'
+                yield dest_dir_file + '\n'
 
     @staticmethod
     def _condition(filter_dir, filter_group, *, condition=None):
@@ -214,10 +213,10 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                     log.info("{} overwriting {}".format(sanitize_string(file),
                                                         sanitize_string(dest_dir_file)))
                     shutil.copy(file, dest_dir_file)
-                    yield sanitize_string(dest_dir_file) + '\n'
+                    yield dest_dir_file + '\n'
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
                 shutil.copy(file, dest_dir_file)
-                yield sanitize_string(dest_dir_file) + '\n'
+                yield dest_dir_file + '\n'
 
 

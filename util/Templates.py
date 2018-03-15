@@ -127,7 +127,6 @@ def invoke_shell(*args, command, **kwargs) -> str:
     except KeyError as e:
         log.error("Filter {}, not found".format(e))
         exit(1)
-    output = sanitize_string(output)
     return output
 
 
