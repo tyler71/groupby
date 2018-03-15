@@ -46,10 +46,10 @@ class ActionAppendRegexFilter(ActionAppendCreateFunc):
     def _re_match(self, filename, *, pattern) -> str:
         assert isinstance(pattern, re._pattern_type)
         split_file = os.path.split(filename)[1]
-        quoted_dir = shlex.quote(split_file)
 
-        result = pattern.search(quoted_dir)
-        return result.group() if result else ""
+        result = pattern.search(split_file)
+        result = result.group() if result else ''
+        return result
 
 
 class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
@@ -97,10 +97,11 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         def _re_match(filename, *, pattern) -> str:
             assert isinstance(pattern, re._pattern_type)
             split_file = os.path.split(filename)[1]
-            quoted_dir = shlex.quote(split_file)
 
-            result = pattern.search(quoted_dir)
-            return result.group() if result else ""
+            result = pattern.search(split_file)
+            result = result.group() if result else ''
+            return result
+
         try:
             expr = re.compile(abstraction)
         except Exception as e:

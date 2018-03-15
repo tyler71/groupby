@@ -114,9 +114,10 @@ class EscapedBraceExpansion(BraceExpansion):
         return value
 
 
-def invoke_shell(*args, command, **kwargs) -> str:
+def invoke_shell(*args, command, **labled_filters) -> str:
+    sanitized_labeled_filters = {key: shlex.quote(value) for key, value in labled_filters.items()}
     try:
-        output = subprocess.check_output(command(*args, **kwargs), shell=True)
+        output = subprocess.check_output(command(*args, **sanitized_labeled_filters), shell=True)
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
