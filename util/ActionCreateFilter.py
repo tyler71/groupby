@@ -56,13 +56,13 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         filters = OrderedDict(
             {
                 "partial_md5": cls.partial_md5_sum,
-                "md5": cls.md5_sum,
-                "sha": cls.sha_sum,
-                "modified": cls.modification_date,
-                "accessed": cls.access_date,
-                "size": cls.disk_size,
-                "filename": cls.file_name,
-                "file": cls.direct_compare,
+                "md5"        : cls.md5_sum,
+                "sha"        : cls.sha_sum,
+                "modified"   : cls.modification_date,
+                "accessed"   : cls.access_date,
+                "size"       : cls.disk_size,
+                "filename"   : cls.file_name,
+                "file"       : cls.direct_compare,
             }
         )
         return filters
@@ -80,7 +80,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
     # https://stackoverflow.com/a/14822210
     @classmethod
-    def _bytes_round(cls, size_bytes, rounding=None):
+    def _size_round(cls, size_bytes, rounding=None):
         rounding = rounding.upper()
         size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
         if size_bytes == 0:
@@ -120,8 +120,8 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             'YEAR'   : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0, day=1, month=1),
             'WEEKDAY': lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0).weekday(),
         }
-        return rounding_level[rounding.upper()](datetime_)
-        # day hour microsecond minute month second weekday year
+        rounded_datetime = rounding_level[rounding.upper()](datetime_)
+        return rounded_datetime
 
     # Used with checksum functions
     @classmethod
@@ -131,7 +131,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
                 yield chunk
 
     @classmethod
-    def access_date(cls, filename: str, rounding=None) -> str:
+    def access_date(cls, filename: str, *, rounding=None) -> str:
         access_time = os.path.getmtime(filename)
         access_datetime = datetime.datetime.fromtimestamp(access_time)
         if rounding is not None:
@@ -139,7 +139,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         return str(access_datetime)
 
     @classmethod
-    def modification_date(cls, filename: str, rounding=None) -> str:
+    def modification_date(cls, filename: str, *, rounding=None) -> str:
         modification_time = os.path.getmtime(filename)
         modified_datetime = datetime.datetime.fromtimestamp(modification_time)
         if rounding is not None:
@@ -157,11 +157,11 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
     def disk_size(cls, filename: str, *, rounding=False) -> str:
         byte_usage = os.path.getsize(filename)
         if rounding is not False:
-            byte_usage = cls._bytes_round(byte_usage, rounding=rounding)
+            byte_usage = cls._size_round(byte_usage, rounding=rounding)
         return str(byte_usage)
 
     @classmethod
-    def md5_sum(cls, filename, chunk_size=65536) -> str:
+    def md5_sum(cls, filename, *, chunk_size=65536) -> str:
         checksumer = hashlib.md5()
         for chunk in cls._iter_read(filename, chunk_size):
             checksumer.update(chunk)
