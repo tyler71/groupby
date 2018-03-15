@@ -17,7 +17,8 @@ def directory_search(directory: str, *,
         if all((
                 dir_hidden is not True,
                 orig_directory_hidden is not True,
-                hidden_in_dir(directory))):
+                hidden_in_dir(directory))
+                ):
             continue
 
         # Check for included and excluded directories
@@ -99,7 +100,11 @@ def hidden_in_dir(directory):
         return False
     else:
         for fragment_dir in split_directory:
-            if fragment_dir.startswith('.'):
+            if all((
+                fragment_dir.startswith('.'),
+                not fragment_dir == '.',
+                not fragment_dir.startswith('..'),
+            )):
                 return True
         return False
 
