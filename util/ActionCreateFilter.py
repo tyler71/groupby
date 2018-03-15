@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import math
 import logging
 import os
 import re
@@ -16,6 +17,7 @@ _whitespace = re.compile('^([\n \t\r]|)+$')
 
 log = logging.getLogger(__name__)
 
+
 class OrderedDefaultListDict(OrderedDict):
     def __missing__(self, key):
         self[key] = value = []
@@ -31,6 +33,7 @@ class ActionAppendShellFilter(ActionAppendCreateFunc):
 
 class ActionAppendRegexFilter(ActionAppendCreateFunc):
     def _process(self, template):
+        log.warning("--filter-regex is deprecated, use -f filename:'{expr}' instead".format(expr=template))
         try:
             template = re.compile(template)
         except Exception as e:
@@ -55,20 +58,72 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         filters = OrderedDict(
             {
                 "partial_md5": cls.partial_md5_sum,
-                "md5": cls.md5_sum,
-                "sha256": cls.sha256_sum,
-                "modified": cls.modification_date,
-                "accessed": cls.access_date,
-                "size": cls.disk_size,
-                "filename": cls.file_name,
-                "file": cls.direct_compare,
+                "md5"        : cls.md5_sum,
+                "sha"        : cls.sha_sum,
+                "modified"   : cls.modification_date,
+                "accessed"   : cls.access_date,
+                "size"       : cls.disk_size,
+                "filename"   : cls.file_name,
+                "file"       : cls.direct_compare,
             }
         )
         return filters
 
     def _process(self, template):
-        func_name = template
-        return self.filters()[func_name]
+        if ":" in template:
+            func_name, abstraction = template.split(":")
+            func_name = self.filters()[func_name]
+            filter_func = partial(func_name, abstraction=abstraction)
+        else:
+            func_name = template
+            filter_func = self.filters()[func_name]
+
+        return filter_func
+
+    # https://stackoverflow.com/a/14822210
+    @classmethod
+    def _size_round(cls, size_bytes, abstraction=None):
+        abstraction = abstraction.upper()
+        size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+        if size_bytes == 0:
+            return "0.0{}".format(size_name[size_name.index(abstraction)])
+        p = math.pow(1024, size_name.index(abstraction))
+        s = round(size_bytes / p, 0)
+        output = "{}{}".format(s, size_name[size_name.index(abstraction)])
+        return output
+
+    @classmethod
+    def _filename_round(cls, filename, abstraction=None):
+        def _re_match(filename, *, pattern) -> str:
+            assert isinstance(pattern, re._pattern_type)
+            split_file = os.path.split(filename)[1]
+            quoted_dir = shlex.quote(split_file)
+
+            result = pattern.search(quoted_dir)
+            return result.group() if result else ""
+        try:
+            expr = re.compile(abstraction)
+        except Exception as e:
+            err_msg = 'Regex "{expr}" generated this error\n{err}'
+            log.error(err_msg.format(expr=expr, err=e))
+            exit(1)
+        regex_pattern = _re_match(filename, pattern=expr)
+        return regex_pattern
+
+    @classmethod
+    def _datetime_round(cls, datetime_, abstraction=None):
+        rounding_level = {
+            'MICRO'  : lambda dt: dt.replace(microsecond=0),
+            'SECOND' : lambda dt: dt.replace(microsecond=0),
+            'MINUTE' : lambda dt: dt.replace(microsecond=0, second=0),
+            'HOUR'   : lambda dt: dt.replace(microsecond=0, second=0, minute=0),
+            'DAY'    : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0),
+            'MONTH'  : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0, day=1),
+            'YEAR'   : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0, day=1, month=1),
+            'WEEKDAY': lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0).weekday(),
+        }
+        rounded_datetime = rounding_level[abstraction.upper()](datetime_)
+        return rounded_datetime
 
     # Used with checksum functions
     @classmethod
@@ -77,40 +132,62 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             for chunk in iter(lambda: file.read(chunk_size), b''):
                 yield chunk
 
-    @staticmethod
-    def access_date(filename: str) -> str:
+    @classmethod
+    def access_date(cls, filename: str, *, abstraction=None) -> str:
         access_time = os.path.getmtime(filename)
         access_datetime = datetime.datetime.fromtimestamp(access_time)
+        if abstraction is not None:
+            access_datetime = cls._datetime_round(access_datetime, abstraction)
         return str(access_datetime)
 
-    @staticmethod
-    def modification_date(filename: str) -> str:
+    @classmethod
+    def modification_date(cls, filename: str, *, abstraction=None) -> str:
         modification_time = os.path.getmtime(filename)
         modified_datetime = datetime.datetime.fromtimestamp(modification_time)
+        if abstraction is not None:
+            modified_datetime = cls._datetime_round(modified_datetime, abstraction)
         return str(modified_datetime)
 
-    @staticmethod
-    def file_name(filename: str) -> str:
+    @classmethod
+    def file_name(cls, filename: str, *, abstraction=None) -> str:
         file_basename = os.path.basename(filename)
+        if abstraction is not None:
+            file_basename = cls._filename_round(filename, abstraction=abstraction)
         return str(file_basename)
 
-    @staticmethod
-    def disk_size(filename: str, *args) -> str:
+    @classmethod
+    def disk_size(cls, filename: str, *, abstraction=None) -> str:
         byte_usage = os.path.getsize(filename)
+        if abstraction is not None:
+            byte_usage = cls._size_round(byte_usage, abstraction=abstraction)
         return str(byte_usage)
 
-    @staticmethod
-    def md5_sum(filename, chunk_size=65536) -> str:
+    @classmethod
+    def md5_sum(cls, filename, *, chunk_size=65536) -> str:
         checksumer = hashlib.md5()
-        for chunk in ActionAppendFilePropertyFilter._iter_read(filename, chunk_size):
+        for chunk in cls._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
         return str(file_hash)
 
-    @staticmethod
-    def sha256_sum(filename, chunk_size=65536) -> str:
-        checksumer = hashlib.sha256()
-        for chunk in ActionAppendFilePropertyFilter._iter_read(filename, chunk_size):
+    @classmethod
+    def sha_sum(cls, filename, *, chunk_size=65536, abstraction=None) -> str:
+        sha_levels = {
+            '1': hashlib.sha1,
+            '224': hashlib.sha224,
+            '256': hashlib.sha256,
+            '384': hashlib.sha384,
+            '512': hashlib.sha512,
+            '3_224': hashlib.sha3_224,
+            '3_256': hashlib.sha3_256,
+            '3_384': hashlib.sha3_384,
+            '3_512': hashlib.sha3_512,
+        }
+        if abstraction is None:
+            checksumer = sha_levels['256']()
+        else:
+            checksumer = sha_levels[abstraction]()
+        for chunk in cls._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
         return str(file_hash)

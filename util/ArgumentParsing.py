@@ -14,7 +14,6 @@ from util.ActionCreateFunc import ActionAppendExecShell, \
 def parser_logic(parser):
     parser.add_argument('-f', '--filter',
                         dest="filters",
-                        choices=ActionAppendFilePropertyFilter.filters(),
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
                         action=ActionAppendFilePropertyFilter,
                         )

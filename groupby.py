@@ -16,7 +16,6 @@ from util.Templates import sanitize_string
 
 
 def main():
-
     parser = argparse.ArgumentParser()
     parser = parser_logic(parser)
     args = parser.parse_args()
@@ -27,7 +26,10 @@ def main():
                             format='[%(levelname)s] %(message)s',
                             )
     else:
-        logging.disable(logging.CRITICAL)
+        logging.basicConfig(level=5,
+                            stream=sys.stderr,
+                            format='[%(levelname)s] %(message)s',
+                            )
 
     # Usage of set to remove directories specified multiple times
     paths = (path for directory in set(args.directories)
