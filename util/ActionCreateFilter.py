@@ -69,9 +69,9 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
     def _process(self, template):
         if ":" in template:
-            func_name, rounding = template.split(":")
+            func_name, abstraction = template.split(":")
             func_name = self.filters()[func_name]
-            filter_func = partial(func_name, rounding=rounding)
+            filter_func = partial(func_name, abstraction=abstraction)
         else:
             func_name = template
             filter_func = self.filters()[func_name]
@@ -80,18 +80,18 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
     # https://stackoverflow.com/a/14822210
     @classmethod
-    def _size_round(cls, size_bytes, rounding=None):
-        rounding = rounding.upper()
+    def _size_round(cls, size_bytes, abstraction=None):
+        abstraction = abstraction.upper()
         size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
         if size_bytes == 0:
-            return "0.0{}".format(size_name[size_name.index(rounding)])
-        p = math.pow(1024, size_name.index(rounding))
+            return "0.0{}".format(size_name[size_name.index(abstraction)])
+        p = math.pow(1024, size_name.index(abstraction))
         s = round(size_bytes / p, 0)
-        output = "{}{}".format(s, size_name[size_name.index(rounding)])
+        output = "{}{}".format(s, size_name[size_name.index(abstraction)])
         return output
 
     @classmethod
-    def _filename_round(cls, filename, rounding=None):
+    def _filename_round(cls, filename, abstraction=None):
         def _re_match(filename, *, pattern) -> str:
             assert isinstance(pattern, re._pattern_type)
             split_file = os.path.split(filename)[1]
@@ -100,7 +100,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             result = pattern.search(quoted_dir)
             return result.group() if result else ""
         try:
-            expr = re.compile(rounding)
+            expr = re.compile(abstraction)
         except Exception as e:
             err_msg = 'Regex "{expr}" generated this error\n{err}'
             log.error(err_msg.format(expr=expr, err=e))
@@ -109,7 +109,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         return regex_pattern
 
     @classmethod
-    def _datetime_round(cls, datetime_, rounding=None):
+    def _datetime_round(cls, datetime_, abstraction=None):
         rounding_level = {
             'MICRO'  : lambda dt: dt.replace(microsecond=0),
             'SECOND' : lambda dt: dt.replace(microsecond=0),
@@ -120,7 +120,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             'YEAR'   : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0, day=1, month=1),
             'WEEKDAY': lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0).weekday(),
         }
-        rounded_datetime = rounding_level[rounding.upper()](datetime_)
+        rounded_datetime = rounding_level[abstraction.upper()](datetime_)
         return rounded_datetime
 
     # Used with checksum functions
@@ -131,33 +131,33 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
                 yield chunk
 
     @classmethod
-    def access_date(cls, filename: str, *, rounding=None) -> str:
+    def access_date(cls, filename: str, *, abstraction=None) -> str:
         access_time = os.path.getmtime(filename)
         access_datetime = datetime.datetime.fromtimestamp(access_time)
-        if rounding is not None:
-            access_datetime = cls._datetime_round(access_datetime, rounding)
+        if abstraction is not None:
+            access_datetime = cls._datetime_round(access_datetime, abstraction)
         return str(access_datetime)
 
     @classmethod
-    def modification_date(cls, filename: str, *, rounding=None) -> str:
+    def modification_date(cls, filename: str, *, abstraction=None) -> str:
         modification_time = os.path.getmtime(filename)
         modified_datetime = datetime.datetime.fromtimestamp(modification_time)
-        if rounding is not None:
-            modified_datetime = cls._datetime_round(modified_datetime, rounding)
+        if abstraction is not None:
+            modified_datetime = cls._datetime_round(modified_datetime, abstraction)
         return str(modified_datetime)
 
     @classmethod
-    def file_name(cls, filename: str, *, rounding=False) -> str:
+    def file_name(cls, filename: str, *, abstraction=None) -> str:
         file_basename = os.path.basename(filename)
-        if rounding is not False:
-            file_basename = cls._filename_round(filename, rounding=rounding)
+        if abstraction is not None:
+            file_basename = cls._filename_round(filename, abstraction=abstraction)
         return str(file_basename)
 
     @classmethod
-    def disk_size(cls, filename: str, *, rounding=False) -> str:
+    def disk_size(cls, filename: str, *, abstraction=None) -> str:
         byte_usage = os.path.getsize(filename)
-        if rounding is not False:
-            byte_usage = cls._size_round(byte_usage, rounding=rounding)
+        if abstraction is not None:
+            byte_usage = cls._size_round(byte_usage, abstraction=abstraction)
         return str(byte_usage)
 
     @classmethod
@@ -169,7 +169,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         return str(file_hash)
 
     @classmethod
-    def sha_sum(cls, filename, *, chunk_size=65536, rounding=None) -> str:
+    def sha_sum(cls, filename, *, chunk_size=65536, abstraction=None) -> str:
         sha_levels = {
             '1': hashlib.sha1,
             '224': hashlib.sha224,
@@ -181,10 +181,10 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             '3_384': hashlib.sha3_384,
             '3_512': hashlib.sha3_512,
         }
-        if rounding is None:
+        if abstraction is None:
             checksumer = sha_levels['256']()
         else:
-            checksumer = sha_levels[rounding]()
+            checksumer = sha_levels[abstraction]()
         for chunk in cls._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
