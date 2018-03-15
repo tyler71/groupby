@@ -80,7 +80,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
     @classmethod
     # https://stackoverflow.com/a/14822210
-    def _bytes_round(cls, size_bytes, rounding='KB'):
+    def _bytes_round(cls, size_bytes, rounding=None):
         rounding = rounding.upper()
         size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
         if size_bytes == 0:
@@ -89,6 +89,24 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         s = round(size_bytes / p, 0)
         output = "{}{}".format(s, size_name[size_name.index(rounding)])
         return output
+
+    @classmethod
+    def _filename_round(cls, filename, rounding=None):
+        def _re_match(filename, *, pattern) -> str:
+            assert isinstance(pattern, re._pattern_type)
+            split_file = os.path.split(filename)[1]
+            quoted_dir = shlex.quote(split_file)
+
+            result = pattern.search(quoted_dir)
+            return result.group() if result else ""
+        try:
+            expr = re.compile(rounding)
+        except Exception as e:
+            err_msg = 'Regex "{expr}" generated this error\n{err}'
+            log.error(err_msg.format(expr=expr, err=e))
+            exit(1)
+        regex_pattern = _re_match(filename, pattern=expr)
+        return regex_pattern
 
     # Used with checksum functions
     @classmethod
@@ -109,9 +127,11 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         modified_datetime = datetime.datetime.fromtimestamp(modification_time)
         return str(modified_datetime)
 
-    @staticmethod
-    def file_name(filename: str) -> str:
+    @classmethod
+    def file_name(cls, filename: str, *, rounding=False) -> str:
         file_basename = os.path.basename(filename)
+        if rounding is not False:
+            file_basename = cls._filename_round(filename, rounding=rounding)
         return str(file_basename)
 
     @classmethod
