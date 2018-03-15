@@ -140,6 +140,8 @@ def sanitize_string(msg):
         msg = msg.decode(encode_type)
     elif isinstance(msg, bytes):
         msg = msg.decode(encode_type, errors='replace')
+    elif isinstance(msg, type(iter)):
+        msg = [sanitize_string(value) for value in msg]
     return msg
 
 
