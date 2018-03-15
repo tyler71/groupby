@@ -17,6 +17,7 @@ _whitespace = re.compile('^([\n \t\r]|)+$')
 
 log = logging.getLogger(__name__)
 
+
 class OrderedDefaultListDict(OrderedDict):
     def __missing__(self, key):
         self[key] = value = []
@@ -32,6 +33,7 @@ class ActionAppendShellFilter(ActionAppendCreateFunc):
 
 class ActionAppendRegexFilter(ActionAppendCreateFunc):
     def _process(self, template):
+        log.warning("--filter-regex is deprecated, use -f filename:'{expr}' instead".format(expr=template))
         try:
             template = re.compile(template)
         except Exception as e:

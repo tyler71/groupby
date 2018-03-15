@@ -26,7 +26,10 @@ def main():
                             format='[%(levelname)s] %(message)s',
                             )
     else:
-        logging.disable(logging.CRITICAL)
+        logging.basicConfig(level=5,
+                            stream=sys.stderr,
+                            format='[%(levelname)s] %(message)s',
+                            )
 
     # Usage of set to remove directories specified multiple times
     paths = (path for directory in set(args.directories)
