@@ -204,7 +204,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         return checksumer.hexdigest()
 
     @staticmethod
-    def direct_compare(cls, filename) -> bytes:
+    def direct_compare(filename) -> bytes:
         with open(filename, 'rb') as file:
             data = file.read()
         return data
