@@ -5,7 +5,6 @@
 ## Features
 * Simple to use: `groupy` will return grouped results in current directory
 * Predefined filters or use your own
-* Regular Expression filter
 * Supports similar GNU Parallel notation
 * Execute commands on each grouped file
 * Ignore or prefer specific directories or files
@@ -90,7 +89,6 @@ With the exceptions of `{..}` and `{fn}`, this brace expansion is a similar synt
 *groupby* supports three kinds of filters
 * builtin
 * shell
-* regex
 
 Filters are completed in order, left to right as specified on each file discovered.
 ### Builtin Filters
@@ -134,11 +132,43 @@ For example, `-f modified:HOUR` will group files that have been modified in the 
 
 
 ##### FILENAME
-Regular Expressions are permitted on filenames
+[Python based regular expressions](https://docs.python.org/3/library/re.html) are permitted on filenames
 
 Syntax: `-f filename:'EXPRESSION`
 
-For example, `-f filename:'\.\w{3}$'` will output filenames ending with a '.' followed by 3 alphanumeric characters
+Filenames often carry unique information about a file, such as
+* resolution for videos
+* bit-rate for audio
+* versions of software
+
+This information can be used to group the files.
+
+```buildoutcfg
+# foo/foo2_1080p.mkv
+# foo/bar_720p.mkv
+# foo/foo4_720p.mkv
+# foo/foo6_480p.mkv
+
+groupby -f filename:'\d{3,4}p' foo/
+# '\d{3,4}p' == Match 3 or 4 digits and then a character of 'p'
+# Output
+-> foo/foo6_480p.mkv
+->
+-> foo/foo4_720p.mkv
+->     foo/bar_720p.mkv
+->
+-> foo/foo2_1080p.mkv
+```
+The regex match may also be used as notation for custom shell commmands
+
+```buildoutcfg
+groupby -f filename:'\d+p' foo -x "mkdir -p {f1}/{/}"
+# Commands executed
+-> mkdir -p 480p/foo6_480p.mkv
+-> mkdir -p 720p/foo4_720p.mkv
+-> mkdir -p 720p/bar_720p.mkv
+-> mkdir -p 1080p/foo2_1080p.mkv
+```
 
 ##### SIZE
 Size permit rounding of reported byte size
@@ -163,42 +193,6 @@ grep -oE '[0-9]+' {} -> grep -oE '[0-9]+' foobar.mkv -> 476027
 See Brace Expansion for more information
 
 ### Regular Expression Filters (regex)
-[Python based regular expressions](https://docs.python.org/3/library/re.html) 
-may be invoked with `-E`/`--filter-regex`
-
-Filenames often carry unique information about a file, such as
-* resolution for videos
-* bit-rate for audio
-* versions of software
-
-This information can be used to group the files.
-
-```buildoutcfg
-# foo/foo2_1080p.mkv
-# foo/bar_720p.mkv
-# foo/foo4_720p.mkv
-# foo/foo6_480p.mkv
-
-groupby --filter-regex '\d{3,4}p' foo/
-# '\d{3,4}p' == Match 3 or 4 digits and then a character of 'p'
-# Output
--> foo/foo6_480p.mkv
-->
--> foo/foo4_720p.mkv
-->     foo/bar_720p.mkv
-->
--> foo/foo2_1080p.mkv
-```
-The regex match may also be used as notation for custom shell commmands
-
-```buildoutcfg
-groupby --filter-regex '\d+p' foo -x "mkdir -p {f1}/{/}"
-# Commands executed
--> mkdir -p 480p/foo6_480p.mkv
--> mkdir -p 720p/foo4_720p.mkv
--> mkdir -p 720p/bar_720p.mkv
--> mkdir -p 1080p/foo2_1080p.mkv
-```
 
 ## Group Execution
 The results are grouped by their filters and can be acted on.
