@@ -83,7 +83,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
         mergedir_flag = template
 
         if ":" in mergedir_flag:
-            mergedir_flag = mergedir_flag.split(":")
+            mergedir_flag = mergedir_flag.split(":", 1)
             if len(mergedir_flag) == 2:
                 merge_dir, overwrite_flag = mergedir_flag
         else:

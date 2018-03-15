@@ -185,7 +185,7 @@ Syntax: `-f size:OPTION`
 
 **options**: `B`, `KB`, `MB`, `GB`, `TB`, `PB`, `EB`, `ZB`, `YB`
 
-For example, `-f size:MB` will output filenames rounded by the nearest MegaByte
+For example, `-f size:MB` will output filenames rounded by the nearest megabyte
 
 ### Shell Filters
 Shell filters, invoked with `-s`/`--filter-shell` require the use of brace expansion to know which file to act on.

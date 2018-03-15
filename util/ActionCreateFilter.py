@@ -70,7 +70,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
     def _process(self, template):
         if ":" in template:
-            func_name, abstraction = template.split(":")
+            func_name, abstraction = template.split(":", 1)
             func_name = self.filters()[func_name]
             filter_func = partial(func_name, abstraction=abstraction)
         else:
