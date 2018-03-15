@@ -33,6 +33,10 @@ class ActionAppendCreateFunc(argparse._AppendAction):
                 values_list.append(callable_)
             values = values_list
 
+        log.debug("Appending {value} to {namespace}".format(
+            value=values,
+            namespace=namespace,
+            ))
         super().__call__(parser, namespace, values, option_string)
 
     def _process(self, template):
