@@ -68,6 +68,10 @@ class BraceExpansion(string.Formatter):
             self.template = self.template.replace(key, alias)
 
     def __call__(self, *args, **kwargs):
+        log.debug("{} called with {} {}".format(
+            self.__repr__(),
+            sanitize_string(args),
+            sanitize_string(kwargs)))
         return self.format(self.template, *args, **kwargs)
 
     def format_field(self, value, spec):
