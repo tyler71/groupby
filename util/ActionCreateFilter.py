@@ -57,7 +57,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             {
                 "partial_md5": cls.partial_md5_sum,
                 "md5": cls.md5_sum,
-                "sha256": cls.sha256_sum,
+                "sha": cls.sha_sum,
                 "modified": cls.modification_date,
                 "accessed": cls.access_date,
                 "size": cls.disk_size,
@@ -78,8 +78,8 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
         return filter_func
 
-    @classmethod
     # https://stackoverflow.com/a/14822210
+    @classmethod
     def _bytes_round(cls, size_bytes, rounding=None):
         rounding = rounding.upper()
         size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
@@ -141,18 +141,32 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             byte_usage = cls._bytes_round(byte_usage, rounding=rounding)
         return str(byte_usage)
 
-    @staticmethod
-    def md5_sum(filename, chunk_size=65536) -> str:
+    @classmethod
+    def md5_sum(cls, filename, chunk_size=65536) -> str:
         checksumer = hashlib.md5()
-        for chunk in ActionAppendFilePropertyFilter._iter_read(filename, chunk_size):
+        for chunk in cls._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
         return str(file_hash)
 
-    @staticmethod
-    def sha256_sum(filename, chunk_size=65536) -> str:
-        checksumer = hashlib.sha256()
-        for chunk in ActionAppendFilePropertyFilter._iter_read(filename, chunk_size):
+    @classmethod
+    def sha_sum(cls, filename, *, chunk_size=65536, rounding=None) -> str:
+        sha_levels = {
+            '1': hashlib.sha1,
+            '224': hashlib.sha224,
+            '256': hashlib.sha256,
+            '384': hashlib.sha384,
+            '512': hashlib.sha512,
+            '3_224': hashlib.sha3_224,
+            '3_256': hashlib.sha3_256,
+            '3_384': hashlib.sha3_384,
+            '3_512': hashlib.sha3_512,
+        }
+        if rounding is None:
+            checksumer = sha_levels['256']()
+        else:
+            checksumer = sha_levels[rounding]()
+        for chunk in cls._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
         return str(file_hash)
