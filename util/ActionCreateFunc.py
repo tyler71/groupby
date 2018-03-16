@@ -173,6 +173,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                 shutil.copy(file, dest_dir_file)
                 yield dest_dir_file + '\n'
 
+    @staticmethod
     def _error(filter_dir, filter_group):
         for file in filter_group:
             filename = os.path.split(file)[1]
