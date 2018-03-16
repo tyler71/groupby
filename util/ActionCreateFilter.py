@@ -125,7 +125,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         rounded_datetime = rounding_level[abstraction.upper()](datetime_)
         return rounded_datetime
 
-    # Used with checksum functions
+    # Used with checksum functions to reduce memory footprint
     @classmethod
     def _iter_read(cls, filename: str, chunk_size=65536) -> bytes:
         with open(filename, 'rb') as file:
@@ -183,10 +183,10 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             '3_384': hashlib.sha3_384,
             '3_512': hashlib.sha3_512,
         }
-        if abstraction is None:
-            checksumer = sha_levels['256']()
-        else:
+        if abstraction is not None:
             checksumer = sha_levels[abstraction]()
+        else:
+            checksumer = sha_levels['256']()
         for chunk in cls._iter_read(filename, chunk_size):
             checksumer.update(chunk)
         file_hash = checksumer.hexdigest()
