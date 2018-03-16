@@ -82,53 +82,8 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
     # https://stackoverflow.com/a/14822210
     @classmethod
     def _size_round(cls, size_bytes, abstraction=None):
+        aliases = cls.aliases("size_round")
         abstraction = abstraction.upper()
-        aliases = {
-            'B': 'B',
-            'BYTE': 'B',
-            'BYTES': 'B',
-
-            'KB': 'KB',
-            'KILO': 'KB',
-            'KILOBYTE': 'KB',
-            'KILOBYTES': 'KB',
-
-            'MB': 'MB',
-            'MEGA': 'MB',
-            'MEGABYTE': 'MB',
-            'MEGABYTES': 'MB',
-
-            'GB': 'GB',
-            'GIGA': 'GB',
-            'GIGABYTE': 'GB',
-            'GIGABYTES': 'GB',
-
-            'TB': 'TB',
-            'TERA': 'TB',
-            'TERABYTE': 'TB',
-            'TERABYTES': 'TB',
-
-            'PB': 'PB',
-            'PETA': 'PB',
-            'PETABYTE': 'PB',
-            'PETABYTES': 'PB',
-
-            'EB': 'EB',
-            'EXA': 'EB',
-            'EXABYTE': 'EB',
-            'EXABYTES': 'EB',
-
-            'ZB': 'ZB',
-            'ZETTA': 'ZB',
-            'ZETTABYTE': 'ZB',
-            'ZETTABYTES': 'ZB',
-
-            'YB': 'YB',
-            'YOTTA': 'YB',
-            'YOTTABYTE': 'YB',
-            'YOTTABYTES': 'YB',
-
-        }
         size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
         if size_bytes == 0:
             return "0.0{}".format(aliases['BYTES'])
@@ -166,35 +121,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
     @classmethod
     def _datetime_round(cls, datetime_, abstraction=None):
-        aliases = {
-            'NANO'       : 'MICROSECOND',
-            'MICROSECOND': 'MICROSECOND',
-
-            'S'          : 'SECOND',
-            'SEC'        : 'SECOND',
-            'SECOND'     : 'SECOND',
-
-            'M'          : 'MINUTE',
-            'MIN'        : 'MINUTE',
-            'MINUTE'     : 'MINUTE',
-
-            'H'          : 'HOUR',
-            'HOUR'       : 'HOUR',
-
-            'D'          : 'DAY',
-            'DAY'        : 'DAY',
-
-            'MON'        : 'MONTH',
-            'MONTH'      : 'MONTH',
-
-            'YEAR'       : 'YEAR',
-            'Y'          : 'YEAR',
-            'YR'         : 'YEAR',
-
-            'WEEKDAY'    : 'WEEKDAY',
-            'WD'         : 'WEEKDAY',
-        }
-
+        aliases = cls.aliases("datetime_round")
         rounding_level = {
             'MICRO'  : lambda dt: dt.replace(microsecond=0),
             'SECOND' : lambda dt: dt.replace(microsecond=0),
@@ -298,6 +225,86 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         with open(filename, 'rb') as file:
             data = file.read()
         return data
+
+    @classmethod
+    def aliases(cls, alias_type):
+        datetime_round = {
+            'NANO'       : 'MICROSECOND',
+            'MICROSECOND': 'MICROSECOND',
+
+            'S'          : 'SECOND',
+            'SEC'        : 'SECOND',
+            'SECOND'     : 'SECOND',
+
+            'M'          : 'MINUTE',
+            'MIN'        : 'MINUTE',
+            'MINUTE'     : 'MINUTE',
+
+            'H'          : 'HOUR',
+            'HOUR'       : 'HOUR',
+
+            'D'          : 'DAY',
+            'DAY'        : 'DAY',
+
+            'MON'        : 'MONTH',
+            'MONTH'      : 'MONTH',
+
+            'YEAR'       : 'YEAR',
+            'Y'          : 'YEAR',
+            'YR'         : 'YEAR',
+
+            'WEEKDAY'    : 'WEEKDAY',
+            'WD'         : 'WEEKDAY',
+        }
+        size_round = {
+            'B': 'B',
+            'BYTE': 'B',
+            'BYTES': 'B',
+
+            'KB': 'KB',
+            'KILO': 'KB',
+            'KILOBYTE': 'KB',
+            'KILOBYTES': 'KB',
+
+            'MB': 'MB',
+            'MEGA': 'MB',
+            'MEGABYTE': 'MB',
+            'MEGABYTES': 'MB',
+
+            'GB': 'GB',
+            'GIGA': 'GB',
+            'GIGABYTE': 'GB',
+            'GIGABYTES': 'GB',
+
+            'TB': 'TB',
+            'TERA': 'TB',
+            'TERABYTE': 'TB',
+            'TERABYTES': 'TB',
+
+            'PB': 'PB',
+            'PETA': 'PB',
+            'PETABYTE': 'PB',
+            'PETABYTES': 'PB',
+
+            'EB': 'EB',
+            'EXA': 'EB',
+            'EXABYTE': 'EB',
+            'EXABYTES': 'EB',
+
+            'ZB': 'ZB',
+            'ZETTA': 'ZB',
+            'ZETTABYTE': 'ZB',
+            'ZETTABYTES': 'ZB',
+
+            'YB': 'YB',
+            'YOTTA': 'YB',
+            'YOTTABYTE': 'YB',
+            'YOTTABYTES': 'YB',
+        }
+        if alias_type == "size_round":
+            return size_round
+        elif alias_type == "datetime_round":
+            return datetime_round
 
 
 class DuplicateFilters:
