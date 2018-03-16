@@ -112,6 +112,35 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
     @classmethod
     def _datetime_round(cls, datetime_, abstraction=None):
+        aliases = {
+            'NANO'       : 'MICROSECOND',
+            'MICROSECOND': 'MICROSECOND',
+
+            'S'          : 'SECOND',
+            'SEC'        : 'SECOND',
+            'SECOND'     : 'SECOND',
+
+            'M'          : 'MINUTE',
+            'MIN'        : 'MINUTE',
+            'MINUTE'     : 'MINUTE',
+
+            'H'          : 'HOUR',
+            'HOUR'       : 'HOUR',
+
+            'D'          : 'DAY',
+            'DAY'        : 'DAY',
+
+            'MON'        : 'MONTH',
+            'MONTH'      : 'MONTH',
+
+            'YEAR'       : 'YEAR',
+            'Y'          : 'YEAR',
+            'YR'         : 'YEAR',
+
+            'WEEKDAY'    : 'WEEKDAY',
+            'WD'         : 'WEEKDAY',
+        }
+
         rounding_level = {
             'MICRO'  : lambda dt: dt.replace(microsecond=0),
             'SECOND' : lambda dt: dt.replace(microsecond=0),
@@ -122,7 +151,14 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             'YEAR'   : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0, day=1, month=1),
             'WEEKDAY': lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0).weekday(),
         }
-        rounded_datetime = rounding_level[abstraction.upper()](datetime_)
+        try:
+            abstraction = aliases[abstraction.upper()]
+        except KeyError as e:
+            log.error("Modifier {} is not valid".format(e))
+            # Set used to remove duplicate values
+            print("Valid Keys:", *sorted(set(aliases.values())), sep='\n  ')
+            exit(1)
+        rounded_datetime = rounding_level[abstraction](datetime_)
         return rounded_datetime
 
     # Used with checksum functions to reduce memory footprint
