@@ -83,12 +83,66 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
     @classmethod
     def _size_round(cls, size_bytes, abstraction=None):
         abstraction = abstraction.upper()
+        aliases = {
+            'B': 'B',
+            'BYTE': 'B',
+            'BYTES': 'B',
+
+            'KB': 'KB',
+            'KILO': 'KB',
+            'KILOBYTE': 'KB',
+            'KILOBYTES': 'KB',
+
+            'MB': 'MB',
+            'MEGA': 'MB',
+            'MEGABYTE': 'MB',
+            'MEGABYTES': 'MB',
+
+            'GB': 'GB',
+            'GIGA': 'GB',
+            'GIGABYTE': 'GB',
+            'GIGABYTES': 'GB',
+
+            'TB': 'TB',
+            'TERA': 'TB',
+            'TERABYTE': 'TB',
+            'TERABYTES': 'TB',
+
+            'PB': 'PB',
+            'PETA': 'PB',
+            'PETABYTE': 'PB',
+            'PETABYTES': 'PB',
+
+            'EB': 'EB',
+            'EXA': 'EB',
+            'EXABYTE': 'EB',
+            'EXABYTES': 'EB',
+
+            'ZB': 'ZB',
+            'ZETTA': 'ZB',
+            'ZETTABYTE': 'ZB',
+            'ZETTABYTES': 'ZB',
+
+            'YB': 'YB',
+            'YOTTA': 'YB',
+            'YOTTABYTE': 'YB',
+            'YOTTABYTES': 'YB',
+
+        }
         size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
         if size_bytes == 0:
-            return "0.0{}".format(size_name[size_name.index(abstraction)])
-        p = math.pow(1024, size_name.index(abstraction))
+            return "0.0{}".format(aliases['BYTES'])
+        try:
+            power_level = size_name.index(aliases[abstraction])
+        except KeyError as e:
+            log.error("Modifier {} is not valid".format(e))
+            # Set used to remove duplicate values
+            print("Valid Keys:", *sorted(set(aliases.values())), sep='\n  ')
+            exit(1)
+
+        p = math.pow(1024, power_level)
         s = round(size_bytes / p, 0)
-        output = "{}{}".format(s, size_name[size_name.index(abstraction)])
+        output = "{}{}".format(s, aliases[abstraction])
         return output
 
     @classmethod
