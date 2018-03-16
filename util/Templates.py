@@ -74,8 +74,8 @@ class BraceExpansion(string.Formatter):
     def __call__(self, *args, **kwargs):
         log.debug("{} called with {} {}".format(
             self.__repr__(),
-            sanitize_string(args),
-            sanitize_string(kwargs)))
+            sanitize_object(args),
+            sanitize_object(kwargs)))
         return self.format(self.template, *args, **kwargs)
 
     def format_field(self, value, spec):
@@ -119,21 +119,20 @@ class EscapedBraceExpansion(BraceExpansion):
 
     def format_field(self, value, spec):
         value = super().format_field(value, spec)
-        value = shlex.quote(value)
-        return value
+        shell_escape_value = shlex.quote(value)
+        return shell_escape_value
 
 
 def invoke_shell(*args, command, **labled_filters) -> str:
-    shell_escaped_labeled_filters = {key: shlex.quote(value)
-                                     for key, value in labled_filters.items()}
+    shell_escaped_labeled_filters = sanitize_object(labled_filters)
     try:
         output = subprocess.check_output(command(*args, **shell_escaped_labeled_filters), shell=True)
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
-        log.error(msg.format(cmd=sanitize_string(e.cmd),
+        log.error(msg.format(cmd=sanitize_object(e.cmd),
                              code=e.returncode,
-                             output=sanitize_string(e.output)))
+                             output=sanitize_object(e.output)))
         exit(1)
     except KeyError as e:
         log.error("Filter {}, not found".format(e))
@@ -141,16 +140,22 @@ def invoke_shell(*args, command, **labled_filters) -> str:
     return output
 
 
-def sanitize_string(msg):
+def sanitize_object(obj):
     encode_type = sys.getfilesystemencoding()
-    if isinstance(msg, str):
-        msg = msg.encode(encode_type, errors='replace')
-        msg = msg.decode(encode_type)
-    elif isinstance(msg, bytes):
-        msg = msg.decode(encode_type, errors='replace')
-    elif isinstance(msg, type(iter)):
-        msg = [sanitize_string(value) for value in msg]
-    return msg
+    if isinstance(obj, str):
+        obj = obj.encode(encode_type, errors='replace')
+        obj = obj.decode(encode_type)
+    elif isinstance(obj, bytes):
+        obj = obj.decode(encode_type, errors='replace')
+    elif isinstance(obj, dict):
+        obj = {sanitize_object(key): sanitize_object(value)
+               for key, value in obj.items()}
+    elif isinstance(obj, type(iter)):
+        # Sanitizes the iterable and calls the original iterable on it
+        # A list will return a list, tuple a tuple etc
+        iter_type = type(obj)
+        obj = iter_type(sanitize_object(value) for value in obj)
+    return obj
 
 
 def negation(func):

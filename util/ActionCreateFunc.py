@@ -7,13 +7,13 @@ from functools import partial
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import EscapedBraceExpansion
 from util.Templates import invoke_shell
-from util.Templates import sanitize_string
+from util.Templates import sanitize_object
 
 log = logging.getLogger(__name__)
 
 
 def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
-    log.info(' -> '.join(sanitize_string(filter_output)
+    log.info(' -> '.join(sanitize_object(filter_output)
                          for filter_output in labeled_filters.values()))
     if basic_formatting is True:
         for grp in filtered_group:
@@ -29,9 +29,9 @@ def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
 
 class ActionAppendExecShell(ActionAppendCreateFunc):
     def _process(self, template):
-        template_format = EscapedBraceExpansion(template)
+        command_template_format = EscapedBraceExpansion(template)
 
-        shell_command = partial(self._group_invoke_shell, command=template_format)
+        shell_command = partial(self._group_invoke_shell, command=command_template_format)
         return shell_command
 
     def _group_invoke_shell(self, filtered_group, command, **kwargs):
@@ -43,10 +43,10 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
 def remove_files(filtered_group: iter, **kwargs):
     for filename in filtered_group:
         try:
-            log.info("Removing {file}".format(file=sanitize_string(filename)))
+            log.info("Removing {file}".format(file=sanitize_object(filename)))
             os.remove(filename)
         except FileNotFoundError:
-            log.warning("{} Not Found".format(sanitize_string(filename)))
+            log.warning("{} Not Found".format(sanitize_object(filename)))
     return None
 
 
@@ -55,12 +55,12 @@ def hardlink_files(filtered_group: iter, **kwargs):
     for filename in others:
         try:
             log.info("Linking {source_file} -> {filename}".format(
-                source_file=sanitize_string(source_file),
-                filename=sanitize_string(filename)))
+                source_file=sanitize_object(source_file),
+                filename=sanitize_object(filename)))
             os.remove(filename)
             os.link(source_file, filename)
         except FileNotFoundError:
-            log.warning("{} Not Found".format(sanitize_string(filename)))
+            log.warning("{} Not Found".format(sanitize_object(filename)))
     return None
 
 
@@ -100,7 +100,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             overwrite_method = self._count
 
         if os.path.exists(merge_dir):
-            log.error("{} already exists".format(sanitize_string(merge_dir)))
+            log.error("{} already exists".format(sanitize_object(merge_dir)))
             exit(1)
         else:
             os.makedirs(merge_dir)
@@ -147,8 +147,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
                     else:
                         dest_file = os.path.join(filename_split[0] + "_{}".format(count) + filename_split[1])
                     dest_dir_file = os.path.join(dest_dir, dest_file)
-                log.info('Incrementing {} to {}'.format(sanitize_string(filename),
-                                                        sanitize_string(dest_file)))
+                log.info('Incrementing {} to {}'.format(sanitize_object(filename),
+                                                        sanitize_object(dest_file)))
                 shutil.copy(file, dest_dir_file)
                 yield dest_dir_file + '\n'
             else:
@@ -164,8 +164,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             dest_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_file):
                 msg = "{} Exists, Ignoring {}".format(
-                    sanitize_string(dest_file),
-                    sanitize_string(file))
+                    sanitize_object(dest_file),
+                    sanitize_object(file))
                 log.info(msg)
                 continue
             else:
@@ -178,7 +178,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             filename = os.path.split(file)[1]
             dest_dir_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_dir_file):
-                log.error('{} already exists, exiting'.format(sanitize_string(dest_dir_file)))
+                log.error('{} already exists, exiting'.format(sanitize_object(dest_dir_file)))
                 exit(1)
             else:
                 dest_dir_file = os.path.join(filter_dir, filename)
@@ -211,8 +211,8 @@ class ActionAppendMerge(ActionAppendCreateFunc):
             dest_dir_file = os.path.join(filter_dir, filename)
             if os.path.exists(dest_dir_file):
                 if condition(file, dest_dir_file):
-                    log.info("{} overwriting {}".format(sanitize_string(file),
-                                                        sanitize_string(dest_dir_file)))
+                    log.info("{} overwriting {}".format(sanitize_object(file),
+                                                        sanitize_object(dest_dir_file)))
                     shutil.copy(file, dest_dir_file)
                     yield dest_dir_file + '\n'
             else:

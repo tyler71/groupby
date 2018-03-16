@@ -12,7 +12,7 @@ from util.ArgumentParsing import parser_logic
 from util.DirectorySearch import directory_search
 from util.Logging import log_levels
 from util.Templates import negation
-from util.Templates import sanitize_string
+from util.Templates import sanitize_object
 
 
 def main():
@@ -78,7 +78,7 @@ def main():
             command_string = group_action(results, **labeled_filters)
             if command_string is not None:
                 for output in command_string:
-                    print(sanitize_string(output), end='')
+                    print(sanitize_object(output), end='')
             else:
                 continue
         else:
