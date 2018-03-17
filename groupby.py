@@ -69,6 +69,7 @@ def main():
     else:
         group_action = print_results
     for index, results in enumerate(filtered_groups):
+        output_string_occurred = False
         if len(results) >= args.group_size:
             # Take each filters output and label f1: 1st_output, fn: n_output...
             # Strip filter_output because of embedded newline
@@ -78,13 +79,16 @@ def main():
             command_string = group_action(results, **labeled_filters)
             if command_string is not None:
                 for output in command_string:
-                    print(sanitize_object(output), end='')
+                    if output:
+                        output_string_occurred = True
+                        print(sanitize_object(output), end='')
+                if output_string_occurred is True:
+                    print('')
             else:
                 continue
         else:
             # Removes extra blank newlines
             continue
-        print('')
 
 
 if __name__ == '__main__':
