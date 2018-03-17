@@ -117,6 +117,7 @@ class EscapedBraceExpansion(BraceExpansion):
     def __init__(self, template):
         super().__init__(template)
 
+    # This captures all brace expansion {} and {fn}
     def format_field(self, value, spec):
         value = super().format_field(value, spec)
         shell_escape_value = shlex.quote(value)
@@ -124,9 +125,8 @@ class EscapedBraceExpansion(BraceExpansion):
 
 
 def invoke_shell(*args, command, **labled_filters) -> str:
-    sanitized_labeled_filters = sanitize_object(labled_filters)
     try:
-        output = subprocess.check_output(command(*args, **sanitized_labeled_filters), shell=True)
+        output = subprocess.check_output(command(*args, **labled_filters), shell=True)
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
