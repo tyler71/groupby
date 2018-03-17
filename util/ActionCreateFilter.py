@@ -86,7 +86,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         abstraction = abstraction.upper()
         size_pow = {"B": 0, "KB": 1, "MB": 2, "GB": 3, "TB": 4, "PB": 5, "EB": 6, "ZB": 7, "YB": 8}
         if size_bytes == 0:
-            return "0.0{}".format(aliases['BYTES'])
+            return "0.0{}".format(aliases[abstraction])
         try:
             power_level = size_pow[aliases[abstraction]]
         except KeyError as e:
