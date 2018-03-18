@@ -312,21 +312,6 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             'PETA': 'PB',
             'PETABYTE': 'PB',
             'PETABYTES': 'PB',
-
-            'EB': 'EB',
-            'EXA': 'EB',
-            'EXABYTE': 'EB',
-            'EXABYTES': 'EB',
-
-            'ZB': 'ZB',
-            'ZETTA': 'ZB',
-            'ZETTABYTE': 'ZB',
-            'ZETTABYTES': 'ZB',
-
-            'YB': 'YB',
-            'YOTTA': 'YB',
-            'YOTTABYTE': 'YB',
-            'YOTTABYTES': 'YB',
         }
         if alias_type == "size_round":
             return size_round
