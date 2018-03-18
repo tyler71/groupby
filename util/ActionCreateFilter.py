@@ -111,20 +111,23 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
     def _size_round(cls, size_bytes, abstraction=None):
         aliases = cls.aliases("size_round")
         abstraction = abstraction.upper()
-        size_pow = {"B": 0, "KB": 1, "MB": 2, "GB": 3, "TB": 4, "PB": 5, "EB": 6, "ZB": 7, "YB": 8}
+        size_pow = OrderedDict([("B", 0), ("KB", 1), ("MB", 2), ("GB", 3), ("TB", 4), ("PB", 5)])
         if size_bytes == 0:
-            return "0.0{}".format(aliases[abstraction])
+            return "0{}".format(aliases[abstraction])
         try:
             power_level = size_pow[aliases[abstraction]]
         except KeyError as e:
             log.error("Modifier {} is not valid".format(e))
             # Set used to remove duplicate values
-            print("Valid Keys:", *sorted(set(aliases.values())), sep='\n  ')
+            print("Valid Keys:", *size_pow.keys(), sep='\n  ')
             exit(1)
 
         p = math.pow(1024, power_level)
         s = round(size_bytes / p, 0)
-        output = "{}{}".format(s, aliases[abstraction])
+
+        # Convert to integer
+        real_number = int(s)
+        output = "{}{}".format(real_number, aliases[abstraction])
         return output
 
     @classmethod
