@@ -3,7 +3,8 @@ from functools import partial
 
 from util.ActionCreateFilter import ActionAppendRegexFilter, \
     ActionAppendShellFilter, \
-    ActionAppendFilePropertyFilter
+    ActionAppendFilePropertyFilter, \
+    ActionSelectFilter
 from util.ActionCreateFunc import ActionAppendExecShell, \
     ActionAppendMerge, \
     remove_files, \
@@ -15,7 +16,8 @@ def parser_logic(parser):
     parser.add_argument('-f', '--filter',
                         dest="filters",
                         help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
-                        action=ActionAppendFilePropertyFilter,
+                        action=ActionSelectFilter,
+                        # action=ActionAppendFilePropertyFilter,
                         )
 
     parser.add_argument('-E', '--filter-regex',
