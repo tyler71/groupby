@@ -59,16 +59,7 @@ class BraceExpansion(string.Formatter):
 
     def __init__(self, template):
         self.template = template
-        self.aliases = {
-            "{}": "{0:z}",
-            "{.}": "{0:a}",
-            "{/}": "{0:b}",
-            "{//}": "{0:c}",
-            "{/.}": "{0:e}",
-            "{..}": "{0:f}",
-        }
-
-        for key, alias in self.aliases.items():
+        for key, alias in self.aliases().items():
             self.template = self.template.replace(key, alias)
 
     def __call__(self, *args, **kwargs):
@@ -77,6 +68,18 @@ class BraceExpansion(string.Formatter):
             sanitize_object(args),
             sanitize_object(kwargs)))
         return self.format(self.template, *args, **kwargs)
+
+    @classmethod
+    def aliases(cls):
+        aliases = {
+            '{}': '{0:z}',
+            '{.}': '{0:a}',
+            '{/}': '{0:b}',
+            '{//}': '{0:c}',
+            '{/.}': '{0:e}',
+            '{..}': '{0:f}',
+        }
+        return aliases
 
     def format_field(self, value, spec):
         # {} notation: normal output
