@@ -17,6 +17,30 @@ _whitespace = re.compile('^([\n \t\r]|)+$')
 log = logging.getLogger(__name__)
 
 
+class ActionSelectFilter(ActionAppendCreateFunc):
+    def _process(self, template):
+        self.filters = ActionAppendFilePropertyFilter.filters()
+        self.aliases = EscapedBraceExpansion.aliases()
+        selected_filter = self.check_filter_type(template)
+        return selected_filter
+
+    def check_filter_type(self, template):
+        if ":" in template:
+            filter_check = template.split(":", 1)[0]
+        else:
+            filter_check = template
+        if filter_check in self.filters:
+
+            return ActionAppendFilePropertyFilter._process(template)
+        elif any((alias in template
+                  for alias in self.aliases.keys())):
+            return ActionAppendShellFilter._process(template)
+        else:
+            msg = "{filter} is not a valid filter"
+            print(msg.format(filter=template))
+            exit(1)
+
+
 class OrderedDefaultListDict(OrderedDict):
     def __missing__(self, key):
         self[key] = value = []
@@ -24,12 +48,14 @@ class OrderedDefaultListDict(OrderedDict):
 
 
 class ActionAppendShellFilter(ActionAppendCreateFunc):
-    def _process(self, template):
+    @staticmethod
+    def _process(template):
         template_format = EscapedBraceExpansion(template)
         shell_command = partial(invoke_shell, command=template_format)
         return shell_command
 
 
+# Deprecated
 class ActionAppendRegexFilter(ActionAppendCreateFunc):
     def _process(self, template):
         log.warning("--filter-regex is deprecated, use -f filename:'{expr}' instead".format(expr=template))
@@ -68,14 +94,15 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         )
         return filters
 
-    def _process(self, template):
+    @classmethod
+    def _process(cls, template):
         if ":" in template:
             func_name, abstraction = template.split(":", 1)
-            func_name = self.filters()[func_name]
+            func_name = cls.filters()[func_name]
             filter_func = partial(func_name, abstraction=abstraction)
         else:
             func_name = template
-            filter_func = self.filters()[func_name]
+            filter_func = cls.filters()[func_name]
 
         return filter_func
 
