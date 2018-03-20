@@ -78,7 +78,7 @@ def main():
             for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[source_result]):
                 labeled_filters["f{fn}".format(fn=filter_number + 1)] = filter_output.strip()
 
-            command_string = group_action(results, **labeled_filters)
+            command_string = group_action(results, labeled_filters=labeled_filters)
             if command_string is not None:
                 for output in command_string:
                     if output:

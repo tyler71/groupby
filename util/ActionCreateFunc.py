@@ -12,7 +12,7 @@ from util.Templates import sanitize_object
 log = logging.getLogger(__name__)
 
 
-def print_results(filtered_group, *, basic_formatting=False, **labeled_filters):
+def print_results(filtered_group, *, basic_formatting=False, labeled_filters):
     log.info(' -> '.join(sanitize_object(filter_output)
                          for filter_output in labeled_filters.values()))
     if basic_formatting is True:
@@ -34,13 +34,13 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
         shell_command = partial(self._group_invoke_shell, command=command_template_format)
         return shell_command
 
-    def _group_invoke_shell(self, filtered_group, command, **kwargs):
+    def _group_invoke_shell(self, filtered_group, command, labeled_filters, **kwargs):
         for file in filtered_group:
-            output = invoke_shell(file, command=command, **kwargs)
+            output = invoke_shell(file, command=command, labeled_filters=labeled_filters, **kwargs)
             yield output
 
 
-def remove_files(filtered_group: iter, **kwargs):
+def remove_files(filtered_group: iter, labeled_filters, **kwargs):
     for filename in filtered_group:
         try:
             log.info("Removing {file}".format(file=sanitize_object(filename)))
@@ -50,7 +50,7 @@ def remove_files(filtered_group: iter, **kwargs):
     return None
 
 
-def hardlink_files(filtered_group: iter, **kwargs):
+def hardlink_files(filtered_group: iter, labeled_filters, **kwargs):
     source_file, *others = filtered_group
     for filename in others:
         try:
@@ -111,7 +111,7 @@ class ActionAppendMerge(ActionAppendCreateFunc):
         return callable_
 
     @staticmethod
-    def _abstract_call(filtered_group, *, merge_dir, overwrite_method, **labeled_filters):
+    def _abstract_call(filtered_group, *, merge_dir, overwrite_method, labeled_filters):
         filter_dir = os.path.join(merge_dir, *labeled_filters.values())
         os.makedirs(filter_dir)
         output = overwrite_method(filter_dir, filter_group=filtered_group)

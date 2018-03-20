@@ -127,9 +127,9 @@ class EscapedBraceExpansion(BraceExpansion):
         return shell_escape_value
 
 
-def invoke_shell(*args, command, **labled_filters) -> str:
+def invoke_shell(*args, command, labeled_filters) -> str:
     try:
-        output = subprocess.check_output(command(*args, **labled_filters), shell=True)
+        output = subprocess.check_output(command(*args, **labeled_filters), shell=True)
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
