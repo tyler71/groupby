@@ -135,11 +135,17 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
     def _filename_round(cls, filename, abstraction=None):
         def _re_match(filename, *, pattern) -> str:
             assert isinstance(pattern, re._pattern_type)
-            split_file = os.path.split(filename)[1]
+            split_filename = os.path.split(filename)[1]
 
-            result = pattern.search(split_file)
-            result = result.group() if result else ''
-            return result
+            # If capture groups are used, use them,
+            # otherwise return the entire matched expression
+            result = pattern.search(split_filename)
+            if result and result.groups():
+                return ''.join(result.groups())
+            elif result and result.group():
+                return result.group()
+            else:
+                return ''
 
         try:
             expr = re.compile(abstraction)
