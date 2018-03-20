@@ -111,7 +111,7 @@ Filters are completed in order, left to right as specified on each file discover
 * **file**: returns the byte data
 
 #### Customizing Builtin
-Additionally, these filters allow additional specification of the output
+Additionally, these filters allow modifiers of the output
 * sha
 * modified
 * accessed
@@ -167,7 +167,19 @@ groupby -f filename:'\d{3,4}p' foo/
 ->
 -> foo/foo2_1080p.mkv
 ```
-The regex match may also be used as notation for custom shell commmands
+If capture groups are part of the expression, only the captured groups are returned
+Below, the string must have a `.` followed by 2-4 alphanumeric characters and end the string,
+but it will only return a result of the 2-4 alphanumeric characters
+
+```commandline
+groupby -f filename:'\.(\w{2,4}$'
+# Output
+-> mkv
+-> mkv
+-> mkv
+-> mkv
+```
+The output of this expression is available with the notation {fn} like other filters
 
 ```commandline
 groupby -f filename:'\d+p' foo -x "mkdir -p {f1}/{/}"
