@@ -177,8 +177,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             print("Valid Keys:", *sorted(set(aliases.values())), sep='\n  ')
             exit(1)
         rounded_datetime = rounding_level[abstraction](datetime_)
-        spaces_converted = str(rounded_datetime).replace(' ', '_')
-        return spaces_converted
+        return rounded_datetime
 
     # Used with checksum functions to reduce memory footprint
     @classmethod
@@ -193,7 +192,8 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         access_datetime = datetime.datetime.fromtimestamp(access_time)
         if abstraction is not None:
             access_datetime = cls._datetime_round(access_datetime, abstraction)
-        return str(access_datetime)
+        spaces_converted = str(access_datetime).replace(' ', '_')
+        return str(spaces_converted)
 
     @classmethod
     def modification_date(cls, filename: str, *, abstraction=None) -> str:
@@ -201,7 +201,8 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         modified_datetime = datetime.datetime.fromtimestamp(modification_time)
         if abstraction is not None:
             modified_datetime = cls._datetime_round(modified_datetime, abstraction)
-        return str(modified_datetime)
+        spaces_converted = str(modified_datetime).replace(' ', '_')
+        return str(spaces_converted)
 
     @classmethod
     def file_name(cls, filename: str, *, abstraction=None) -> str:
