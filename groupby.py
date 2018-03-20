@@ -68,13 +68,14 @@ def main():
         group_action = args.group_action[-1]
     else:
         group_action = print_results
-    for index, results in enumerate(filtered_groups):
+    for results in filtered_groups:
         output_string_occurred = False
         if len(results) >= args.group_size:
             # Take each filters output and label f1: 1st_output, fn: n_output...
             # Strip filter_output because of embedded newline
             labeled_filters = OrderedDict()
-            for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[index]):
+            source_result = results[0]
+            for filter_number, filter_output in enumerate(filtered_groups.filter_hashes[source_result]):
                 labeled_filters["f{fn}".format(fn=filter_number + 1)] = filter_output.strip()
             command_string = group_action(results, **labeled_filters)
             if command_string is not None:

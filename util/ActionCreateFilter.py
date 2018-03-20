@@ -5,6 +5,7 @@ import math
 import os
 import re
 from collections import OrderedDict
+from collections import defaultdict
 from functools import partial
 
 from util.Templates import ActionAppendCreateFunc, \
@@ -326,7 +327,7 @@ class DuplicateFilters:
     def __init__(self, *, filters, filenames, conditions=None):
         self.filters = filters
         self.filenames = filenames
-        self.filter_hashes = list()
+        self.filter_hashes = defaultdict(list)
         if conditions is None:
             self.conditions = list()
         else:
@@ -351,16 +352,15 @@ class DuplicateFilters:
                 if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                     # Just a newline means no output
                     continue
+                self.filter_hashes[path].append(item_hash)
                 grouped_groups[item_hash].append(path)
         for key, group in grouped_groups.items():
             if len(group) > 0:
                 # key is appended enclosed in a list to group it, allowing other filters to also append to that
                 # specific group
-                self.filter_hashes.append([key])
                 yield group
 
     def _additional_filters(self, func, groups):
-        index = 0
         for group_list in groups:
             unmatched_groups = OrderedDefaultListDict()
             filtered_groups = list()
@@ -368,10 +368,11 @@ class DuplicateFilters:
                 first, *others = group_list
                 filtered_groups.append(first)
                 source_hash = func(first).strip()
+                self.filter_hashes[first].append(source_hash)
 
                 # For each additional filter, append the source hash to the filter_hashes, allowing
                 # a user to use the results as part of a command
-                self.filter_hashes[index].append(source_hash)
+                # self.filter_hashes[index].append(source_hash)
 
                 for item in others:
                     item_hash = func(item).strip()
@@ -381,6 +382,7 @@ class DuplicateFilters:
                     if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                         continue
 
+                    self.filter_hashes[item].append(item_hash)
                     # If this item matches the source, include it in the list to be returned.
                     if item_hash == source_hash:
                         filtered_groups.append(item)
@@ -390,15 +392,8 @@ class DuplicateFilters:
             yield filtered_groups
             # Calls itself on all unmatched groups
             if unmatched_groups:
-                previous_filter_track = self.filter_hashes[index][0:-1]
                 for item_hash, unmatched_group in unmatched_groups.items():
-                    # key is appended enclosed in a list to group it, allowing other filters to also append to that
-                    # specific group
-                    index += 1
-                    self.filter_hashes.insert(index, previous_filter_track + [item_hash])
                     yield unmatched_group
-
-            index += 1
 
 
 if __name__ == '__main__':
