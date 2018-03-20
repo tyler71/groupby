@@ -370,10 +370,6 @@ class DuplicateFilters:
                 source_hash = func(first).strip()
                 self.filter_hashes[first].append(source_hash)
 
-                # For each additional filter, append the source hash to the filter_hashes, allowing
-                # a user to use the results as part of a command
-                # self.filter_hashes[index].append(source_hash)
-
                 for item in others:
                     item_hash = func(item).strip()
 
