@@ -133,7 +133,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
     @classmethod
     def _filename_round(cls, filename, abstraction=None):
-        def _re_match(filename, *, pattern) -> str:
+        def re_match(filename, *, pattern) -> str:
             assert isinstance(pattern, re._pattern_type)
             split_filename = os.path.split(filename)[1]
 
@@ -153,7 +153,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             err_msg = 'Regex "{expr}" generated this error\n{err}'
             log.error(err_msg.format(expr=expr, err=e))
             exit(1)
-        regex_pattern = _re_match(filename, pattern=expr)
+        regex_pattern = re_match(filename, pattern=expr)
         return regex_pattern
 
     @classmethod
@@ -177,7 +177,8 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             print("Valid Keys:", *sorted(set(aliases.values())), sep='\n  ')
             exit(1)
         rounded_datetime = rounding_level[abstraction](datetime_)
-        return rounded_datetime
+        spaces_converted = str(rounded_datetime).replace(' ', '_')
+        return spaces_converted
 
     # Used with checksum functions to reduce memory footprint
     @classmethod
