@@ -1,10 +1,10 @@
 # **groupby**
 
-*groupby* is a dedicated tool for grouping files by their properties.
+*groupby* is a tool for grouping files by their properties.
 
 ## Features
 * Simple to use: `groupy` will return grouped results in current directory
-* Predefined filters or use your own
+* Builtin or shell filters
 * Supports similar GNU Parallel notation
 * Execute commands on each grouped file
 * Ignore or prefer specific directories or files
@@ -147,11 +147,13 @@ Filters are completed in order, left to right as specified on each file discover
 
 #### Customizing Builtin
 Additionally, these filters allow modifiers of the output
-* **sha**     :[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
-* **modified**:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
-* **accessed**:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
-* **size**    :[B, KB, MB, GB, TB, PB]
-* **filename**:'EXPRESSION'
+```commandline
+sha     :[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
+modified:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+accessed:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+size    :[B, KB, MB, GB, TB, PB]
+filename:'EXPRESSION'
+```
 
 The syntax follows a common format of `filter:OPTION`, delimited by a '`:`'
 
@@ -159,15 +161,21 @@ If omitted, uses the default or unmodified output
 ##### SHA
 SHA permits multiple checksum levels to group by.
 
-Syntax: `-f sha:[1,224,256,384,512,3_224,3_256,3_384,3_512]`
+Syntax: 
+```commandline
+-f sha:[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
+```
 
 For example, `-f sha:256` will invoke a sha256 checksum on the file
 
 ##### DATETIME
 `modified` and `accessed` permit rounding of their reported times.
 
-Syntax: `-f modified:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]` / 
-        `-f accessed:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]`
+Syntax: 
+```commandline
+-f modified:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+-f accessed:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+```
 
 For example, `-f modified:HOUR` will group files that have been modified in the same hour
 
@@ -184,7 +192,10 @@ Abbreviations:
 ##### FILENAME
 [Python based regular expressions](https://docs.python.org/3/library/re.html) are permitted on filenames
 
-Syntax: `-f filename:'EXPRESSION'`
+Syntax: 
+```commandline
+-f filename:'EXPRESSION'
+```
 
 Filenames often carry unique information about a file, such as
 * resolution for videos
@@ -236,7 +247,10 @@ groupby -f filename:'\d+p' foo -x "mkdir -p {f1}/{/}"
 ##### SIZE
 Size permit rounding of reported byte size
 
-Syntax: `-f size:[B, KB, MB, GB, TB, PB]`
+Syntax:
+```commandline
+-f size:[B, KB, MB, GB, TB, PB]
+```
 
 For example, `-f size:MB` will output filenames rounded by the nearest megabyte
 
@@ -256,15 +270,16 @@ file to act on and to identify it as a shell filter.
 For example, ```du -b {}``` will translate to ```du -b foobar.mkv```
 
 Be aware of the output of shell commands. They often include the relative path and filename
-in the output. *Output should be sanitized to only include the output of the command* through
+in the output. *Output should be sanitized to only include the relative output of the command* through
 tools such as `cut` or `grep`. For example
 ```commandline
-du -b {} -> du -b foobar.mkv -> 476027 foobar.mkv              # Bad
-du -b {} -> du -b foobar.mkv | cut -f1 -> 476027               # Better
-grep -oE '[0-9]+' {} -> grep -oE '[0-9]+' foobar.mkv -> 476027 # Better
+du -b {} 
+    -> 476027 foobar.mkv              # Bad
+du -b {} 
+    -> 476027                         # Better
+du -b {} | grep -oE '[0-9]+'
+    -> 476027                         # Better
 ```
-See Brace Expansion for more information
-
 ## Group Execution
 The results are grouped by their filters and can be acted on.
 Only the last action specified will be used.
@@ -362,9 +377,9 @@ $ groupby -r -f size -x "mkdir -p {f1}; mv {} {f1}/{/}
  ->  mv /foo/bar/file.ogg 122254/file.ogg
 
 # Group all pictures into year and month
-groupby.py -t2 -r \                             
-    -s "exiftool -p '\$DateTimeOriginal' {} | cut -d\: -f1" \                   
-    -s "exiftool -p '\$DateTimeOriginal' {} | cut -d\: -f2" \                   
+groupby.py -g2 -r \                             
+    -f "exiftool -p '\$DateTimeOriginal' {} | cut -d\: -f1" \                   
+    -f "exiftool -p '\$DateTimeOriginal' {} | cut -d\: -f2" \                   
     -x "echo mkdir -p {f1}/{f2}; echo mv {} {f1}/{f2}/{/}"  \                   
     foo/bar
 # Commands executed
