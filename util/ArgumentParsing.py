@@ -12,15 +12,15 @@ from util.ActionCreateFunc import ActionAppendExecShell, \
 def parser_logic(parser):
     parser.add_argument('-f', '--filter',
                         dest="filters",
-                        help="Filenames represented as {}: --shell \"du {} | cut -f1\"",
+                        metavar="FILTER",
+                        help=help_filter,
                         action=ActionSelectFilter,
-                        # action=ActionAppendFilePropertyFilter,
                         )
 
     parser.add_argument('-x', '--exec-shell',
                         dest="group_action",
                         metavar='COMMAND',
-                        help="Filenames represented as {}, filters as {f1}, {fn}...: --exec-group \"echo {} {f1}\"",
+                        help=help_exec_shell,
                         action=ActionAppendExecShell,
                         )
 
@@ -28,8 +28,7 @@ def parser_logic(parser):
                         dest="group_action",
                         metavar="DIRECTORY",
                         action=ActionAppendMerge,
-                        help='Includes 4 options including {merge_options}'.format(
-                            merge_options=' '.join(ActionAppendMerge.overwrite_flags().keys()))
+                        help=help_exec_merge,
                         )
 
     parser.add_argument('--exec-remove',
@@ -48,7 +47,7 @@ def parser_logic(parser):
                         const=partial(print_results, basic_formatting=True),
                         dest="group_action",
                         action="append_const",
-                        help='No indenting or empty newlines in standard output',
+                        help='no indenting or empty newlines in standard output',
                         )
 
     parser.add_argument('-r', '--recursive',
@@ -85,7 +84,7 @@ def parser_logic(parser):
                         )
 
     parser.add_argument('--follow-symbolic',
-                        action='store_true', help="Allow following of symbolic links for compare",
+                        action='store_true', help="allow following of symbolic links for compare",
                         )
 
     parser.add_argument('-g', '--group-size', metavar="SIZE", type=int, default=1,
@@ -104,3 +103,46 @@ def parser_logic(parser):
                         )
     return parser
 
+
+help_filter = """builtin filters
+modifiers with syntax filter:modifier
+  partial_md5
+  md5
+  sha     :[1,224,256,384,512,3_224,3_256,3_384,3_512]
+  modified:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
+  accessed:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
+  size    :[B, KB, MB, GB, TB, PB]
+  filename:'EXPRESSION'
+  file
+example: -f size:mb
+
+shell filters
+filenames represented as {}: 
+example: -f \"du {} | cut -f1\""""
+
+help_exec_shell = """complete shell command on grouped files
+notation:
+  {}  : path and filename
+  {.} : filename, extension removed
+  {/} : filename, path removed
+  {//}: path of filename
+  {/.}: filename, extension and path removed
+  {..}: extension of filename
+  {fn}: filter output of filter n
+example: -x "mkdir {f1}; mv {} {f1}/{/}"
+"""
+
+help_exec_merge = """syntax DIRECTORY:MODIFIER
+default = DIRECTORY:COUNT
+COUNT : increment conflicting filenames
+        foo.mkv -> foo_0001.mkv
+IGNORE: skip conflicting filenames
+ERROR : exit the program if conflicting filename found
+
+replace conflicting filenames with CONDITION
+LARGER
+SMALLER
+NEWER
+OLDER
+example: -m foo:LARGER
+"""

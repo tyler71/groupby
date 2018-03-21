@@ -248,6 +248,7 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         datetime_round = {
             'NANO'       : 'MICROSECOND',
             'MICROSECOND': 'MICROSECOND',
+            'MICRO'      : 'MICROSECOND',
 
             'S'          : 'SECOND',
             'SEC'        : 'SECOND',

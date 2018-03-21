@@ -16,7 +16,7 @@ from util.Templates import sanitize_object
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser = parser_logic(parser)
     args = parser.parse_args()
 

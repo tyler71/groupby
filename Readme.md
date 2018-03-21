@@ -16,10 +16,8 @@
 
 ## Syntax
 ```commandline
-usage: groupby [-h]
-               [-f {partial_md5,md5,sha256,modified,accessed,size,filename,file}]
-               [-E EXPRESSION] [-s COMMAND] [-x COMMAND] [-m DIRECTORY]
-               [--exec-remove] [--exec-link] [--exec-basic-formatting] [-r]
+usage: groupby [-h] [-f FILTERS] [-x COMMAND] [-m DIRECTORY] [--exec-remove]
+               [--exec-link] [--exec-basic-formatting] [-r]
                [--include INCLUDE] [--exclude EXCLUDE]
                [--dir-include DIR_INCLUDE] [--dir-exclude DIR_EXCLUDE]
                [--dir-hidden] [--max-depth MAX_DEPTH] [--empty-file]
@@ -31,7 +29,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f {partial_md5,md5,sha256,modified,accessed,size,filename,file}, --filter {partial_md5,md5,sha256,modified,accessed,size,filename,file}
+  -f FILTERS, --filter FILTERS
                         Filenames represented as {}: --shell "du {} | cut -f1"
   -x COMMAND, --exec-shell COMMAND
                         Filenames represented as {}, filters as {f1}, {fn}...:
