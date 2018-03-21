@@ -56,29 +56,6 @@ class ActionAppendShellFilter(ActionAppendCreateFunc):
         return shell_command
 
 
-# Deprecated
-class ActionAppendRegexFilter(ActionAppendCreateFunc):
-    def _process(self, template):
-        log.warning("--filter-regex is deprecated, use -f filename:'{expr}' instead".format(expr=template))
-        try:
-            template = re.compile(template)
-        except Exception as e:
-            err_msg = 'Regex "{expr}" generated this error\n{err}'
-            log.error(err_msg.format(expr=template, err=e))
-            exit(1)
-        regex_pattern = partial(self._re_match, pattern=template)
-        return regex_pattern
-
-    @staticmethod
-    def _re_match(filename, *, pattern) -> str:
-        assert isinstance(pattern, re._pattern_type)
-        split_file = os.path.split(filename)[1]
-
-        result = pattern.search(split_file)
-        result = result.group() if result else ''
-        return result
-
-
 class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
     @classmethod
     def filters(cls):
