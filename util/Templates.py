@@ -127,11 +127,12 @@ class EscapedBraceExpansion(BraceExpansion):
         return shell_escape_value
 
 
-def invoke_shell(*args, command, labeled_filters, **kwargs) -> bytes:
+def invoke_shell(*args, command, labeled_filters=None, **kwargs) -> bytes:
     # If any extra named arguments provided, use labeled_filters to carry it
-    labeled_filters.update(kwargs)
+    if labeled_filters is not None:
+        kwargs.update(labeled_filters)
     try:
-        output = subprocess.check_output(command(*args, **labeled_filters), shell=True)
+        output = subprocess.check_output(command(*args, **kwargs), shell=True)
     except subprocess.CalledProcessError as e:
         msg = 'Command: "{cmd}" generated a code [{code}]\n' \
               'Output: {output}'
