@@ -147,32 +147,39 @@ Filters are completed in order, left to right as specified on each file discover
 
 #### Customizing Builtin
 Additionally, these filters allow modifiers of the output
-* sha
-* modified
-* accessed
-* size
-* filename
+* sha     :[1,224,256,384,512,3_224,3_256,3_384,3_512]
+* modified:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
+* accessed:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
+* size    :[B, KB, MB, GB, TB, PB]
+* filename:'EXPRESSION'
 
 The syntax follows a common format of `filter:OPTION`, delimited by a '`:`'
+
+If omitted, uses the default or unmodified output
 ##### SHA
 SHA permits multiple checksum levels to group by.
 
-Syntax: `-f sha:OPTION`
-
-**options**: `1`, `224`, `256`, `384`, `512`, `3_224`, `3_256`, `3_384`, `3_512`
+Syntax: `-f sha:[1,224,256,384,512,3_224,3_256,3_384,3_512]`
 
 For example, `-f sha:256` will invoke a sha256 checksum on the file
 
 ##### DATETIME
 `modified` and `accessed` permit rounding of their reported times.
 
-Syntax: `-f modified:OPTION` / 
-        `-f accessed:OPTION`
-
-**options**: `MICRO`, `SECOND`, `MINUTE`, `HOUR`, `DAY`, `MONTH`, `YEAR`, `WEEKDAY`
+Syntax: `-f modified:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]` / 
+        `-f accessed:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]`
 
 For example, `-f modified:HOUR` will group files that have been modified in the same hour
 
+Abbreviations:
+* MICROSECOND: `NANO` `MICRO` `MICROSECONDS`
+* SECOND: `S` `SEC` `SECONDS`
+* MINUTE: `M` `MIN` `MINUTES`
+* HOUR: `H` `HOURS`
+* DAY: `D` `DAYS`
+* MONTH: `MON` `MONTHS`
+* YEAR: `Y` `YR` `YEARS`
+* WEEKDAY: `WD` `WEEKDAYS`
 
 ##### FILENAME
 [Python based regular expressions](https://docs.python.org/3/library/re.html) are permitted on filenames
@@ -229,11 +236,18 @@ groupby -f filename:'\d+p' foo -x "mkdir -p {f1}/{/}"
 ##### SIZE
 Size permit rounding of reported byte size
 
-Syntax: `-f size:OPTION`
-
-**options**: `B`, `KB`, `MB`, `GB`, `TB`, `PB`, `EB`, `ZB`, `YB`
+Syntax: `-f size:[B, KB, MB, GB, TB, PB]`
 
 For example, `-f size:MB` will output filenames rounded by the nearest megabyte
+
+Abbrevations:
+* BYTE: `B` `BYTES`
+* KILOBYTE: `KB` `KILO` `KILOBYTES`
+* MEGABYTE: `MB` `MEGA` `MEGABYTES`
+* GIGABYTE: `GB` `GIGA` `GIGABYTES`
+* TERABYTE: `TB` `TERA` `TERABYTES`
+* PETABYTE: `PB` `PETA` `PETABYTES`
+
 
 ### Shell Filters
 Shell filters, invoked similary with `-f`/`--filter` require the use of brace expansion to know which
