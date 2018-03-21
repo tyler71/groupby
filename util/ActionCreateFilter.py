@@ -69,7 +69,8 @@ class ActionAppendRegexFilter(ActionAppendCreateFunc):
         regex_pattern = partial(self._re_match, pattern=template)
         return regex_pattern
 
-    def _re_match(self, filename, *, pattern) -> str:
+    @staticmethod
+    def _re_match(filename, *, pattern) -> str:
         assert isinstance(pattern, re._pattern_type)
         split_file = os.path.split(filename)[1]
 

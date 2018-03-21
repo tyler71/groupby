@@ -34,7 +34,8 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
         shell_command = partial(self._group_invoke_shell, command=command_template_format)
         return shell_command
 
-    def _group_invoke_shell(self, filtered_group, command, labeled_filters, **kwargs):
+    @staticmethod
+    def _group_invoke_shell(filtered_group, command, labeled_filters, **kwargs):
         for file in filtered_group:
             output = invoke_shell(file, command=command, labeled_filters=labeled_filters, **kwargs)
             yield output
