@@ -39,7 +39,8 @@ class ActionAppendCreateFunc(argparse._AppendAction):
             ))
         super().__call__(parser, namespace, values, option_string)
 
-    def _process(self, template):
+    @staticmethod
+    def _process(template):
         # should take a template
         # and return a function allowing it to be called with a string
         raise (ValueError, "Expected to be extended in subclass")

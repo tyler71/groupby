@@ -17,11 +17,10 @@
 ## Syntax
 ```commandline
 usage: groupby [-h] [-f FILTER] [-x COMMAND] [-m DIRECTORY] [--exec-remove]
-               [--exec-link] [--exec-basic-formatting] [-r]
-               [--include INCLUDE] [--exclude EXCLUDE]
-               [--dir-include DIR_INCLUDE] [--dir-exclude DIR_EXCLUDE]
-               [--dir-hidden] [--max-depth MAX_DEPTH] [--empty-file]
-               [--follow-symbolic] [-g SIZE] [-v]
+               [--exec-link] [--exec-basic-formatting] [-r] [--include FILE]
+               [--exclude FILE] [--dir-include DIRECTORY]
+               [--dir-exclude DIRECTORY] [--dir-hidden] [--max-depth DEPTH]
+               [--empty-file] [--follow-symbolic] [-g SIZE] [-v]
                [directory [directory ...]]
 
 positional arguments:
@@ -75,12 +74,12 @@ optional arguments:
   --exec-basic-formatting
                         no indenting or empty newlines in standard output
   -r, --recursive
-  --include INCLUDE
-  --exclude EXCLUDE
-  --dir-include DIR_INCLUDE
-  --dir-exclude DIR_EXCLUDE
+  --include FILE
+  --exclude FILE
+  --dir-include DIRECTORY
+  --dir-exclude DIRECTORY
   --dir-hidden
-  --max-depth MAX_DEPTH
+  --max-depth DEPTH
   --empty-file          Allow comparision of empty files
   --follow-symbolic     allow following of symbolic links for compare
   -g SIZE, --group-size SIZE

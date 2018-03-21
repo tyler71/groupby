@@ -56,18 +56,22 @@ def parser_logic(parser):
 
     parser.add_argument('--include',
                         action='append',
+                        metavar='FILE',
                         )
 
     parser.add_argument('--exclude',
                         action='append',
+                        metavar='FILE',
                         )
 
     parser.add_argument('--dir-include',
                         action='append',
+                        metavar='DIRECTORY',
                         )
 
     parser.add_argument('--dir-exclude',
                         action='append',
+                        metavar='DIRECTORY',
                         )
 
     parser.add_argument('--dir-hidden',
@@ -76,6 +80,7 @@ def parser_logic(parser):
 
     parser.add_argument("--max-depth",
                         type=int,
+                        metavar='DEPTH',
                         )
 
     parser.add_argument('--empty-file',
@@ -87,7 +92,10 @@ def parser_logic(parser):
                         action='store_true', help="allow following of symbolic links for compare",
                         )
 
-    parser.add_argument('-g', '--group-size', metavar="SIZE", type=int, default=1,
+    parser.add_argument('-g', '--group-size',
+                        metavar="SIZE",
+                        type=int,
+                        default=1,
                         help="Minimum number of files in each group",
                         )
 
