@@ -33,7 +33,6 @@ optional arguments:
   -h, --help            show this help message and exit
   -f {partial_md5,md5,sha256,modified,accessed,size,filename,file}, --filter {partial_md5,md5,sha256,modified,accessed,size,filename,file}
                         Filenames represented as {}: --shell "du {} | cut -f1"
-  -s COMMAND, --filter-shell COMMAND
   -x COMMAND, --exec-shell COMMAND
                         Filenames represented as {}, filters as {f1}, {fn}...:
                         --exec-group "echo {} {f1}"
