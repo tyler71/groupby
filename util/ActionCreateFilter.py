@@ -396,14 +396,10 @@ class DuplicateFilters:
             yield filtered_groups
             # Calls itself on all unmatched groups
             if unmatched_groups:
-                for item_hash, unmatched_group in unmatched_groups.items():
+                for unmatched_group in unmatched_groups.values():
+                    log.debug("Subgroup")
                     yield unmatched_group
 
 
 if __name__ == '__main__':
-    print(md5_sum("tests/file_properties/hash"))
-    print(partial_md5_sum("tests/file_properties/hash"))
-    print(sha256_sum("tests/file_properties/hash"))
-
-    print(disk_size("tests/file_properties/5120_byte"))
-    print(modification_date("tests/file_properties/5120_byte"))
+    pass

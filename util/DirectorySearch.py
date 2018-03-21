@@ -110,5 +110,4 @@ def hidden_in_dir(directory):
 
 
 if __name__ == '__main__':
-    for directory, files in directory_search("tests/directory_search"):
-        print(directory, files)
+    pass
