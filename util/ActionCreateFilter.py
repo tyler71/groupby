@@ -243,8 +243,8 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             data = file.read()
         return data
 
-    @classmethod
-    def aliases(cls, alias_type):
+    @staticmethod
+    def aliases(alias_type):
         datetime_round = {
             'NANO'       : 'MICROSECOND',
             'MICROSECOND': 'MICROSECOND',

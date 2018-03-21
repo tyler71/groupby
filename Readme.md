@@ -113,12 +113,18 @@ To assist with this, brace expansion of the following syntax is observed:
 # Filter output
 {fn} -> output
 ```
-With the exceptions of `{..}` and `{fn}`, this brace expansion is a similar syntax to [GNU Parallel](https://www.gnu.org/software/parallel/)
+With the exceptions of `{..}` and `{fn}`, this brace expansion is a similar syntax to [GNU Parallel's Context Replace](https://www.gnu.org/software/parallel/man.html#EXAMPLE:-Context-replace)
 
 Filenames with invalid encoding or with characters with special meaning to the shell are quoted.
-For example `echo {}; echo malicous_command` will be quoted to prevent `echo malcious_command` from being run
-
-Invalid encoding is also sanitized before printing to the screen, however group actions can be completed on it
+```commandline
+groupby -x "echo {}"
+-> echo '/path/foobar.ogg; malicous_command'
+ /path/foobar.ogg; malicous_command
+groupby -x "echo {/}"
+-> echo 'foobar.ogg; malicous_command'
+ foobar.ogg; malicous_command
+```
+Invalid encoding is also sanitized before printing to the screen, however actions can be completed on it
 
 For example, a file with invalid encoding will be replaced with `?`  `R??ڀ?2??z?&?̀?????B?A?I?P?CvJ??` prior to printing on the screen
 but file actions will be done on the original filename
@@ -203,7 +209,7 @@ Below, the string must have a `.` followed by 2-4 alphanumeric characters and en
 but it will only return a result of the 2-4 alphanumeric characters
 
 ```commandline
-groupby -f filename:'\.(\w{2,4}$'
+groupby -f filename:'\.(\w{2,4})$'
 # Output
 -> mkv
 -> mkv
