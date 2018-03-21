@@ -42,7 +42,8 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
 
 
 def remove_files(filtered_group: iter, labeled_filters, **kwargs):
-    for filename in filtered_group:
+    files_to_remove = filtered_group[1:]
+    for filename in files_to_remove:
         try:
             log.info("Removing {file}".format(file=sanitize_object(filename)))
             os.remove(filename)
