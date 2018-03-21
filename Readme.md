@@ -16,7 +16,7 @@
 
 ## Syntax
 ```commandline
-usage: groupby [-h] [-f FILTERS] [-x COMMAND] [-m DIRECTORY] [--exec-remove]
+usage: groupby [-h] [-f FILTER] [-x COMMAND] [-m DIRECTORY] [--exec-remove]
                [--exec-link] [--exec-basic-formatting] [-r]
                [--include INCLUDE] [--exclude EXCLUDE]
                [--dir-include DIR_INCLUDE] [--dir-exclude DIR_EXCLUDE]
@@ -29,18 +29,51 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -f FILTERS, --filter FILTERS
-                        Filenames represented as {}: --shell "du {} | cut -f1"
+  -f FILTER, --filter FILTER
+                        builtin filters
+                        modifiers with syntax filter:modifier
+                          partial_md5
+                          md5
+                          sha     :[1,224,256,384,512,3_224,3_256,3_384,3_512]
+                          modified:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
+                          accessed:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
+                          size    :[B, KB, MB, GB, TB, PB]
+                          filename:'EXPRESSION'
+                          file
+                        example: -f size:mb
+                        
+                        shell filters
+                        filenames represented as {}: 
+                        example: -f "du {} | cut -f1"
   -x COMMAND, --exec-shell COMMAND
-                        Filenames represented as {}, filters as {f1}, {fn}...:
-                        --exec-group "echo {} {f1}"
+                        complete shell command on grouped files
+                        notation:
+                          {}  : path and filename
+                          {.} : filename, extension removed
+                          {/} : filename, path removed
+                          {//}: path of filename
+                          {/.}: filename, extension and path removed
+                          {..}: extension of filename
+                          {fn}: filter output of filter n
+                        example: -x "mkdir {f1}; mv {} {f1}/{/}"
   -m DIRECTORY, --exec-merge DIRECTORY
-                        Includes 4 options including COUNT IGNORE ERROR LARGER
-                        SMALLER NEWER OLDER
+                        syntax DIRECTORY:MODIFIER
+                        default = DIRECTORY:COUNT
+                        COUNT : increment conflicting filenames
+                                foo.mkv -> foo_0001.mkv
+                        IGNORE: skip conflicting filenames
+                        ERROR : exit the program if conflicting filename found
+                        
+                        replace conflicting filenames with CONDITION
+                        LARGER
+                        SMALLER
+                        NEWER
+                        OLDER
+                        example: -m foo:LARGER
   --exec-remove
   --exec-link
   --exec-basic-formatting
-                        No indenting or empty newlines in standard output
+                        no indenting or empty newlines in standard output
   -r, --recursive
   --include INCLUDE
   --exclude EXCLUDE
@@ -49,7 +82,7 @@ optional arguments:
   --dir-hidden
   --max-depth MAX_DEPTH
   --empty-file          Allow comparision of empty files
-  --follow-symbolic     Allow following of symbolic links for compare
+  --follow-symbolic     allow following of symbolic links for compare
   -g SIZE, --group-size SIZE
                         Minimum number of files in each group
   -v, --verbosity
