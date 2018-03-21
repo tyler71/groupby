@@ -198,6 +198,7 @@ groupby -f filename:'\d{3,4}p' foo/
 -> foo/foo2_1080p.mkv
 ```
 If capture groups are part of the expression, only the captured groups are returned
+
 Below, the string must have a `.` followed by 2-4 alphanumeric characters and end the string,
 but it will only return a result of the 2-4 alphanumeric characters
 
@@ -230,8 +231,11 @@ Syntax: `-f size:OPTION`
 For example, `-f size:MB` will output filenames rounded by the nearest megabyte
 
 ### Shell Filters
-Shell filters, invoked with `-s`/`--filter-shell` require the use of brace expansion to know which file to act on.
+Shell filters, invoked similary with `-f`/`--filter` require the use of brace expansion to know which
+file to act on and to identify it as a shell filter.
+
 For example, ```du -b {}``` will translate to ```du -b foobar.mkv```
+
 Be aware of the output of shell commands. They often include the relative path and filename
 in the output. *Output should be sanitized to only include the output of the command* through
 tools such as `cut` or `grep`. For example
@@ -250,7 +254,7 @@ There are 2 types of group execution
 * **shell**: Executes the shell command on each grouped file
 
 ### Builtin
-*groupby* has 3 built in action on grouped files
+*groupby* has 3 built in actions on grouped files
 * **Link**: for each group, hardlink the first file to all the others in the group
 * **Remove**: for each group, remove all but the first file
 * **Merge**: Merge directories into the merge directory
