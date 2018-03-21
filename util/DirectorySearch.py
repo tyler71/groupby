@@ -5,7 +5,7 @@ import pathlib
 def directory_search(directory: str, *,
                      recursive=True, max_depth=None, dir_hidden=None,
                      include=None, exclude=None,
-                     dir_include=None, dir_exclude=None,
+                     dir_include=None, dir_exclude=None
                      ) -> tuple:
     orig_directory = os.path.expanduser(directory)
     orig_directory_hidden = hidden_in_dir(directory)
