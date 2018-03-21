@@ -147,11 +147,11 @@ Filters are completed in order, left to right as specified on each file discover
 
 #### Customizing Builtin
 Additionally, these filters allow modifiers of the output
-* sha     :[1,224,256,384,512,3_224,3_256,3_384,3_512]
-* modified:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
-* accessed:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
-* size    :[B, KB, MB, GB, TB, PB]
-* filename:'EXPRESSION'
+* **sha**     :[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
+* **modified**:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+* **accessed**:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+* **size**    :[B, KB, MB, GB, TB, PB]
+* **filename**:'EXPRESSION'
 
 The syntax follows a common format of `filter:OPTION`, delimited by a '`:`'
 
