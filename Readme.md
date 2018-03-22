@@ -214,7 +214,7 @@ This information can be used to group the files.
 # foo/foo4_720p.mkv
 # foo/foo6_480p.mkv
 
-groupby -f filename:'\d{3,4}p' foo/
+$ groupby -f filename:'\d{3,4}p' foo/
 # '\d{3,4}p' == Match 3 or 4 digits and then a character of 'p'
 # Output
 -> foo/foo6_480p.mkv
@@ -230,12 +230,22 @@ Below, the string must have a `.` followed by 2-4 alphanumeric characters and en
 but it will only return a result of the 2-4 alphanumeric characters
 
 ```commandline
-groupby -f filename:'\.(\w{2,4})$'
+$ groupby -f filename:'\.(\w{2,4})$'
 # Output
 -> mkv
 -> mkv
 -> mkv
 -> mkv
+```
+Sometimes it is useful to use groups as part of a expression without wanting to turn up in the output.
+
+In these cases, use non capturing groups `(?:)`
+```commandline
+$ groupby -v -f filename:'(document)_\d?(?:\.\w+){1,2}' foo
+[INFO] document
+foo/document_1.tar
+    foo/document_2.tar.gz
+    foo/document_1.tar.gz
 ```
 The output of this expression is available with the notation {fn} like other filters
 
