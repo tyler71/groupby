@@ -275,9 +275,9 @@ tools such as `cut` or `grep`. For example
 ```commandline
 du -b {} 
     -> 476027 foobar.mkv              # Bad
-du -b {} 
+du -b {} | cut -f1 
     -> 476027                         # Better
-du -b {} | grep -oE '[0-9]+'
+du -b {} | grep -oE '^[0-9]+'
     -> 476027                         # Better
 ```
 ## Group Execution

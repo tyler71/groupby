@@ -116,17 +116,20 @@ help_filter = """builtin filters
 modifiers with syntax filter:modifier
   partial_md5
   md5
-  sha     :[1,224,256,384,512,3_224,3_256,3_384,3_512]
-  modified:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
-  accessed:[MICROSECOND,SECOND,MINUTE,HOUR,DAY,MONTH,YEAR,WEEKDAY]
+  sha     :[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
+  modified:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+  accessed:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
   size    :[B, KB, MB, GB, TB, PB]
   filename:'EXPRESSION'
   file
-example: -f size:mb
+example: -f modified
+         -f size:mb
 
 shell filters
 filenames represented as {}: 
-example: -f \"du {} | cut -f1\""""
+example: -f \"du {} | cut -f1\"
+         -f \"exiftool -p '\$DateTimeOriginal' {} | cut -d\: -f1\"
+"""
 
 help_exec_shell = """complete shell command on grouped files
 notation:
@@ -138,6 +141,7 @@ notation:
   {..}: extension of filename
   {fn}: filter output of filter n
 example: -x "mkdir {f1}; mv {} {f1}/{/}"
+         -x "mkdir {f1}; ffmpeg -i {} ogg/{/.}.ogg"
 """
 
 help_exec_merge = """syntax DIRECTORY:MODIFIER
@@ -153,4 +157,5 @@ SMALLER
 NEWER
 OLDER
 example: -m foo:LARGER
+         -m foo:ERROR
 """
