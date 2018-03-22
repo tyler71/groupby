@@ -119,11 +119,12 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             # otherwise return the entire matched expression
             result = pattern.search(split_filename)
             if result and result.groups():
-                return ''.join(result.groups())
+                value = ''.join(value for value in result.groups() if value)
             elif result and result.group():
-                return result.group()
+                value = result.group()
             else:
-                return ''
+                value = ' '
+            return value
 
         try:
             expr = re.compile(abstraction)
