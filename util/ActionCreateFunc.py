@@ -68,8 +68,20 @@ def remove_files(filtered_group: iter, labeled_filters, **kwargs):
 
 
 def hardlink_files(filtered_group: iter, labeled_filters, **kwargs):
-    source_file, *others = filtered_group
-    for filename in others:
+    source_file, *files_to_link = filtered_group
+    if len(files_to_link) > 0:
+        warning_message = "This is a Destructive operation. " \
+                          "Are you sure you wish to remove and hard link the following duplicate files?"
+        print(warning_message)
+        pprint.pprint(files_to_link)
+        warning_response = input("Y/N ").upper()
+        print(warning_response)
+
+        if warning_response != 'Y':
+            print('Exiting...')
+            exit(1)
+
+    for filename in files_to_link:
         try:
             log.info("Linking {source_file} -> {filename}".format(
                 source_file=sanitize_object(source_file),
