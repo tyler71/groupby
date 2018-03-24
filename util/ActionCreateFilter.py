@@ -68,7 +68,6 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
                 "accessed"   : cls.access_date,
                 "size"       : cls.disk_size,
                 "filename"   : cls.file_name,
-                "file"       : cls.direct_compare,
             }
         )
         return filters
@@ -237,12 +236,6 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
                     break
                 checksumer.update(chunk)
         return checksumer.hexdigest()
-
-    @staticmethod
-    def direct_compare(filename) -> bytes:
-        with open(filename, 'rb') as file:
-            data = file.read()
-        return data
 
     @staticmethod
     def aliases(alias_type):
