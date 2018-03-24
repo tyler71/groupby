@@ -45,14 +45,12 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
 def remove_files(filtered_group: iter, labeled_filters, **kwargs):
     files_to_remove = filtered_group[1:]
     if len(files_to_remove) > 0:
-        warning_message = "This is a Destructive operation. " \
-                          "Are you sure you wish to remove the following duplicate files?"
+        warning_message = "Are you sure you wish to remove and hard link the following duplicate files?"
         print(warning_message)
         pprint.pprint(files_to_remove)
         warning_response = input("Y/N ").upper()
-        print(warning_response)
 
-        if warning_response != 'Y':
+        if warning_response and warning_response != 'Y':
             print('Exiting...')
             exit(1)
 
@@ -70,14 +68,12 @@ def remove_files(filtered_group: iter, labeled_filters, **kwargs):
 def hardlink_files(filtered_group: iter, labeled_filters, **kwargs):
     source_file, *files_to_link = filtered_group
     if len(files_to_link) > 0:
-        warning_message = "This is a Destructive operation. " \
-                          "Are you sure you wish to remove and hard link the following duplicate files?"
+        warning_message = "Are you sure you wish to remove and hard link the following duplicate files?"
         print(warning_message)
         pprint.pprint(files_to_link)
         warning_response = input("Y/N ").upper()
-        print(warning_response)
 
-        if warning_response != 'Y':
+        if warning_response and warning_response != 'Y':
             print('Exiting...')
             exit(1)
 
