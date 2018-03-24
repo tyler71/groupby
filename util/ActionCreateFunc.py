@@ -3,6 +3,7 @@ import logging
 import os
 import shutil
 from functools import partial
+import pprint
 
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import EscapedBraceExpansion
@@ -43,13 +44,27 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
 
 def remove_files(filtered_group: iter, labeled_filters, **kwargs):
     files_to_remove = filtered_group[1:]
-    for filename in files_to_remove:
-        try:
-            log.info("Removing {file}".format(file=sanitize_object(filename)))
-            os.remove(filename)
-        except FileNotFoundError:
-            log.warning("{} Not Found".format(sanitize_object(filename)))
-    return None
+    if len(files_to_remove) > 0:
+        warning_message = "This is a Destructive operation. " \
+                          "Are you sure you wish to remove the following duplicate files?"
+        print(warning_message)
+        pprint.pprint(files_to_remove)
+        warning_response = input("Y/N ").upper()
+        print(warning_response)
+
+        if warning_response != 'Y':
+            print('Exiting...')
+            exit(1)
+
+        for filename in files_to_remove:
+            try:
+                log.info("Removing {file}".format(file=sanitize_object(filename)))
+                os.remove(filename)
+            except FileNotFoundError:
+                log.warning("{} Not Found".format(sanitize_object(filename)))
+        return None
+    else:
+        return None
 
 
 def hardlink_files(filtered_group: iter, labeled_filters, **kwargs):
