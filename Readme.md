@@ -196,6 +196,10 @@ Abbreviations:
 ##### FILENAME
 [Python based regular expressions](https://docs.python.org/3/library/re.html) are permitted on filenames
 
+The result of the expression on each filename is returned as the filter output
+
+However, if capture groups are used, the captured portion of the match is returned
+
 Syntax: 
 ```commandline
 -f filename:'EXPRESSION'
@@ -224,7 +228,6 @@ $ groupby -f filename:'\d{3,4}p' foo/
 ->
 -> foo/foo2_1080p.mkv
 ```
-If capture groups are part of the expression, only the captured groups are returned
 
 Below, the string must have a `.` followed by 2-4 alphanumeric characters and end the string,
 but it will only return a result of the 2-4 alphanumeric characters

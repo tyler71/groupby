@@ -10,7 +10,7 @@ from functools import partial
 
 from util.Templates import ActionAppendCreateFunc, \
     EscapedBraceExpansion
-from util.Templates import invoke_shell
+from util.Templates import invoke_shell, sanitize_object
 
 # This matches a newline, a space, tab, return character OR a null value: between the | and )
 _whitespace = re.compile('^([\n \t\r]|)+$')
@@ -340,6 +340,8 @@ class DuplicateFilters:
                 if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
                     # Just a newline means no output
                     continue
+
+                log.debug("{path}: {hash}".format(path=sanitize_object(path), hash=sanitize_object(item_hash)))
                 self.filter_hashes[path].append(item_hash)
                 grouped_groups[item_hash].append(path)
         for key, group in grouped_groups.items():
