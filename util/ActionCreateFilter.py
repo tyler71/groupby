@@ -341,7 +341,11 @@ class DuplicateFilters:
                     # Just a newline means no output
                     continue
 
-                log.debug("{path}: {hash}".format(path=sanitize_object(path), hash=sanitize_object(item_hash)))
+                log.debug("{path}:{spaces} {hash}".format(
+                    path=sanitize_object(path),
+                    spaces=' ' * (50 - len(sanitize_object(path))),
+                    hash=sanitize_object(item_hash)))
+
                 self.filter_hashes[path].append(item_hash)
                 grouped_groups[item_hash].append(path)
         for key, group in grouped_groups.items():
