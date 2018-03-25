@@ -34,11 +34,10 @@ optional arguments:
                           partial_md5
                           md5
                           sha     :[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
-                          modified:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
-                          accessed:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+                          modified:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%DIRECTIVE'
+                          accessed:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%DIRECTIVE'
                           size    :[B, KB, MB, GB, TB, PB]
                           filename:'EXPRESSION'
-                          file
                         example: -f modified
                                  -f size:mb
                         
