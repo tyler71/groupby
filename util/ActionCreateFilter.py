@@ -227,14 +227,17 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
             'YEAR'   : lambda dt: dt.strftime('%Y'),
             'WEEKDAY': lambda dt: dt.strftime('%A'),
         }
-        try:
-            abstraction = aliases[abstraction.upper()]
-        except KeyError as e:
-            log.error("Modifier {} is not valid".format(e))
-            # Set used to remove duplicate values
-            print("Valid Keys:", *sorted(set(aliases.values())), sep='\n  ')
-            exit(1)
-        rounded_datetime = rounding_level[abstraction](datetime_)
+        if '%' in abstraction:
+            rounded_datetime = datetime_.strftime(abstraction)
+        else:
+            try:
+                abstraction = aliases[abstraction.upper()]
+            except KeyError as e:
+                log.error("Modifier {} is not valid".format(e))
+                # Set used to remove duplicate values
+                print("Valid Keys:", *sorted(set(aliases.values())), sep='\n  ')
+                exit(1)
+            rounded_datetime = rounding_level[abstraction](datetime_)
         return rounded_datetime
 
     @staticmethod

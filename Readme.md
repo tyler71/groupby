@@ -193,6 +193,16 @@ Abbreviations:
 * YEAR: `Y` `YR` `YEARS`
 * WEEKDAY: `WD` `WEEKDAYS`
 
+If the modifier includes a `%`, a literal [Datetime's strftime](https://docs.python.org/3.6/library/datetime.html#strftime-and-strptime-behavior)
+is used
+
+Syntax:
+```commandline
+-f modified:'%EXPRESSION'
+-f accessed:'%EXPRESSION'
+```
+
+For example, `-f modified:'%p'` will group files based on their modification date in either in `AM` or `PM`
 ##### FILENAME
 [Python based regular expressions](https://docs.python.org/3/library/re.html) are permitted on filenames
 
