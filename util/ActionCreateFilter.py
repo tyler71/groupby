@@ -134,29 +134,6 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
         regex_pattern = re_match(filename, pattern=expr)
         return regex_pattern
 
-    @classmethod
-    def _datetime_round(cls, datetime_, abstraction=None):
-        aliases = cls.aliases("datetime_round")
-        rounding_level = {
-            'MICRO'  : lambda dt: dt.replace(microsecond=0),
-            'SECOND' : lambda dt: dt.replace(microsecond=0),
-            'MINUTE' : lambda dt: dt.replace(microsecond=0, second=0),
-            'HOUR'   : lambda dt: dt.replace(microsecond=0, second=0, minute=0),
-            'DAY'    : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0),
-            'MONTH'  : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0, day=1),
-            'YEAR'   : lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0, day=1, month=1),
-            'WEEKDAY': lambda dt: dt.replace(microsecond=0, second=0, minute=0, hour=0).weekday(),
-        }
-        try:
-            abstraction = aliases[abstraction.upper()]
-        except KeyError as e:
-            log.error("Modifier {} is not valid".format(e))
-            # Set used to remove duplicate values
-            print("Valid Keys:", *sorted(set(aliases.values())), sep='\n  ')
-            exit(1)
-        rounded_datetime = rounding_level[abstraction](datetime_)
-        return rounded_datetime
-
     # Used with checksum functions to reduce memory footprint
     @classmethod
     def _iter_read(cls, filename: str, chunk_size=65536) -> bytes:
@@ -236,6 +213,29 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
                     break
                 checksumer.update(chunk)
         return checksumer.hexdigest()
+
+    @classmethod
+    def _datetime_round(cls, datetime_, abstraction=None) -> str:
+        aliases = cls.aliases("datetime_round")
+        rounding_level = {
+            'MICRO'  : lambda dt: dt.strftime('%f'),
+            'SECOND' : lambda dt: dt.strftime('%S'),
+            'MINUTE' : lambda dt: dt.strftime('%M'),
+            'HOUR'   : lambda dt: dt.strftime('%H'),
+            'DAY'    : lambda dt: dt.strftime('%d'),
+            'MONTH'  : lambda dt: dt.strftime('%m'),
+            'YEAR'   : lambda dt: dt.strftime('%Y'),
+            'WEEKDAY': lambda dt: dt.strftime('%A'),
+        }
+        try:
+            abstraction = aliases[abstraction.upper()]
+        except KeyError as e:
+            log.error("Modifier {} is not valid".format(e))
+            # Set used to remove duplicate values
+            print("Valid Keys:", *sorted(set(aliases.values())), sep='\n  ')
+            exit(1)
+        rounded_datetime = rounding_level[abstraction](datetime_)
+        return rounded_datetime
 
     @staticmethod
     def aliases(alias_type):
