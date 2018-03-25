@@ -366,11 +366,11 @@ class DuplicateFilters:
 
                     # If matching _whitespace, continue since it shouldn't be considered a valid
                     # output, however will only check for values less then 10 (for performance)
-                if len(item_hash) < 10:
-                    if len(item_hash) == 0:
-                        continue
-                    elif _whitespace.match(str(item_hash)):
-                        continue
+                    if len(item_hash) < 10:
+                        if len(item_hash) == 0:
+                            continue
+                        elif _whitespace.match(str(item_hash)):
+                            continue
 
                     self.filter_hashes[item].append(item_hash)
                     # If this item matches the source, include it in the list to be returned.
