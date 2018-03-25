@@ -330,14 +330,18 @@ class DuplicateFilters:
         for path in paths:
             if all(condition(path) for condition in conditions):
                 item_hash = func(path).strip()
-                if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
-                    # Just a newline means no output
-                    continue
-
                 log.debug("{path}:{spaces} {hash}".format(
                     path=sanitize_object(path),
                     spaces=' ' * (50 - len(sanitize_object(path))),
                     hash=sanitize_object(item_hash)))
+
+                # If matching _whitespace or length of 0, continue since it shouldn't be
+                # considered a valid output, however will only check for values less then 10 (for performance)
+                if len(item_hash) < 10:
+                    if len(item_hash) == 0:
+                        continue
+                    elif _whitespace.match(str(item_hash)):
+                        continue
 
                 self.filter_hashes[path].append(item_hash)
                 grouped_groups[item_hash].append(path)
@@ -362,7 +366,10 @@ class DuplicateFilters:
 
                     # If matching _whitespace, continue since it shouldn't be considered a valid
                     # output, however will only check for values less then 10 (for performance)
-                    if len(item_hash) < 10 and _whitespace.match(str(item_hash)):
+                if len(item_hash) < 10:
+                    if len(item_hash) == 0:
+                        continue
+                    elif _whitespace.match(str(item_hash)):
                         continue
 
                     self.filter_hashes[item].append(item_hash)
