@@ -11,40 +11,45 @@ def directory_search(directory: str, *,
     orig_directory_hidden = hidden_in_dir(directory)
 
     directory_depth = 0
-    for directory, subdir, files in os.walk(orig_directory):
 
-        # Skip hidden directories if specified
-        if all((
-                dir_hidden is not True,
-                orig_directory_hidden is not True,
-                hidden_in_dir(directory))
-                ):
-            continue
+    if not os.path.isdir(orig_directory):
+        for file in filenames_from_file(orig_directory):
+            yield file
+    else:
+        for directory, subdir, files in os.walk(orig_directory):
 
-        # Check for included and excluded directories
-        # If directory matches, skip it
-        if dir_include or dir_exclude:
-            if not dir_include_exclude(directory, include=dir_include, exclude=dir_exclude):
+            # Skip hidden directories if specified
+            if all((
+                    dir_hidden is not True,
+                    orig_directory_hidden is not True,
+                    hidden_in_dir(directory))
+                    ):
                 continue
-        if include or exclude:
-            for directory, file in file_include_exclude(files,
-                                                        directory=directory,
-                                                        include=include,
-                                                        exclude=exclude
-                                                        ):
-                yield os.path.join(directory, file)
-        else:
-            for file in files:
-                yield os.path.join(directory, file)
 
-        # Break after 1st iteration to prevent recursiveness
-        # If max-depth is specified, break after specified number
-        if recursive is False:
-            break
-        elif max_depth is int and max_depth > 0:
-            directory_depth += 1
-            if directory_depth == max_depth:
+            # Check for included and excluded directories
+            # If directory matches, skip it
+            if dir_include or dir_exclude:
+                if not dir_include_exclude(directory, include=dir_include, exclude=dir_exclude):
+                    continue
+            if include or exclude:
+                for directory, file in file_include_exclude(files,
+                                                            directory=directory,
+                                                            include=include,
+                                                            exclude=exclude
+                                                            ):
+                    yield os.path.join(directory, file)
+            else:
+                for file in files:
+                    yield os.path.join(directory, file)
+
+            # Break after 1st iteration to prevent recursiveness
+            # If max-depth is specified, break after specified number
+            if recursive is False:
                 break
+            elif max_depth is int and max_depth > 0:
+                directory_depth += 1
+                if directory_depth == max_depth:
+                    break
 
 
 def dir_include_exclude(directory, *, include=None, exclude=None):
@@ -107,6 +112,12 @@ def hidden_in_dir(directory):
             )):
                 return True
         return False
+
+
+def filenames_from_file(file):
+    with open(file) as f:
+        for line in f.readlines():
+            yield line.rstrip()
 
 
 if __name__ == '__main__':
