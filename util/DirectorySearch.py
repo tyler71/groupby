@@ -16,7 +16,6 @@ def directory_search(directory: str, *,
     directory_depth = 0
 
     if not os.path.isdir(orig_directory):
-        log.info("Reading from {file}".format(file=orig_directory))
         for file in filenames_from_file(orig_directory):
             yield file
     else:
@@ -120,8 +119,29 @@ def hidden_in_dir(directory):
 
 def filenames_from_file(file):
     with open(file) as f:
-        for line in f.readlines():
-            yield line.rstrip()
+        # Trial a initial line from file to see if it is valid, with additional checks
+        # if it fails, consider it a bad file and crash
+        # If it is valid, on subsequent invalid filenames just skip
+        try:
+            initial_line = next(f)
+            initial_line = initial_line.rstrip()
+        except UnicodeDecodeError:
+            log.error("'{}' is not a valid file".format(file))
+            exit(1)
+
+        log.info("Reading from '{file}'".format(file=file))
+        if os.path.exists(initial_line):
+            yield initial_line
+        else:
+            print("Each line must be a filename")
+            exit(1)
+
+        for line in f:
+            file = line.rstrip()
+            if os.path.exists(file):
+                yield file
+            else:
+                log.warning("File '{}' not found, skipping".format(file))
 
 
 if __name__ == '__main__':
