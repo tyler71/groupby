@@ -83,7 +83,12 @@ def main():
                 for output in command_string:
                     if output:
                         output_string_occurred = True
-                        print(sanitize_object(output), end='')
+
+                        # Sanitize and handle all newline characters from
+                        # messing up output
+                        output = sanitize_object(output)
+                        output = ' '.join(output.splitlines())
+                        print(output)
                 if output_string_occurred is True:
                     print('')
             else:
