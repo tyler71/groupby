@@ -1,5 +1,8 @@
+import logging
 import os
 import pathlib
+
+log = logging.getLogger(__name__)
 
 
 def directory_search(directory: str, *,
@@ -13,6 +16,7 @@ def directory_search(directory: str, *,
     directory_depth = 0
 
     if not os.path.isdir(orig_directory):
+        log.info("Reading from {file}".format(file=orig_directory))
         for file in filenames_from_file(orig_directory):
             yield file
     else:
