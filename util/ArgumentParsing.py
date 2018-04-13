@@ -116,13 +116,13 @@ help_filter = """builtin filters
 modifiers with syntax filter:modifier
   partial_md5
   md5
-  sha     :[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
-  modified:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%%DIRECTIVE'
-  accessed:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%%DIRECTIVE'
-  size    :[B, KB, MB, GB, TB, PB]
-  filename:'EXPRESSION'
+  sha     ::[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
+  modified::[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%%DIRECTIVE'
+  accessed::[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%%DIRECTIVE'
+  size    ::[B, KB, MB, GB, TB, PB]
+  filename::'EXPRESSION'
 example: -f modified
-         -f size:mb
+         -f size::mb
 
 shell filters
 filenames represented as {}: 
@@ -143,18 +143,18 @@ example: -x "mkdir {f1}; mv {} {f1}/{/}"
          -x "mkdir {f1}; ffmpeg -i {} ogg/{/.}.ogg"
 """
 
-help_exec_merge = """syntax DIRECTORY:MODIFIER
-default = DIRECTORY:COUNT
-COUNT : increment conflicting filenames
+help_exec_merge = """syntax DIRECTORY::MODIFIER
+default = DIRECTORY::COUNT
+COUNT :: increment conflicting filenames
         foo.mkv -> foo_0001.mkv
-IGNORE: skip conflicting filenames
-ERROR : exit the program if conflicting filename found
+IGNORE:: skip conflicting filenames
+ERROR :: exit the program if conflicting filename found
 
 replace conflicting filenames with CONDITION
 LARGER
 SMALLER
 NEWER
 OLDER
-example: -m foo:LARGER
-         -m foo:ERROR
+example: -m foo::LARGER
+         -m foo::ERROR
 """

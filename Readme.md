@@ -30,16 +30,16 @@ optional arguments:
   -h, --help            show this help message and exit
   -f FILTER, --filter FILTER
                         builtin filters
-                        modifiers with syntax filter:modifier
+                        modifiers with syntax filter::modifier
                           partial_md5
                           md5
-                          sha     :[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
-                          modified:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%DIRECTIVE'
-                          accessed:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%DIRECTIVE'
-                          size    :[B, KB, MB, GB, TB, PB]
-                          filename:'EXPRESSION'
+                          sha     ::[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
+                          modified::[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%DIRECTIVE'
+                          accessed::[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY] | '%DIRECTIVE'
+                          size    ::[B, KB, MB, GB, TB, PB]
+                          filename::'EXPRESSION'
                         example: -f modified
-                                 -f size:mb
+                                 -f size::mb
                         
                         shell filters
                         filenames represented as {}: 
@@ -58,8 +58,8 @@ optional arguments:
                         example: -x "mkdir {f1}; mv {} {f1}/{/}"
                                  -x "mkdir {f1}; ffmpeg -i {} ogg/{/.}.ogg"
   -m DIRECTORY, --exec-merge DIRECTORY
-                        syntax DIRECTORY:MODIFIER
-                        default = DIRECTORY:COUNT
+                        syntax DIRECTORY::MODIFIER
+                        default = DIRECTORY::COUNT
                         COUNT : increment conflicting filenames
                                 foo.mkv -> foo_0001.mkv
                         IGNORE: skip conflicting filenames
@@ -70,8 +70,8 @@ optional arguments:
                         SMALLER
                         NEWER
                         OLDER
-                        example: -m foo:LARGER
-                                 -m foo:ERROR
+                        example: -m foo::LARGER
+                                 -m foo::ERROR
   --exec-remove
   --exec-link
   --exec-basic-formatting
@@ -151,14 +151,14 @@ Filters are completed in order, left to right as specified on each file discover
 #### Customizing Builtin
 Additionally, these filters allow modifiers of the output
 ```commandline
-sha     :[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
-modified:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
-accessed:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
-size    :[B, KB, MB, GB, TB, PB]
-filename:'EXPRESSION'
+sha     ::[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
+modified::[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+accessed::[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+size    ::[B, KB, MB, GB, TB, PB]
+filename::'EXPRESSION'
 ```
 
-The syntax follows a common format of `filter:OPTION`, delimited by a '`:`'
+The syntax follows a common format of `filter::OPTION`, delimited by a '`:`'
 
 If omitted, uses the default or unmodified output
 ##### SHA
@@ -169,15 +169,15 @@ Syntax:
 -f sha:[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
 ```
 
-For example, `-f sha:256` will invoke a sha256 checksum on the file
+For example, `-f sha::256` will invoke a sha256 checksum on the file
 
 ##### DATETIME
 `modified` and `accessed` permit rounding of their reported times.
 
 Syntax: 
 ```commandline
--f modified:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
--f accessed:[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+-f modified::[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
+-f accessed::[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
 ```
 
 For example, `-f modified:HOUR` will group files that have been modified in the same hour
@@ -197,11 +197,11 @@ is used
 
 Syntax:
 ```commandline
--f modified:'%DIRECTIVE'
--f accessed:'%DIRECTIVE'
+-f modified::'%DIRECTIVE'
+-f accessed::'%DIRECTIVE'
 ```
 
-For example, `-f modified:'%p'` will group files based on their modification date in either in `AM` or `PM`
+For example, `-f modified::'%p'` will group files based on their modification date in either in `AM` or `PM`
 ##### FILENAME
 [Python based regular expressions](https://docs.python.org/3/library/re.html) are permitted on filenames
 
@@ -211,7 +211,7 @@ However, if capture groups are used, the captured portion of the match is return
 
 Syntax: 
 ```commandline
--f filename:'EXPRESSION'
+-f filename::'EXPRESSION'
 ```
 
 Filenames often carry unique information about a file, such as
@@ -227,7 +227,7 @@ This information can be used to group the files.
 # foo/foo4_720p.mkv
 # foo/foo6_480p.mkv
 
-$ groupby -f filename:'\d{3,4}p' foo/
+$ groupby -f filename::'\d{3,4}p' foo/
 # '\d{3,4}p' == Match 3 or 4 digits and then a character of 'p'
 # Output
 -> foo/foo6_480p.mkv
@@ -242,7 +242,7 @@ Below, the string must have a `.` followed by 2-4 alphanumeric characters and en
 but it will only return a result of the 2-4 alphanumeric characters
 
 ```commandline
-$ groupby -f filename:'\.(\w{2,4})$'
+$ groupby -f filename::'\.(\w{2,4})$'
 # Output
 -> mkv
 -> mkv
@@ -253,7 +253,7 @@ Sometimes it is useful to use groups as part of a expression without wanting to 
 
 In these cases, use non capturing groups `(?:)`
 ```commandline
-$ groupby -v -f filename:'(document)_\d?(?:\.\w+){1,2}' foo
+$ groupby -v -f filename::'(document)_\d?(?:\.\w+){1,2}' foo
 [INFO] document
 foo/document_1.tar
     foo/document_2.tar.gz
@@ -275,10 +275,10 @@ Size permit rounding of reported byte size
 
 Syntax:
 ```commandline
--f size:[B, KB, MB, GB, TB, PB]
+-f size::[B, KB, MB, GB, TB, PB]
 ```
 
-For example, `-f size:MB` will output filenames rounded by the nearest megabyte
+For example, `-f size::MB` will output filenames rounded by the nearest megabyte
 
 Abbrevations:
 * BYTE: `B` `BYTES`
@@ -365,15 +365,15 @@ If unspecified, defaults to COUNT
 * SMALLER
 
 ##### Count
-Syntax: `--exec-merge testdir:COUNT`
+Syntax: `--exec-merge testdir::COUNT`
 
 Add a increment count. `foo.mp4` -> `foo_0001.mp4`
 ##### Ignore
-Syntax: `--exec-merge testdir:IGNORE`
+Syntax: `--exec-merge testdir::IGNORE`
 
 Ignore existing files
 ##### Error
-Syntax: `--exec-merge testdir:ERROR`
+Syntax: `--exec-merge testdir::ERROR`
 
 Raise a error and kill the program
 
@@ -388,7 +388,7 @@ Each test is completed with the target file compared against the already copied 
 The result is only the CONDITION of files are copied over.
 For example,
 ```
-groupby -f size --exec-merge testdir:SMALLER
+groupby -f size --exec-merge testdir::SMALLER
 ```
 Will result in only the smaller of conflicting files to exist
 ### Shell

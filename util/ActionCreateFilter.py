@@ -26,12 +26,11 @@ class ActionSelectFilter(ActionAppendCreateFunc):
         return selected_filter
 
     def check_filter_type(self, template):
-        if ":" in template:
-            filter_check = template.split(":", 1)[0]
+        if "::" in template:
+            filter_check = template.split("::", 1)[0]
         else:
             filter_check = template
         if filter_check in self.filters:
-
             return ActionAppendFilePropertyFilter._process(template)
         elif any((alias in template
                   for alias in self.aliases.keys())):
@@ -74,8 +73,8 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
 
     @classmethod
     def _process(cls, template):
-        if ":" in template:
-            func_name, abstraction = template.split(":", 1)
+        if "::" in template:
+            func_name, abstraction = template.split("::", 1)
             func_name = cls.filters()[func_name]
             filter_func = partial(func_name, abstraction=abstraction)
         else:
