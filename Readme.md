@@ -166,7 +166,7 @@ SHA permits multiple checksum levels to group by.
 
 Syntax: 
 ```commandline
--f sha:[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
+-f sha::[1, 224, 256, 384, 512, 3_224, 3_256, 3_384, 3_512]
 ```
 
 For example, `-f sha::256` will invoke a sha256 checksum on the file
@@ -180,7 +180,7 @@ Syntax:
 -f accessed::[MICROSECOND, SECOND, MINUTE, HOUR, DAY, MONTH, YEAR, WEEKDAY]
 ```
 
-For example, `-f modified:HOUR` will group files that have been modified in the same hour
+For example, `-f modified::HOUR` will group files that have been modified in the same hour
 
 Abbreviations:
 * MICROSECOND: `NANO` `MICRO` `MICROSECONDS`
@@ -262,7 +262,7 @@ foo/document_1.tar
 The output of this expression is available with the notation {fn} like other filters
 
 ```commandline
-groupby -f filename:'\d+p' foo -x "mkdir -p {f1}/{/}"
+groupby -f filename::'\d+p' foo -x "mkdir -p {f1}/{/}"
 # Commands executed
 -> mkdir -p 480p/foo6_480p.mkv
 -> mkdir -p 720p/foo4_720p.mkv
