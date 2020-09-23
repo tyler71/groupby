@@ -146,7 +146,6 @@ Filters are completed in order, left to right as specified on each file discover
 * **accessed**: returns the accessed date
 * **size**: returns the size in bytes
 * **filename**: returns the filename
-* **file**: returns the byte data
 
 #### Customizing Builtin
 Additionally, these filters allow modifiers of the output

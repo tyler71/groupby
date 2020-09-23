@@ -136,9 +136,12 @@ class ActionAppendFilePropertyFilter(ActionAppendCreateFunc):
     # Used with checksum functions to reduce memory footprint
     @classmethod
     def _iter_read(cls, filename: str, chunk_size=65536) -> bytes:
-        with open(filename, 'rb') as file:
-            for chunk in iter(lambda: file.read(chunk_size), b''):
-                yield chunk
+        try:
+            with open(filename, 'rb') as file:
+                for chunk in iter(lambda: file.read(chunk_size), b''):
+                    yield chunk
+        except PermissionError:
+            log.warning("Permission Denied for {}".format(filename))
 
     @classmethod
     def access_date(cls, filename: str, *, abstraction=None) -> str:

@@ -1,9 +1,9 @@
 import datetime
 import logging
 import os
+import pprint
 import shutil
 from functools import partial
-import pprint
 
 from util.Templates import ActionAppendCreateFunc
 from util.Templates import EscapedBraceExpansion
@@ -39,6 +39,7 @@ class ActionAppendExecShell(ActionAppendCreateFunc):
     def _group_invoke_shell(filtered_group, command, labeled_filters, **kwargs):
         for file in filtered_group:
             output = invoke_shell(file, command=command, labeled_filters=labeled_filters, **kwargs)
+            output = sanitize_object(output)
             yield output
 
 
