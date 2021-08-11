@@ -2,6 +2,8 @@
 
 *groupby* is a tool for grouping files by their properties.
 
+[![Run on Repl.it](https://repl.it/badge/github/kefranabg/readme-md-generator)](https://replit.com/@tyler71/groupby)
+
 ## Features
 * Simple to use: `groupy` will return grouped results in current directory
 * Builtin or shell filters
